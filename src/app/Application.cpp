@@ -35,8 +35,8 @@ bool Application::init() {
     Logger::getInstance().info("Initializing application...");
     
     try {
-        // Step 1: Initialize SDL Video
-        if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_GAMECONTROLLER) != 0) {
+        // Step 1: Initialize SDL Video and Audio
+        if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_GAMECONTROLLER | SDL_INIT_AUDIO) != 0) {
             Logger::getInstance().error("Error: " + std::string(SDL_GetError()));
             return false;
         }
@@ -125,7 +125,11 @@ bool Application::init() {
         if (!mainWindow_) mainWindow_ = std::make_unique<MainWindow>();
 
         // Set references in MainWindow
-        mainWindow_->setLibraryView(dynamic_cast<LibraryView*>(viewFactory_->createLibraryView(libraryController_.get(), library_.get())));
+        mainWindow_->setLibraryView(dynamic_cast<LibraryView*>(viewFactory_->createLibraryView(
+            libraryController_.get(), 
+            library_.get(),
+            playbackController_.get()
+        )));
         mainWindow_->setPlaylistView(dynamic_cast<PlaylistView*>(viewFactory_->createPlaylistView(playlistController_.get(), playlistManager_.get())));
         mainWindow_->setNowPlayingView(dynamic_cast<NowPlayingView*>(viewFactory_->createNowPlayingView(playbackController_.get(), playbackState_.get())));
         mainWindow_->setHistoryView(dynamic_cast<HistoryView*>(viewFactory_->createHistoryView(historyController_.get(), history_.get())));

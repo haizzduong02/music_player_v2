@@ -6,6 +6,8 @@
 #include "../model/Library.h"
 #include <string>
 
+class PlaybackController;
+
 /**
  * @file LibraryView.h
  * @brief Library view using ImGui
@@ -22,7 +24,7 @@
  */
 class LibraryView : public BaseView {
 public:
-    LibraryView(LibraryController* controller, Library* library);
+    LibraryView(LibraryController* controller, Library* library, PlaybackController* playbackController);
     ~LibraryView() override;
     
     void render() override;
@@ -32,6 +34,7 @@ public:
 private:
     LibraryController* controller_;
     Library* library_;
+    PlaybackController* playbackController_;
     
     // UI state
     std::string searchQuery_;

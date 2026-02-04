@@ -48,7 +48,8 @@ public:
      */
     IView* createLibraryView(
         LibraryController* controller,
-        Library* library) override;
+        Library* library,
+        PlaybackController* playbackController) override;
     
     /**
      * @brief Create playlist view

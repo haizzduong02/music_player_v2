@@ -11,8 +11,13 @@
  * @brief Production playback engine using SDL2  
  */
 
+#include <memory> 
+
 class SDL2PlaybackEngine : public IPlaybackEngine {
 private:
+    struct Impl;
+    std::unique_ptr<Impl> impl_;
+
     // Observer pattern
     std::vector<IObserver*> observers_;
     std::mutex observerMutex_;

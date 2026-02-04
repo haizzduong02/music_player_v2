@@ -47,7 +47,8 @@ public:
      */
     virtual IView* createLibraryView(
         LibraryController* controller,
-        Library* library) = 0;
+        Library* library,
+        PlaybackController* playbackController) = 0;
     
     /**
      * @brief Create playlist view

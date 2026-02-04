@@ -113,5 +113,11 @@ void NowPlayingView::handleInput() {
 }
 
 void NowPlayingView::update(void* subject) {
-    // Playback state has changed - will re-render on next frame
+    // Playback state has changed
+    if (state_ && state_->getStatus() == PlaybackStatus::PLAYING) {
+        if (!visible_) {
+            visible_ = true;
+            ImGui::SetWindowFocus("Now Playing");
+        }
+    }
 }

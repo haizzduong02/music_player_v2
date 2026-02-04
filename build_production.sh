@@ -43,6 +43,10 @@ if ! pkg-config --exists taglib; then
     MISSING_DEPS+=("libtag1-dev")
 fi
 
+if ! pkg-config --exists SDL2_mixer; then
+    MISSING_DEPS+=("libsdl2-mixer-dev")
+fi
+
 if [ ${#MISSING_DEPS[@]} -gt 0 ]; then
     echo -e "${RED}❌ Missing dependencies: ${MISSING_DEPS[*]}${NC}"
     echo -e "${YELLOW}Install with: sudo apt-get install ${MISSING_DEPS[*]}${NC}"

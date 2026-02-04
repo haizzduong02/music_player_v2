@@ -14,8 +14,9 @@ IView* ViewFactory::createMainWindow() {
 
 IView* ViewFactory::createLibraryView(
     LibraryController* controller,
-    Library* library) {
-    return new LibraryView(controller, library);
+    Library* library,
+    PlaybackController* playbackController) {
+    return new LibraryView(controller, library, playbackController);
 }
 
 IView* ViewFactory::createPlaylistView(

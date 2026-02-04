@@ -1,13 +1,14 @@
 #include "../../../inc/app/view/LibraryView.h"
 #include "../../../inc/utils/Logger.h"
+#include "../../../inc/app/controller/PlaybackController.h"
 
 #ifdef USE_IMGUI
 #include <imgui.h>
 #endif
 #include <algorithm>
 
-LibraryView::LibraryView(LibraryController* controller, Library* library)
-    : controller_(controller), library_(library), selectedIndex_(-1) {
+LibraryView::LibraryView(LibraryController* controller, Library* library, PlaybackController* playbackController)
+    : controller_(controller), library_(library), playbackController_(playbackController), selectedIndex_(-1) {
     
     // Attach as observer to library
     if (library_) {
@@ -58,8 +59,14 @@ void LibraryView::render() {
                 displayText = meta.artist + " - " + displayText;
             }
             
-            if (ImGui::Selectable(displayText.c_str(), isSelected)) {
+            if (ImGui::Selectable(displayText.c_str(), isSelected, ImGuiSelectableFlags_AllowDoubleClick)) {
                 selectedIndex_ = static_cast<int>(i);
+                
+                if (ImGui::IsMouseDoubleClicked(0)) {
+                    if (playbackController_) {
+                        playbackController_->play(file);
+                    }
+                }
             }
             
             // Right-click context menu
