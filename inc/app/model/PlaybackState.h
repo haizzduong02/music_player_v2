@@ -113,6 +113,13 @@ public:
      * @param index New index
      */
     void setQueueIndex(size_t index);
+
+    /**
+     * @brief Sync queue index with the given track
+     * Find the track in the play queue and set queue index to the next one
+     * @param track Track to sync with
+     */
+    void syncQueueIndex(std::shared_ptr<MediaFile> track);
     
     /**
      * @brief Get next track from queue

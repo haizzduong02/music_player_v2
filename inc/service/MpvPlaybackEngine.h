@@ -40,6 +40,7 @@ public:
     
     // Video support
     void* getVideoTexture() override;
+    void getVideoSize(int& width, int& height) override;
     void updateVideo() override;
 
 private:

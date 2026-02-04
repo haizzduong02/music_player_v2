@@ -23,6 +23,7 @@ bool PlaybackController::play(std::shared_ptr<MediaFile> track, bool pushToStack
     
     // Update state first
     state_->setCurrentTrack(track);
+    state_->syncQueueIndex(track); // Sync queue index for correct Next behavior
     state_->setStatus(PlaybackStatus::PLAYING);
     
     // Reset position and set duration from metadata

@@ -103,6 +103,13 @@ public:
     virtual void* getVideoTexture() { return nullptr; }
 
     /**
+     * @brief Get the dimensions of the current video frame
+     * @param width Output width
+     * @param height Output height
+     */
+    virtual void getVideoSize(int& width, int& height) { width = 0; height = 0; }
+
+    /**
      * @brief Update video frame (called every frame on main thread)
      */
     virtual void updateVideo() {}

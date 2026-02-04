@@ -15,12 +15,12 @@
 #endif
 
 // Color scheme
-static const ImVec4 COLOR_BG_DARK = ImVec4(0.11f, 0.40f, 0.35f, 1.0f);       // #1C6758
+// Color scheme - Swapped (Black Window, Teal Panels)
+static const ImVec4 COLOR_BG_BLACK = ImVec4(0.00f, 0.00f, 0.00f, 1.0f);      // #000000 (Pure Black)
+static const ImVec4 COLOR_BG_TEAL = ImVec4(0.11f, 0.40f, 0.35f, 1.0f);       // #1C6758 (Original Teal)
 static const ImVec4 COLOR_ACCENT = ImVec4(0.94f, 0.35f, 0.49f, 1.0f);        // #F05A7E
-static const ImVec4 COLOR_SECONDARY = ImVec4(0.24f, 0.51f, 0.38f, 1.0f);     // #3D8361
-static const ImVec4 COLOR_BG_DARKER = ImVec4(0.08f, 0.28f, 0.24f, 1.0f);     // Darker teal for panels
-static const ImVec4 COLOR_TEXT = ImVec4(0.95f, 0.95f, 0.95f, 1.0f);          // White text
-static const ImVec4 COLOR_TEXT_DIM = ImVec4(0.70f, 0.70f, 0.70f, 1.0f);      // Dimmed text
+static const ImVec4 COLOR_TEXT = ImVec4(0.95f, 0.95f, 0.95f, 1.0f);          
+static const ImVec4 COLOR_TEXT_DIM = ImVec4(0.70f, 0.70f, 0.70f, 1.0f);      
 
 MainWindow::MainWindow() {
     Logger::getInstance().info("MainWindow created");
@@ -33,11 +33,6 @@ void MainWindow::render() {
     
 #ifdef USE_IMGUI
     if (ImGui::GetCurrentContext() == nullptr) {
-        static bool logged = false;
-        if (!logged) {
-            Logger::getInstance().warn("ImGui logic skipped: Context not initialized");
-            logged = true;
-        }
         return;
     }
 
@@ -51,38 +46,42 @@ void MainWindow::render() {
                                    ImGuiWindowFlags_NoResize | 
                                    ImGuiWindowFlags_NoMove |
                                    ImGuiWindowFlags_NoCollapse |
-                                   ImGuiWindowFlags_NoBringToFrontOnFocus;
+                                   ImGuiWindowFlags_NoBringToFrontOnFocus |
+                                   ImGuiWindowFlags_NoScrollbar |
+                                   ImGuiWindowFlags_NoScrollWithMouse; // Fix mouse scrolling
     
-    ImGui::PushStyleColor(ImGuiCol_WindowBg, COLOR_BG_DARK);
+    ImGui::PushStyleColor(ImGuiCol_WindowBg, COLOR_BG_BLACK); // Main background black
     ImGui::PushStyleColor(ImGuiCol_Text, COLOR_TEXT);
     
-    if (ImGui::Begin("MainWindow", nullptr, windowFlags)) {
+    if (ImGui::Begin("MainWindow", nullptr, windowFlags)) { // Begin MainWindow
         // Tab bar at top
         renderTabBar();
         
         ImGui::Separator();
         
-        // Calculate layout sizes - Album art takes 55%, track list takes 40%
+        // Calculate layout sizes - Album art takes 75%, track list takes 25%
         float availableWidth = ImGui::GetContentRegionAvail().x;
         float availableHeight = ImGui::GetContentRegionAvail().y - 80.0f; // Reserve for controls
-        float albumPanelWidth = availableWidth * 0.55f;  // 55% for album + info
-        float trackListWidth = availableWidth * 0.40f;   // 40% for track list
+        float albumPanelWidth = availableWidth * 0.75f;  // Increased to 75%
+        float trackListWidth = availableWidth * 0.24f;   // Reduced to 24% (keep some margin)
         
-        // Main content area
-        ImGui::BeginChild("ContentArea", ImVec2(0, availableHeight), false);
+        // Main content area - Force no scrollbar
+        ImGui::BeginChild("ContentArea", ImVec2(0, availableHeight), false, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
         {
-            // Left side: Album art (55% of width)
-            ImGui::BeginChild("LeftPanel", ImVec2(albumPanelWidth, 0), false);
+            // Left side: Album art (75% of width) - Keep Black or Transparent
+            ImGui::BeginChild("LeftPanel", ImVec2(albumPanelWidth, 0), false, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
             renderNowPlayingInfo();
             renderAlbumArt();
             ImGui::EndChild();
             
             ImGui::SameLine();
             
-            // Right side: Track list (40% of width)
-            ImGui::BeginChild("RightPanel", ImVec2(trackListWidth, 0), false);
+            // Right side: Track list (24% of width) - TEAL Background
+            ImGui::PushStyleColor(ImGuiCol_ChildBg, COLOR_BG_TEAL);
+            ImGui::BeginChild("RightPanel", ImVec2(trackListWidth, 0), true, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
             renderTrackList();
             ImGui::EndChild();
+            ImGui::PopStyleColor(); // Pop ChildBg
         }
         ImGui::EndChild();
         
@@ -100,8 +99,8 @@ void MainWindow::render() {
 
 void MainWindow::renderTabBar() {
 #ifdef USE_IMGUI
-    ImGui::PushStyleColor(ImGuiCol_Button, COLOR_BG_DARKER);
-    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, COLOR_SECONDARY);
+    ImGui::PushStyleColor(ImGuiCol_Button, COLOR_BG_TEAL);
+    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.2f, 0.6f, 0.5f, 1.0f)); // Lighter teal
     ImGui::PushStyleColor(ImGuiCol_ButtonActive, COLOR_ACCENT);
     
     float buttonWidth = 100.0f;
@@ -184,10 +183,10 @@ void MainWindow::renderNowPlayingInfo() {
 
 void MainWindow::renderAlbumArt() {
 #ifdef USE_IMGUI
-    // Use 90% of available width for album art (square)
+    // Use 85% of available width for album art/video, no hard cap
     float availableWidth = ImGui::GetContentRegionAvail().x;
-    float albumSize = availableWidth * 0.9f;
-    if (albumSize > 500) albumSize = 500; // Max size cap
+    float albumSize = availableWidth * 0.85f;
+    // if (albumSize > 500) albumSize = 500; // Max size cap removed per user request
     
     // Check for video texture first
     void* videoTexture = nullptr;
@@ -197,9 +196,22 @@ void MainWindow::renderAlbumArt() {
 
     if (videoTexture) {
         // Render Video
-        // 16:9 aspect ratio usually, or we could query params if accessible. 
-        // For now assume 16:9 or fit width
-        float videoHeight = albumSize * 9.0f / 16.0f;
+        float aspectRatio = 16.0f / 9.0f; // Default fallback
+        
+        int vW = 0, vH = 0;
+        playbackController_->getEngine()->getVideoSize(vW, vH);
+        if (vW > 0 && vH > 0) {
+            aspectRatio = (float)vW / (float)vH;
+        }
+        
+        float videoHeight = albumSize / aspectRatio;
+        
+        // Constrain height to avoid scrolling if video is too tall
+        float maxHeight = ImGui::GetContentRegionAvail().y - 50.0f; // Leave space for info
+        if (videoHeight > maxHeight && maxHeight > 50) {
+            videoHeight = maxHeight;
+            albumSize = videoHeight * aspectRatio; // Adjust width to maintain aspect ratio
+        }
         
         // Center video
         float startX = (availableWidth - albumSize) / 2;
@@ -247,7 +259,7 @@ void MainWindow::renderAlbumArt() {
             ImGui::Image((ImTextureID)(intptr_t)albumArtTexture_, ImVec2(albumSize, albumSize));
         } else {
             // Placeholder
-            ImGui::PushStyleColor(ImGuiCol_ChildBg, COLOR_BG_DARKER);
+            ImGui::PushStyleColor(ImGuiCol_ChildBg, COLOR_BG_TEAL);
             ImGui::BeginChild("AlbumArtPlaceholder", ImVec2(albumSize, albumSize), true);
             ImGui::SetCursorPos(ImVec2(albumSize/2 - 30, albumSize/2 - 10));
             ImGui::Text("[No Art]");
@@ -259,7 +271,7 @@ void MainWindow::renderAlbumArt() {
         float startX = (availableWidth - albumSize) / 2;
         if (startX > 0) ImGui::SetCursorPosX(ImGui::GetCursorPosX() + startX);
 
-        ImGui::PushStyleColor(ImGuiCol_ChildBg, COLOR_BG_DARKER);
+        ImGui::PushStyleColor(ImGuiCol_ChildBg, COLOR_BG_TEAL);
         ImGui::BeginChild("AlbumArtPlaceholder", ImVec2(albumSize, albumSize), true);
         ImGui::SetCursorPos(ImVec2(albumSize/2 - 30, albumSize/2 - 10));
         ImGui::Text("[No Art]");
@@ -271,8 +283,8 @@ void MainWindow::renderAlbumArt() {
 
 void MainWindow::renderTrackList() {
 #ifdef USE_IMGUI
-    ImGui::PushStyleColor(ImGuiCol_ChildBg, COLOR_BG_DARKER);
-    ImGui::PushStyleColor(ImGuiCol_Header, COLOR_SECONDARY);
+    ImGui::PushStyleColor(ImGuiCol_ChildBg, COLOR_BG_TEAL);
+    ImGui::PushStyleColor(ImGuiCol_Header, COLOR_BG_TEAL);
     ImGui::PushStyleColor(ImGuiCol_HeaderHovered, COLOR_ACCENT);
     ImGui::PushStyleColor(ImGuiCol_HeaderActive, COLOR_ACCENT);
     
@@ -288,7 +300,7 @@ void MainWindow::renderTrackList() {
                 
                 // Search bar
                 static char searchBuffer[256] = "";
-                ImGui::PushStyleColor(ImGuiCol_FrameBg, COLOR_BG_DARKER);
+                ImGui::PushStyleColor(ImGuiCol_FrameBg, COLOR_BG_TEAL);
                 if (ImGui::InputText("Search", searchBuffer, sizeof(searchBuffer))) {
                     // Filter handled below
                 }
@@ -564,11 +576,11 @@ void MainWindow::renderPlaybackControls() {
 #ifdef USE_IMGUI
     ImGui::Separator();
     
-    ImGui::PushStyleColor(ImGuiCol_Button, COLOR_SECONDARY);
+    ImGui::PushStyleColor(ImGuiCol_Button, COLOR_BG_TEAL);
     ImGui::PushStyleColor(ImGuiCol_ButtonHovered, COLOR_ACCENT);
     ImGui::PushStyleColor(ImGuiCol_SliderGrab, COLOR_ACCENT);
     ImGui::PushStyleColor(ImGuiCol_SliderGrabActive, COLOR_ACCENT);
-    ImGui::PushStyleColor(ImGuiCol_FrameBg, COLOR_BG_DARKER);
+    ImGui::PushStyleColor(ImGuiCol_FrameBg, COLOR_BG_TEAL);
     
     // Progress bar
     if (playbackState_) {

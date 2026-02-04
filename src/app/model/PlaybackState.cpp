@@ -91,6 +91,23 @@ void PlaybackState::setQueueIndex(size_t index) {
     }
 }
 
+void PlaybackState::syncQueueIndex(std::shared_ptr<MediaFile> track) {
+    if (!track) return;
+    
+    std::lock_guard<std::mutex> lock(dataMutex_);
+    if (playQueue_.empty()) return;
+    
+    // Find track in queue
+    for (size_t i = 0; i < playQueue_.size(); ++i) {
+        if (playQueue_[i]->getPath() == track->getPath()) {
+            // Set index to the NEXT track (i + 1)
+            queueIndex_ = i + 1;
+            return;
+        }
+    }
+    // If not found, do nothing (maintain current queue position)
+}
+
 std::shared_ptr<MediaFile> PlaybackState::getNextTrack() {
     std::lock_guard<std::mutex> lock(dataMutex_);
     

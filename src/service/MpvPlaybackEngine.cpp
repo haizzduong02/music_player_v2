@@ -175,6 +175,11 @@ void* MpvPlaybackEngine::getVideoTexture() {
     return (void*)(intptr_t)texture_;
 }
 
+void MpvPlaybackEngine::getVideoSize(int& width, int& height) {
+    width = videoWidth_;
+    height = videoHeight_;
+}
+
 // Implement standard IPlaybackEngine methods
 bool MpvPlaybackEngine::play(const std::string& filepath) {
     const char* cmd[] = {"loadfile", filepath.c_str(), NULL};
