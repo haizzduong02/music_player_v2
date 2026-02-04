@@ -21,8 +21,9 @@ IView* ViewFactory::createLibraryView(
 
 IView* ViewFactory::createPlaylistView(
     PlaylistController* controller,
-    PlaylistManager* manager) {
-    return new PlaylistView(controller, manager);
+    PlaylistManager* manager,
+    PlaybackController* playbackController) {
+    return new PlaylistView(controller, manager, playbackController);
 }
 
 IView* ViewFactory::createNowPlayingView(
@@ -33,8 +34,9 @@ IView* ViewFactory::createNowPlayingView(
 
 IView* ViewFactory::createHistoryView(
     HistoryController* controller,
-    History* history) {
-    return new HistoryView(controller, history);
+    History* history,
+    PlaybackController* playbackController) {
+    return new HistoryView(controller, history, playbackController);
 }
 
 IView* ViewFactory::createFileBrowserView(

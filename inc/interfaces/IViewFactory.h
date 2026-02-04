@@ -58,7 +58,8 @@ public:
      */
     virtual IView* createPlaylistView(
         PlaylistController* controller,
-        PlaylistManager* manager) = 0;
+        PlaylistManager* manager,
+        PlaybackController* playbackController) = 0;
     
     /**
      * @brief Create now playing view
@@ -78,7 +79,8 @@ public:
      */
     virtual IView* createHistoryView(
         HistoryController* controller,
-        History* history) = 0;
+        History* history,
+        PlaybackController* playbackController) = 0;
     
     /**
      * @brief Create file browser view

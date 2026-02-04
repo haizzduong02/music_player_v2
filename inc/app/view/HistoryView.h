@@ -3,6 +3,7 @@
 
 #include "BaseView.h"
 #include "../controller/HistoryController.h"
+#include "../controller/PlaybackController.h"
 #include "../model/History.h"
 
 /**
@@ -26,7 +27,7 @@ public:
      * @param controller History controller
      * @param history History model to observe
      */
-    HistoryView(HistoryController* controller, History* history);
+    HistoryView(HistoryController* controller, History* history, PlaybackController* playbackController);
     
     /**
      * @brief Destructor - detaches from history
@@ -40,6 +41,7 @@ public:
 private:
     HistoryController* controller_;
     History* history_;
+    PlaybackController* playbackController_;
     
     // UI state
     int selectedIndex_;

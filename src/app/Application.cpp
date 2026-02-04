@@ -98,7 +98,8 @@ bool Application::init() {
         );
         playlistController_ = std::make_unique<PlaylistController>(
             playlistManager_.get(),
-            library_.get()
+            library_.get(),
+            metadataReader_.get()
         );
         playbackController_ = std::make_unique<PlaybackController>(
             playbackEngine_.get(),
@@ -130,9 +131,17 @@ bool Application::init() {
             library_.get(),
             playbackController_.get()
         )));
-        mainWindow_->setPlaylistView(dynamic_cast<PlaylistView*>(viewFactory_->createPlaylistView(playlistController_.get(), playlistManager_.get())));
+        mainWindow_->setPlaylistView(dynamic_cast<PlaylistView*>(viewFactory_->createPlaylistView(
+            playlistController_.get(), 
+            playlistManager_.get(),
+            playbackController_.get()
+        )));
         mainWindow_->setNowPlayingView(dynamic_cast<NowPlayingView*>(viewFactory_->createNowPlayingView(playbackController_.get(), playbackState_.get())));
-        mainWindow_->setHistoryView(dynamic_cast<HistoryView*>(viewFactory_->createHistoryView(historyController_.get(), history_.get())));
+        mainWindow_->setHistoryView(dynamic_cast<HistoryView*>(viewFactory_->createHistoryView(
+            historyController_.get(), 
+            history_.get(),
+            playbackController_.get()
+        )));
         mainWindow_->setFileBrowserView(dynamic_cast<FileBrowserView*>(viewFactory_->createFileBrowserView(fileSystem_.get(), libraryController_.get())));
         
         // Connect FileBrowserView to LibraryView
@@ -143,6 +152,11 @@ bool Application::init() {
         // Connect FileBrowserView to PlaylistView
         if (mainWindow_->getPlaylistView() && mainWindow_->getFileBrowserView()) {
             mainWindow_->getPlaylistView()->setFileBrowserView(mainWindow_->getFileBrowserView());
+        }
+        
+        // Inject PlaylistController into FileBrowserView
+        if (mainWindow_->getFileBrowserView() && playlistController_) {
+            mainWindow_->getFileBrowserView()->setPlaylistController(playlistController_.get());
         }
         
         Logger::getInstance().info("Views initialized");

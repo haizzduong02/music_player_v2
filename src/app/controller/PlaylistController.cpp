@@ -2,8 +2,8 @@
 #include "../../../inc/app/model/MediaFileFactory.h"
 #include "../../../inc/utils/Logger.h"
 
-PlaylistController::PlaylistController(PlaylistManager* playlistManager, Library* library)
-    : playlistManager_(playlistManager), library_(library) {
+PlaylistController::PlaylistController(PlaylistManager* playlistManager, Library* library, IMetadataReader* metadataReader)
+    : playlistManager_(playlistManager), library_(library), metadataReader_(metadataReader) {
 }
 
 bool PlaylistController::createPlaylist(const std::string& name) {
@@ -46,7 +46,7 @@ bool PlaylistController::addToPlaylistAndLibrary(
     
     // If not, add to library first
     if (!file) {
-        file = MediaFileFactory::createMediaFile(filepath, nullptr);
+        file = MediaFileFactory::createMediaFile(filepath, metadataReader_);
         if (!file || !library_->addMedia(file)) {
             Logger::getInstance().error("Failed to add file to library: " + filepath);
             return false;

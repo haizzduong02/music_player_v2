@@ -68,7 +68,11 @@ void LibraryView::render() {
                 
                 if (ImGui::IsMouseDoubleClicked(0)) {
                     if (playbackController_) {
-                        playbackController_->play(file);
+                        // Clear playlist context (Library mode)
+                        playbackController_->setCurrentPlaylist(nullptr);
+                        
+                        // Play with context/queue
+                        playbackController_->playContext(files, i);
                     }
                 }
             }
@@ -87,6 +91,7 @@ void LibraryView::render() {
     // Bottom buttons
     if (ImGui::Button("Add Files")) {
         if (fileBrowserView_) {
+            fileBrowserView_->setMode(FileBrowserView::BrowserMode::LIBRARY);
             fileBrowserView_->show();
         }
     }

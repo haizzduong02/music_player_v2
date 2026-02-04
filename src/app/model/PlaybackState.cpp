@@ -84,6 +84,13 @@ void PlaybackState::setPlayQueue(const std::vector<std::shared_ptr<MediaFile>>& 
     Subject::notify();
 }
 
+void PlaybackState::setQueueIndex(size_t index) {
+    std::lock_guard<std::mutex> lock(dataMutex_);
+    if (index <= playQueue_.size()) {
+        queueIndex_ = index;
+    }
+}
+
 std::shared_ptr<MediaFile> PlaybackState::getNextTrack() {
     std::lock_guard<std::mutex> lock(dataMutex_);
     

@@ -1,9 +1,11 @@
 #include "../../../inc/app/view/HistoryView.h"
 #include "../../../inc/utils/Logger.h"
+#include "../../../inc/app/controller/PlaybackController.h"
 #include <imgui.h>
+#include <string>
 
-HistoryView::HistoryView(HistoryController* controller, History* history)
-    : controller_(controller), history_(history), selectedIndex_(-1) {
+HistoryView::HistoryView(HistoryController* controller, History* history, PlaybackController* playbackController)
+    : controller_(controller), history_(history), playbackController_(playbackController), selectedIndex_(-1) {
     
     // Attach as observer to history
     if (history_) {
@@ -42,8 +44,21 @@ void HistoryView::render() {
                 displayText = meta.artist + " - " + displayText;
             }
             
-            if (ImGui::Selectable(displayText.c_str(), isSelected)) {
+            // Fix ID conflict by appending ##i
+            std::string label = displayText + "##hist_" + std::to_string(i);
+
+            if (ImGui::Selectable(label.c_str(), isSelected, ImGuiSelectableFlags_AllowDoubleClick)) {
                 selectedIndex_ = static_cast<int>(i);
+
+                // Double-click to play
+                if (ImGui::IsMouseDoubleClicked(0)) {
+                    if (playbackController_) {
+                        // Clear playlist context (Library mode)
+                        playbackController_->setCurrentPlaylist(nullptr);
+                        playbackController_->play(track);
+                        Logger::getInstance().info("Playing from history: " + displayText);
+                    }
+                }
             }
             
             // Context menu

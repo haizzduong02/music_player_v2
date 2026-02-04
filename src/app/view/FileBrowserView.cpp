@@ -1,5 +1,6 @@
 #include "../../../inc/app/view/FileBrowserView.h"
 #include "../../../inc/app/model/MediaFileFactory.h"
+#include "../../../inc/app/controller/PlaylistController.h"
 #include "../../../inc/utils/Logger.h"
 #include <imgui.h>
 #include <algorithm>
@@ -10,6 +11,18 @@ FileBrowserView::FileBrowserView(IFileSystem* fileSystem, LibraryController* lib
     // Start at current directory or home
     currentPath_ = fileSystem_->exists(".") ? "." : "/";
     refreshCurrentDirectory();
+}
+
+void FileBrowserView::setPlaylistController(PlaylistController* controller) {
+    playlistController_ = controller;
+}
+
+void FileBrowserView::setMode(BrowserMode mode) {
+    mode_ = mode;
+}
+
+void FileBrowserView::setTargetPlaylist(const std::string& playlistName) {
+    targetPlaylistName_ = playlistName;
 }
 
 void FileBrowserView::render() {
@@ -87,10 +100,17 @@ void FileBrowserView::render() {
             if (ImGui::Selectable(fileInfo.name.c_str(), isSelected, ImGuiSelectableFlags_AllowDoubleClick)) {
                 selectedIndex_ = static_cast<int>(i);
                 
-                // Double-click to add to library
+                // Double-click to add to library or playlist
                 if (ImGui::IsMouseDoubleClicked(0)) {
-                    libController_->addMediaFile(fileInfo.path);
-                    Logger::getInstance().info("Added: " + fileInfo.name);
+                    if (mode_ == BrowserMode::PLAYLIST_SELECTION && playlistController_ && !targetPlaylistName_.empty()) {
+                        // Add to playlist
+                        playlistController_->addToPlaylistAndLibrary(targetPlaylistName_, fileInfo.path);
+                        Logger::getInstance().info("Added to playlist '" + targetPlaylistName_ + "': " + fileInfo.name);
+                    } else {
+                        // Default: Add to library
+                        libController_->addMediaFile(fileInfo.path);
+                        Logger::getInstance().info("Added to Library: " + fileInfo.name);
+                    }
                 }
             }
             fileIndex++;
@@ -103,19 +123,48 @@ void FileBrowserView::render() {
     ImGui::EndChild();
     
     // Bottom buttons
-    if (ImGui::Button("Add Selected")) {
+    std::string addBtnText = "Add Selected";
+    if (mode_ == BrowserMode::PLAYLIST_SELECTION) {
+        addBtnText = "Add to Playlist";
+    } else {
+        addBtnText = "Add to Library";
+    }
+    
+    if (ImGui::Button(addBtnText.c_str())) {
         if (selectedIndex_ >= 0 && selectedIndex_ < static_cast<int>(currentFiles_.size())) {
             const auto& selected = currentFiles_[selectedIndex_];
             if (!selected.isDirectory) {
-                libController_->addMediaFile(selected.path);
+                if (mode_ == BrowserMode::PLAYLIST_SELECTION && playlistController_ && !targetPlaylistName_.empty()) {
+                    playlistController_->addToPlaylistAndLibrary(targetPlaylistName_, selected.path);
+                    Logger::getInstance().info("Added to playlist '" + targetPlaylistName_ + "': " + selected.name);
+                } else {
+                    libController_->addMediaFile(selected.path);
+                    Logger::getInstance().info("Added to Library: " + selected.name);
+                }
             }
         }
     }
     
     ImGui::SameLine();
     
+    // Only show "Add All" if managing library, or implement "Add All to Playlist" similarly
     if (ImGui::Button("Add All in Folder")) {
-        libController_->addMediaFilesFromDirectory(currentPath_, false);
+        if (mode_ == BrowserMode::PLAYLIST_SELECTION && playlistController_ && !targetPlaylistName_.empty()) {
+             // Iterate logic to add all supported files to playlist
+             for (const auto& file : currentFiles_) {
+                 if (!file.isDirectory) {
+                     // Check support again just in case
+                     std::string ext = file.name;
+                     size_t dotPos = ext.find_last_of('.');
+                     if (dotPos != std::string::npos && MediaFileFactory::isSupportedFormat(ext.substr(dotPos))) {
+                         playlistController_->addToPlaylistAndLibrary(targetPlaylistName_, file.path);
+                     }
+                 }
+             }
+             Logger::getInstance().info("Added all files in folder to playlist");
+        } else {
+            libController_->addMediaFilesFromDirectory(currentPath_, false);
+        }
     }
     
     ImGui::End();

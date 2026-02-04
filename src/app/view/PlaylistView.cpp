@@ -1,13 +1,14 @@
 #include "../../../inc/app/view/PlaylistView.h"
 #include "../../../inc/app/view/FileBrowserView.h"
 #include "../../../inc/utils/Logger.h"
+#include "../../../inc/app/controller/PlaybackController.h"
 
 #ifdef USE_IMGUI
 #include <imgui.h>
 #endif
 
-PlaylistView::PlaylistView(PlaylistController* controller, PlaylistManager* manager)
-    : controller_(controller), manager_(manager), selectedTrackIndex_(-1), showCreateDialog_(false), showRenameDialog_(false) {
+PlaylistView::PlaylistView(PlaylistController* controller, PlaylistManager* manager, PlaybackController* playbackController)
+    : controller_(controller), manager_(manager), playbackController_(playbackController), selectedTrackIndex_(-1), showCreateDialog_(false), showRenameDialog_(false) {
     
     // Attach as observer to manager
     if (manager_) {
@@ -71,9 +72,22 @@ void PlaylistView::render() {
             bool isSelected = (static_cast<int>(i) == selectedTrackIndex_);
             
             std::string displayText = tracks[i]->getDisplayName();
+
+            // Fix ID conflict by appending ##i
+            std::string label = displayText + "##pl_" + std::to_string(i);
             
-            if (ImGui::Selectable(displayText.c_str(), isSelected)) {
+            if (ImGui::Selectable(label.c_str(), isSelected, ImGuiSelectableFlags_AllowDoubleClick)) {
                 selectedTrackIndex_ = static_cast<int>(i);
+
+                // Double-click to play
+                if (ImGui::IsMouseDoubleClicked(0)) {
+                    if (playbackController_) {
+                        // Set context to this playlist
+                        playbackController_->setCurrentPlaylist(selectedPlaylist_.get());
+                        playbackController_->play(tracks[i]);
+                        Logger::getInstance().info("Playing from playlist: " + displayText);
+                    }
+                }
             }
             
             // Context menu
@@ -90,6 +104,8 @@ void PlaylistView::render() {
         // Playlist controls
         if (ImGui::Button("Add Files")) {
             if (fileBrowserView_) {
+                fileBrowserView_->setMode(FileBrowserView::BrowserMode::PLAYLIST_SELECTION);
+                fileBrowserView_->setTargetPlaylist(selectedPlaylist_->getName());
                 fileBrowserView_->show();
             }
         }

@@ -3,6 +3,7 @@
 
 #include "BaseView.h"
 #include "../controller/PlaylistController.h"
+#include "../controller/PlaybackController.h"
 #include "../model/PlaylistManager.h"
 #include <string>
 
@@ -24,7 +25,7 @@ class FileBrowserView;
  */
 class PlaylistView : public BaseView {
 public:
-    PlaylistView(PlaylistController* controller, PlaylistManager* manager);
+    PlaylistView(PlaylistController* controller, PlaylistManager* manager, PlaybackController* playbackController);
     ~PlaylistView() override;
     
     void render() override;
@@ -36,6 +37,7 @@ public:
 private:
     PlaylistController* controller_;
     PlaylistManager* manager_;
+    PlaybackController* playbackController_;
     FileBrowserView* fileBrowserView_ = nullptr;
     
     // UI state

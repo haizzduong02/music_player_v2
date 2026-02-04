@@ -3,6 +3,7 @@
 
 #include "../model/PlaylistManager.h"
 #include "../model/Library.h"
+#include "../../interfaces/IMetadataReader.h"
 #include <string>
 #include <vector>
 
@@ -25,8 +26,9 @@ public:
      * @brief Constructor with dependency injection
      * @param playlistManager Playlist manager
      * @param library Library model (for adding tracks)
+     * @param metadataReader Metadata reader for new tracks
      */
-    PlaylistController(PlaylistManager* playlistManager, Library* library);
+    PlaylistController(PlaylistManager* playlistManager, Library* library, IMetadataReader* metadataReader);
     
     /**
      * @brief Create a new playlist
@@ -120,6 +122,7 @@ public:
 private:
     PlaylistManager* playlistManager_;
     Library* library_;
+    IMetadataReader* metadataReader_;
 };
 
 #endif // PLAYLIST_CONTROLLER_H

@@ -109,6 +109,12 @@ public:
     void setPlayQueue(const std::vector<std::shared_ptr<MediaFile>>& queue);
     
     /**
+     * @brief Set current queue index
+     * @param index New index
+     */
+    void setQueueIndex(size_t index);
+    
+    /**
      * @brief Get next track from queue
      * @return Next track, nullptr if queue empty
      */

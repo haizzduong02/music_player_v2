@@ -48,7 +48,7 @@ public:
      * @param track Track to play
      * @return true if playback started
      */
-    bool play(std::shared_ptr<MediaFile> track);
+    bool play(std::shared_ptr<MediaFile> track, bool pushToStack = true);
     
     /**
      * @brief Pause playback
@@ -102,6 +102,13 @@ public:
     Playlist* getCurrentPlaylist() const {
         return currentPlaylist_;
     }
+    
+    /**
+     * @brief Play a track within a context (queue)
+     * @param context List of tracks (queue)
+     * @param startIndex Index of track to start playing
+     */
+    void playContext(const std::vector<std::shared_ptr<MediaFile>>& context, size_t startIndex);
     
     /**
      * @brief Update from observed subject (Observer pattern)

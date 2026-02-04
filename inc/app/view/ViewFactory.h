@@ -59,7 +59,8 @@ public:
      */
     IView* createPlaylistView(
         PlaylistController* controller,
-        PlaylistManager* manager) override;
+        PlaylistManager* manager,
+        PlaybackController* playbackController) override;
     
     /**
      * @brief Create now playing view
@@ -79,7 +80,8 @@ public:
      */
     IView* createHistoryView(
         HistoryController* controller,
-        History* history) override;
+        History* history,
+        PlaybackController* playbackController) override;
     
     /**
      * @brief Create file browser view
