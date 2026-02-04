@@ -1,0 +1,17 @@
+bool Playlist::removeTrackByPath(const std::string& filepath) {
+    std::lock_guard<std::mutex> lock(dataMutex_);
+    
+    auto it = std::find_if(tracks_.begin(), tracks_.end(),
+        [&filepath](const std::shared_ptr<MediaFile>& track) {
+            return track && track->getPath() == filepath;
+        });
+    
+    if (it != tracks_.end()) {
+        tracks_.erase(it);
+        Logger::getInstance().info("Removed track from playlist '" + name_ + "': " + filepath);
+        Subject::notify();
+        return true;
+    }
+    
+    return false;
+}

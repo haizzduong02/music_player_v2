@@ -1,0 +1,37 @@
+I. Tạo ứng dụng CLI cho Linux phục vụ như một trình duyệt/phát file media cơ bản và video (nâng cao) sử dụng C/C++
+[CƠ BẢN]
+1. Ứng dụng của bạn phải có khả năng chạy:
+1- Từ bất kỳ thư mục nào trên máy tính
+2- Từ thiết bị ngoài: USB (phải mount thiết bị và phân tích file trong USB)
+2. Các tùy chọn có sẵn:
+1 - Xem danh sách các file media trong thư mục đó và tất cả thư mục con (âm thanh và video)
++ Phân trang, 25 mục mỗi trang
+2 - Danh sách phát (Playlists):
++ Danh sách các playlist
++ Xem một playlist
++ Tạo/Cập nhật/Xóa một playlist
+3 - Metadata của file (Taglib): [TÍNH NĂNG CHÍNH]
++ Có sẵn từ danh sách media hoặc một playlist
++ Hiển thị metadata của một file media (hầu hết mọi thứ bạn có thể nghĩ đến là metadata):
+  Audio: Tên bài hát, Album, Nghệ sĩ, Thời lượng, Thể loại, Nhà xuất bản, Năm phát hành,...
+  Video: Tên, Kích thước, Thời lượng, Bitrate, Codec,
++ Chỉnh sửa metadata: thay đổi giá trị, thêm khóa mới,...
+4 - Phát nhạc từ ứng dụng của bạn sử dụng thư viện SDL2 trên một luồng (thread) khác.
++ Phát/Tạm dừng
++ Bài tiếp theo/Bài trước đó
++ Tự động chuyển sang bài tiếp theo khi bài hiện tại kết thúc
++ Hiển thị thời gian hiện tại và tổng thời lượng
+5 - Có thể thay đổi âm lượng của thiết bị
+[Kết nối với thiết bị]
+1. Ứng dụng nghe nhạc của bạn phải kết nối với board S32K144 để:
+   + Điều khiển âm lượng bằng ADC
+   + Có thể Phát, tạm dừng, dừng, bài tiếp theo, bài trước đó bằng các nút nhấn.
+   + Hiển thị thông tin bài hát trên màn hình board khi bài hát đang phát.
+ 
+II. Sản phẩm phải có các mục sau:
+1. Đặc tả yêu cầu phần mềm (Software requirement specification)
+   - Usecase và mô tả chúng.
+2. Tài liệu thiết kế (Design document)
+  - Thiết kế kiến trúc (Mô hình MVC)
+  - Thiết kế chi tiết
+3. Lập trình & kiểm thử đơn vị (Coding & unit test).

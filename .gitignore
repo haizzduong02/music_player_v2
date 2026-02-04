@@ -1,0 +1,93 @@
+# ----------------------------------------------------------------------
+# 1. Build & Compiled Directories
+# ----------------------------------------------------------------------
+# Thư mục build chính (quan trọng nhất)
+/build/
+/build_debug/
+/build_release/
+
+# CMake artifacts (phòng trường hợp lỡ tay chạy cmake tại root)
+CMakeFiles/
+CMakeCache.txt
+CMakeScripts/
+cmake_install.cmake
+Makefile
+*.cmake
+!CMakeLists.txt
+
+# ----------------------------------------------------------------------
+# 2. Compiled Object files & Libraries
+# ----------------------------------------------------------------------
+*.o
+*.obj
+*.lo
+*.la
+*.al
+*.libs
+*.so
+*.so.*
+*.a
+*.lib
+*.dll
+*.dylib
+
+# ----------------------------------------------------------------------
+# 3. Executables (File chạy đầu ra)
+# ----------------------------------------------------------------------
+# Tên file chạy chính của project
+music_player
+music_player_debug
+music_player_test
+
+# Bỏ qua tất cả file không có đuôi mở rộng (thường là binary trên Linux)
+# Cẩn thận: Dòng này có thể ignore nhầm file scripts, nên cần whitelist scripts bên dưới
+# *
+# !*/
+
+# ----------------------------------------------------------------------
+# 4. IDE & Editor Configuration (Cấu hình môi trường dev)
+# ----------------------------------------------------------------------
+# Visual Studio Code
+.vscode/
+# Nếu muốn share file launch.json/tasks.json cho team thì comment dòng trên và dùng dòng dưới:
+# .vscode/*
+# !.vscode/launch.json
+# !.vscode/tasks.json
+
+# CLion / IntelliJ
+.idea/
+cmake-build-*/
+
+# Vim / Emacs swap files (Rất hay gặp trên Linux)
+*~
+*.swp
+*.swo
+\#*#
+
+# ----------------------------------------------------------------------
+# 5. OS Generated Files
+# ----------------------------------------------------------------------
+.DS_Store
+.DS_Store?
+._*
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# ----------------------------------------------------------------------
+# 6. Testing & Logs
+# ----------------------------------------------------------------------
+# Google Test generated artifacts
+test_detail.xml
+*.gcov
+*.gcda
+*.gcno
+
+# Logs
+*.log
+
+# ----------------------------------------------------------------------
+# 7. Documentation
+# ----------------------------------------------------------------------
+# Nếu sau này dùng Doxygen
+/docs/doxygen_output/
