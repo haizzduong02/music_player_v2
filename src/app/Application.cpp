@@ -68,6 +68,47 @@ bool Application::init() {
 
         // Setup Dear ImGui style
         ImGui::StyleColorsDark();
+        
+        // Apply custom color scheme: #1C6758, #F05A7E, #3D8361
+        ImGuiStyle& style = ImGui::GetStyle();
+        
+        // Background colors - dark teal
+        style.Colors[ImGuiCol_WindowBg] = ImVec4(0.08f, 0.28f, 0.24f, 1.0f);
+        style.Colors[ImGuiCol_ChildBg] = ImVec4(0.11f, 0.40f, 0.35f, 0.5f);
+        style.Colors[ImGuiCol_PopupBg] = ImVec4(0.11f, 0.40f, 0.35f, 0.95f);
+        
+        // Frame colors
+        style.Colors[ImGuiCol_FrameBg] = ImVec4(0.08f, 0.28f, 0.24f, 1.0f);
+        style.Colors[ImGuiCol_FrameBgHovered] = ImVec4(0.24f, 0.51f, 0.38f, 1.0f);
+        style.Colors[ImGuiCol_FrameBgActive] = ImVec4(0.94f, 0.35f, 0.49f, 1.0f);
+        
+        // Button colors
+        style.Colors[ImGuiCol_Button] = ImVec4(0.24f, 0.51f, 0.38f, 1.0f);
+        style.Colors[ImGuiCol_ButtonHovered] = ImVec4(0.94f, 0.35f, 0.49f, 0.8f);
+        style.Colors[ImGuiCol_ButtonActive] = ImVec4(0.94f, 0.35f, 0.49f, 1.0f);
+        
+        // Header colors (for selectables)
+        style.Colors[ImGuiCol_Header] = ImVec4(0.24f, 0.51f, 0.38f, 0.6f);
+        style.Colors[ImGuiCol_HeaderHovered] = ImVec4(0.94f, 0.35f, 0.49f, 0.6f);
+        style.Colors[ImGuiCol_HeaderActive] = ImVec4(0.94f, 0.35f, 0.49f, 1.0f);
+        
+        // Slider colors
+        style.Colors[ImGuiCol_SliderGrab] = ImVec4(0.94f, 0.35f, 0.49f, 1.0f);
+        style.Colors[ImGuiCol_SliderGrabActive] = ImVec4(0.94f, 0.35f, 0.49f, 1.0f);
+        
+        // Text
+        style.Colors[ImGuiCol_Text] = ImVec4(0.95f, 0.95f, 0.95f, 1.0f);
+        style.Colors[ImGuiCol_TextDisabled] = ImVec4(0.5f, 0.5f, 0.5f, 1.0f);
+        
+        // Separator
+        style.Colors[ImGuiCol_Separator] = ImVec4(0.24f, 0.51f, 0.38f, 0.5f);
+        
+        // Style tweaks
+        style.WindowRounding = 0.0f;
+        style.FrameRounding = 4.0f;
+        style.GrabRounding = 4.0f;
+        style.FramePadding = ImVec2(8, 4);
+        style.ItemSpacing = ImVec2(8, 6);
 
         // Setup Platform/Renderer backends
         ImGui_ImplSDL2_InitForOpenGL(window_, glContext_);
@@ -158,6 +199,10 @@ bool Application::init() {
         if (mainWindow_->getFileBrowserView() && playlistController_) {
             mainWindow_->getFileBrowserView()->setPlaylistController(playlistController_.get());
         }
+        
+        // Inject Playback references into MainWindow for unified controls
+        mainWindow_->setPlaybackController(playbackController_.get());
+        mainWindow_->setPlaybackState(playbackState_.get());
         
         Logger::getInstance().info("Views initialized");
         

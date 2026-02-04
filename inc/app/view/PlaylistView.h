@@ -34,6 +34,8 @@ public:
     
     void setFileBrowserView(FileBrowserView* browserView) { fileBrowserView_ = browserView; }
     
+    PlaylistManager* getManager() const { return manager_; }
+    
 private:
     PlaylistController* controller_;
     PlaylistManager* manager_;

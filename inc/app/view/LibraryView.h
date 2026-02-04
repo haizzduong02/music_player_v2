@@ -34,6 +34,8 @@ public:
     
     void setFileBrowserView(FileBrowserView* browserView) { fileBrowserView_ = browserView; }
     
+    Library* getLibrary() const { return library_; }
+    
 private:
     LibraryController* controller_;
     Library* library_;

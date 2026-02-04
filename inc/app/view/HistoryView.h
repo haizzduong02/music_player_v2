@@ -38,6 +38,8 @@ public:
     void handleInput() override;
     void update(void* subject) override;
     
+    History* getHistory() const { return history_; }
+    
 private:
     HistoryController* controller_;
     History* history_;

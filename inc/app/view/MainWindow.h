@@ -7,124 +7,93 @@
 #include "NowPlayingView.h"
 #include "HistoryView.h"
 #include "FileBrowserView.h"
+#include "../../app/model/PlaybackState.h"
 #include <vector>
 #include <memory>
+#include <GL/gl.h>
 
 /**
  * @file MainWindow.h
- * @brief Main application window
+ * @brief Main application window with unified layout
  * 
- * Container for all child views.
- * Manages ImGui main window and menu bar.
+ * New unified layout with tab navigation, large album art,
+ * and integrated playback controls.
  */
 
 /**
- * @brief Main window class
+ * @brief Screen enum for tab navigation
+ */
+enum class Screen {
+    HISTORY,
+    PLAYLIST,
+    LIBRARY
+};
+
+/**
+ * @brief Main window class with unified layout
  * 
- * Root view that contains all other views.
- * Manages window layout and navigation.
+ * Single window containing:
+ * - Tab buttons (History, Playlist, Library) at top-left
+ * - Album art/video display in center-left
+ * - Track list on right side
+ * - Playback controls at bottom
  */
 class MainWindow : public BaseView {
 public:
-    /**
-     * @brief Constructor
-     */
     MainWindow();
-    
-    /**
-     * @brief Destructor
-     */
     ~MainWindow() override = default;
     
-    /**
-     * @brief Render main window and all child views
-     */
     void render() override;
-    
-    /**
-     * @brief Handle input
-     */
     void handleInput() override;
     
-    /**
-     * @brief Add a child view
-     * @param view View to add
-     */
-    void addView(IView* view);
-    
-    /**
-     * @brief Remove a child view
-     * @param view View to remove
-     */
-    void removeView(IView* view);
-    
-    /**
-     * @brief Set library view
-     * @param view Library view
-     */
+    // View setters
     void setLibraryView(LibraryView* view) { libraryView_ = view; }
-    
-    /**
-     * @brief Set playlist view
-     * @param view Playlist view
-     */
     void setPlaylistView(PlaylistView* view) { playlistView_ = view; }
-    
-    /**
-     * @brief Set now playing view
-     * @param view Now playing view
-     */
     void setNowPlayingView(NowPlayingView* view) { nowPlayingView_ = view; }
-    
-    /**
-     * @brief Set history view
-     * @param view History view
-     */
     void setHistoryView(HistoryView* view) { historyView_ = view; }
-    
-    /**
-     * @brief Set file browser view
-     * @param view File browser view
-     */
     void setFileBrowserView(FileBrowserView* view) { fileBrowserView_ = view; }
     
-    /**
-     * @brief Get library view
-     * @return Library view pointer
-     */
+    // Getters
     LibraryView* getLibraryView() const { return libraryView_; }
-    
-    /**
-     * @brief Get file browser view
-     * @return File browser view pointer
-     */
     FileBrowserView* getFileBrowserView() const { return fileBrowserView_; }
-    
-    /**
-     * @brief Get playlist view
-     * @return Playlist view pointer
-     */
     PlaylistView* getPlaylistView() const { return playlistView_; }
     
+    // Screen navigation
+    void switchScreen(Screen screen);
+    Screen getCurrentScreen() const { return currentScreen_; }
+    
+    // Set playback references for controls
+    void setPlaybackController(PlaybackController* controller) { playbackController_ = controller; }
+    void setPlaybackState(PlaybackState* state) { playbackState_ = state; }
+    
 private:
-    std::vector<IView*> childViews_;
+    // Views
+    LibraryView* libraryView_ = nullptr;
+    PlaylistView* playlistView_ = nullptr;
+    NowPlayingView* nowPlayingView_ = nullptr;
+    HistoryView* historyView_ = nullptr;
+    FileBrowserView* fileBrowserView_ = nullptr;
     
-    // Main views (owned elsewhere, just referenced here)
-    LibraryView* libraryView_;
-    PlaylistView* playlistView_;
-    NowPlayingView* nowPlayingView_;
-    HistoryView* historyView_;
-    FileBrowserView* fileBrowserView_;
+    // State
+    Screen currentScreen_ = Screen::LIBRARY;
     
-    /**
-     * @brief Render menu bar
-     */
-    void renderMenuBar();
+    // Playback references
+    PlaybackController* playbackController_ = nullptr;
+    PlaybackState* playbackState_ = nullptr;
     
-    /**
-     * @brief Render docking layout
-     */
-    void setupDockspace();
+    // Album art texture
+    GLuint albumArtTexture_ = 0;
+    std::string currentTrackPath_;
+    
+    // Render helpers
+    void renderTabBar();
+    void renderAlbumArt();
+    void renderTrackList();
+    void renderPlaybackControls();
+    void renderNowPlayingInfo();
+    
+    // Helper to scroll to currently playing track
+    void scrollToCurrentTrack();
 };
 
 #endif // MAIN_WINDOW_H
