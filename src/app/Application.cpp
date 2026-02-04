@@ -65,6 +65,17 @@ bool Application::init() {
         ImGuiIO& io = ImGui::GetIO(); (void)io;
         io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
         // io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;         // Enable Docking (Requires Docking Branch)
+        
+        // Load Inter font (modern, clean UI font)
+        // Try relative path from build directory first, then from project root
+        ImFont* mainFont = io.Fonts->AddFontFromFileTTF("../assets/fonts/Inter-Variable.ttf", 16.0f);
+        if (!mainFont) {
+            mainFont = io.Fonts->AddFontFromFileTTF("assets/fonts/Inter-Variable.ttf", 16.0f);
+        }
+        if (!mainFont) {
+            Logger::getInstance().warn("Could not load Inter font, using default");
+            io.Fonts->AddFontDefault();
+        }
 
         // Setup Dear ImGui style
         ImGui::StyleColorsDark();

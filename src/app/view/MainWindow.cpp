@@ -276,10 +276,26 @@ void MainWindow::renderTrackList() {
                     files = libraryView_->getLibrary()->search(searchQuery);
                 }
                 
+                // Buttons FIRST (outside scroll)
+                if (ImGui::Button("Add Files")) {
+                    if (fileBrowserView_) {
+                        fileBrowserView_->setMode(FileBrowserView::BrowserMode::LIBRARY);
+                        fileBrowserView_->show();
+                    }
+                }
+                ImGui::SameLine();
+                if (ImGui::Button("Clear Library")) {
+                    if (libraryView_ && libraryView_->getLibrary()) {
+                        libraryView_->getLibrary()->clear();
+                    }
+                }
+                
                 ImGui::Text("Library: %zu tracks", files.size());
                 ImGui::Separator();
                 
-                ImGui::BeginChild("TrackListScroll", ImVec2(0, 0), true);
+                // Calculate remaining height for scroll area
+                float scrollHeight = ImGui::GetContentRegionAvail().y;
+                ImGui::BeginChild("TrackListScroll", ImVec2(0, scrollHeight), true);
                 
                 for (size_t i = 0; i < files.size(); ++i) {
                     const auto& file = files[i];
@@ -288,13 +304,8 @@ void MainWindow::renderTrackList() {
                     
                     ImGui::PushID(static_cast<int>(i));
                     
-                    // Highlight playing track
-                    if (isPlaying) {
-                        ImGui::PushStyleColor(ImGuiCol_Header, COLOR_ACCENT);
-                    }
-                    
-                    // Two-line selectable
-                    float itemHeight = 50.0f;
+                    // Two-line display with full-width selectable
+                    float itemHeight = 45.0f;
                     std::string title = file->getDisplayName();
                     std::string subtitle = meta.artist;
                     if (!meta.album.empty()) {
@@ -302,19 +313,25 @@ void MainWindow::renderTrackList() {
                         subtitle += meta.album;
                     }
                     
-                    bool clicked = ImGui::Selectable("##track", isPlaying, 0, ImVec2(0, itemHeight));
+                    // Full width selectable with highlight
+                    if (isPlaying) {
+                        ImGui::PushStyleColor(ImGuiCol_Header, COLOR_ACCENT);
+                        ImGui::PushStyleColor(ImGuiCol_HeaderHovered, COLOR_ACCENT);
+                    }
+                    
+                    bool clicked = ImGui::Selectable("##track", isPlaying, ImGuiSelectableFlags_SpanAllColumns, ImVec2(0, itemHeight));
                     
                     // Draw text over selectable
                     ImVec2 itemPos = ImGui::GetItemRectMin();
                     ImGui::SetCursorScreenPos(ImVec2(itemPos.x + 10, itemPos.y + 5));
                     ImGui::Text("%s", title.c_str());
-                    ImGui::SetCursorScreenPos(ImVec2(itemPos.x + 10, itemPos.y + 25));
+                    ImGui::SetCursorScreenPos(ImVec2(itemPos.x + 10, itemPos.y + 24));
                     ImGui::PushStyleColor(ImGuiCol_Text, COLOR_TEXT_DIM);
                     ImGui::Text("%s", subtitle.c_str());
                     ImGui::PopStyleColor();
                     
                     if (isPlaying) {
-                        ImGui::PopStyleColor();
+                        ImGui::PopStyleColor(2);
                     }
                     
                     // Single click to play
@@ -332,21 +349,6 @@ void MainWindow::renderTrackList() {
                 }
                 
                 ImGui::EndChild();
-                
-                // Add Files button
-                ImGui::Spacing();
-                if (ImGui::Button("Add Files")) {
-                    if (fileBrowserView_) {
-                        fileBrowserView_->setMode(FileBrowserView::BrowserMode::LIBRARY);
-                        fileBrowserView_->show();
-                    }
-                }
-                ImGui::SameLine();
-                if (ImGui::Button("Clear Library")) {
-                    if (libraryView_ && libraryView_->getLibrary()) {
-                        libraryView_->getLibrary()->clear();
-                    }
-                }
             }
             break;
             
@@ -395,10 +397,24 @@ void MainWindow::renderTrackList() {
                     auto playlist = playlists[selectedPlaylistIdx];
                     auto tracks = playlist->getTracks();
                     
+                    // Buttons FIRST
+                    if (ImGui::Button("Add Files")) {
+                        if (fileBrowserView_) {
+                            fileBrowserView_->setMode(FileBrowserView::BrowserMode::PLAYLIST_SELECTION);
+                            fileBrowserView_->setTargetPlaylist(playlist->getName());
+                            fileBrowserView_->show();
+                        }
+                    }
+                    ImGui::SameLine();
+                    if (ImGui::Button("Clear")) {
+                        playlist->clear();
+                    }
+                    
                     ImGui::Text("%s: %zu tracks", playlist->getName().c_str(), tracks.size());
                     ImGui::Separator();
                     
-                    ImGui::BeginChild("TrackListScroll", ImVec2(0, 0), true);
+                    float scrollHeight = ImGui::GetContentRegionAvail().y;
+                    ImGui::BeginChild("TrackListScroll", ImVec2(0, scrollHeight), true);
                     
                     for (size_t i = 0; i < tracks.size(); ++i) {
                         const auto& track = tracks[i];
@@ -407,11 +423,7 @@ void MainWindow::renderTrackList() {
                         
                         ImGui::PushID(static_cast<int>(i) + 10000);
                         
-                        if (isPlaying) {
-                            ImGui::PushStyleColor(ImGuiCol_Header, COLOR_ACCENT);
-                        }
-                        
-                        float itemHeight = 50.0f;
+                        float itemHeight = 45.0f;
                         std::string title = track->getDisplayName();
                         std::string subtitle = meta.artist;
                         if (!meta.album.empty()) {
@@ -419,18 +431,23 @@ void MainWindow::renderTrackList() {
                             subtitle += meta.album;
                         }
                         
-                        bool clicked = ImGui::Selectable("##track", isPlaying, 0, ImVec2(0, itemHeight));
+                        if (isPlaying) {
+                            ImGui::PushStyleColor(ImGuiCol_Header, COLOR_ACCENT);
+                            ImGui::PushStyleColor(ImGuiCol_HeaderHovered, COLOR_ACCENT);
+                        }
+                        
+                        bool clicked = ImGui::Selectable("##track", isPlaying, ImGuiSelectableFlags_SpanAllColumns, ImVec2(0, itemHeight));
                         
                         ImVec2 itemPos = ImGui::GetItemRectMin();
                         ImGui::SetCursorScreenPos(ImVec2(itemPos.x + 10, itemPos.y + 5));
                         ImGui::Text("%s", title.c_str());
-                        ImGui::SetCursorScreenPos(ImVec2(itemPos.x + 10, itemPos.y + 25));
+                        ImGui::SetCursorScreenPos(ImVec2(itemPos.x + 10, itemPos.y + 24));
                         ImGui::PushStyleColor(ImGuiCol_Text, COLOR_TEXT_DIM);
                         ImGui::Text("%s", subtitle.c_str());
                         ImGui::PopStyleColor();
                         
                         if (isPlaying) {
-                            ImGui::PopStyleColor();
+                            ImGui::PopStyleColor(2);
                         }
                         
                         if (clicked && playbackController_) {
@@ -446,22 +463,6 @@ void MainWindow::renderTrackList() {
                     }
                     
                     ImGui::EndChild();
-                    
-                    // Playlist buttons
-                    ImGui::Spacing();
-                    if (ImGui::Button("Add Files")) {
-                        if (fileBrowserView_ && playlists.size() > 0 && selectedPlaylistIdx < static_cast<int>(playlists.size())) {
-                            fileBrowserView_->setMode(FileBrowserView::BrowserMode::PLAYLIST_SELECTION);
-                            fileBrowserView_->setTargetPlaylist(playlists[selectedPlaylistIdx]->getName());
-                            fileBrowserView_->show();
-                        }
-                    }
-                    ImGui::SameLine();
-                    if (ImGui::Button("Clear")) {
-                        if (selectedPlaylistIdx < static_cast<int>(playlists.size())) {
-                            playlists[selectedPlaylistIdx]->clear();
-                        }
-                    }
                 }
             }
             break;
@@ -470,10 +471,16 @@ void MainWindow::renderTrackList() {
             if (historyView_ && historyView_->getHistory()) {
                 auto historyTracks = historyView_->getHistory()->getAll();
                 
+                // Button FIRST
+                if (ImGui::Button("Clear History")) {
+                    historyView_->getHistory()->clear();
+                }
+                
                 ImGui::Text("History: %zu tracks", historyTracks.size());
                 ImGui::Separator();
                 
-                ImGui::BeginChild("TrackListScroll", ImVec2(0, 0), true);
+                float scrollHeight = ImGui::GetContentRegionAvail().y;
+                ImGui::BeginChild("TrackListScroll", ImVec2(0, scrollHeight), true);
                 
                 for (size_t i = 0; i < historyTracks.size(); ++i) {
                     const auto& track = historyTracks[i];
@@ -482,11 +489,7 @@ void MainWindow::renderTrackList() {
                     
                     ImGui::PushID(static_cast<int>(i) + 20000);
                     
-                    if (isPlaying) {
-                        ImGui::PushStyleColor(ImGuiCol_Header, COLOR_ACCENT);
-                    }
-                    
-                    float itemHeight = 50.0f;
+                    float itemHeight = 45.0f;
                     std::string title = track->getDisplayName();
                     std::string subtitle = meta.artist;
                     if (!meta.album.empty()) {
@@ -494,18 +497,23 @@ void MainWindow::renderTrackList() {
                         subtitle += meta.album;
                     }
                     
-                    bool clicked = ImGui::Selectable("##track", isPlaying, 0, ImVec2(0, itemHeight));
+                    if (isPlaying) {
+                        ImGui::PushStyleColor(ImGuiCol_Header, COLOR_ACCENT);
+                        ImGui::PushStyleColor(ImGuiCol_HeaderHovered, COLOR_ACCENT);
+                    }
+                    
+                    bool clicked = ImGui::Selectable("##track", isPlaying, ImGuiSelectableFlags_SpanAllColumns, ImVec2(0, itemHeight));
                     
                     ImVec2 itemPos = ImGui::GetItemRectMin();
                     ImGui::SetCursorScreenPos(ImVec2(itemPos.x + 10, itemPos.y + 5));
                     ImGui::Text("%s", title.c_str());
-                    ImGui::SetCursorScreenPos(ImVec2(itemPos.x + 10, itemPos.y + 25));
+                    ImGui::SetCursorScreenPos(ImVec2(itemPos.x + 10, itemPos.y + 24));
                     ImGui::PushStyleColor(ImGuiCol_Text, COLOR_TEXT_DIM);
                     ImGui::Text("%s", subtitle.c_str());
                     ImGui::PopStyleColor();
                     
                     if (isPlaying) {
-                        ImGui::PopStyleColor();
+                        ImGui::PopStyleColor(2);
                     }
                     
                     if (clicked && playbackController_) {
@@ -521,14 +529,6 @@ void MainWindow::renderTrackList() {
                 }
                 
                 ImGui::EndChild();
-                
-                // Clear History button
-                ImGui::Spacing();
-                if (ImGui::Button("Clear History")) {
-                    if (historyView_ && historyView_->getHistory()) {
-                        historyView_->getHistory()->clear();
-                    }
-                }
             }
             break;
     }
@@ -577,7 +577,7 @@ void MainWindow::renderPlaybackControls() {
     
     // Playback buttons centered
     float buttonWidth = 40.0f;
-    float totalWidth = buttonWidth * 4 + 30; // 4 buttons + spacing
+    float totalWidth = buttonWidth * 3 + 20; // 3 buttons + spacing
     float volumeWidth = 120.0f;
     float startX = (ImGui::GetContentRegionAvail().x - totalWidth - volumeWidth) / 2;
     ImGui::SetCursorPosX(ImGui::GetCursorPosX() + startX);
@@ -607,13 +607,6 @@ void MainWindow::renderPlaybackControls() {
         }
     } else {
         ImGui::Button(">", ImVec2(buttonWidth, 30));
-    }
-    
-    ImGui::SameLine();
-    
-    // Stop
-    if (ImGui::Button("[]", ImVec2(buttonWidth, 30))) {
-        if (playbackController_) playbackController_->stop();
     }
     
     ImGui::SameLine();

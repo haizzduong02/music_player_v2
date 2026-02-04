@@ -30,6 +30,10 @@ void FileBrowserView::render() {
         return;
     }
     
+    // Set larger window size
+    ImGui::SetNextWindowSize(ImVec2(900, 600), ImGuiCond_FirstUseEver);
+    ImGui::SetNextWindowSizeConstraints(ImVec2(700, 500), ImVec2(1400, 900));
+    
     ImGui::Begin("File Browser", &visible_);
     
     // Current path and navigation
