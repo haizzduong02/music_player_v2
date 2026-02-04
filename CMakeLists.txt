@@ -67,7 +67,7 @@ set(VIEW_SOURCES
 set(SERVICE_SOURCES
     src/service/LocalFileSystem.cpp
     src/service/TagLibMetadataReader.cpp
-    src/service/SDL2PlaybackEngine.cpp
+    src/service/MpvPlaybackEngine.cpp
     src/service/JsonPersistence.cpp
 )
 
@@ -120,6 +120,10 @@ if(EXISTS "${IMGUI_DIR}/imgui.h")
         )
         target_include_directories(imgui PUBLIC ${SDL2_INCLUDE_DIRS})
         target_link_libraries(imgui PUBLIC ${SDL2_LIBRARIES} GL)
+        
+        # Link dl for dlopen/dlsym used by some libs if needed
+        target_link_libraries(imgui PUBLIC ${CMAKE_DL_LIBS})
+
         message(STATUS "  SDL2 Backend:      ON")
     endif()
     
@@ -135,28 +139,23 @@ else()
     message(WARNING "Run './build_production.sh' to download and compile with ImGui")
 endif()
 
-# SDL2 for audio (optional but recommended)
-# SDL2 for audio (optional but recommended)
+# SDL2 for window/gl
 pkg_check_modules(SDL2 sdl2)
-pkg_check_modules(SDL2_MIXER SDL2_mixer)
 
 if(SDL2_FOUND)
     target_include_directories(music_player PRIVATE ${SDL2_INCLUDE_DIRS})
     target_link_libraries(music_player PRIVATE ${SDL2_LIBRARIES})
     target_compile_definitions(music_player PRIVATE USE_SDL2)
     message(STATUS "  SDL2 Support:      ON")
-
-    if(SDL2_MIXER_FOUND)
-        target_include_directories(music_player PRIVATE ${SDL2_MIXER_INCLUDE_DIRS})
-        target_link_libraries(music_player PRIVATE ${SDL2_MIXER_LIBRARIES})
-        target_compile_definitions(music_player PRIVATE USE_SDL_MIXER)
-        message(STATUS "  SDL2 Mixer:        ON")
-    else()
-        message(WARNING "  SDL2 Mixer:        OFF (Install libsdl2-mixer-dev for audio)")
-    endif()
 else()
     message(WARNING "  SDL2 Support:      OFF")
 endif()
+
+# libmpv for playback
+pkg_check_modules(MPV REQUIRED mpv)
+target_include_directories(music_player PRIVATE ${MPV_INCLUDE_DIRS})
+target_link_libraries(music_player PRIVATE ${MPV_LIBRARIES})
+message(STATUS "  libmpv Support:    ON")
 
 # Threading
 find_package(Threads REQUIRED)

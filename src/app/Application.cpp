@@ -3,7 +3,7 @@
 #include "../../inc/service/TagLibMetadataReader.h"
 #include "../../inc/service/LocalFileSystem.h"
 #include "../../inc/service/JsonPersistence.h"
-#include "../../inc/service/SDL2PlaybackEngine.h"
+#include "../../inc/service/MpvPlaybackEngine.h"
 #include "../../inc/app/view/ViewFactory.h"
 #include "../../inc/app/view/MainWindow.h"
 
@@ -14,7 +14,9 @@
 #include <backends/imgui_impl_sdl2.h>
 #include <backends/imgui_impl_opengl3.h>
 #include <thread>
+#include <thread>
 #include <chrono>
+#include <fstream>
 
 Application::Application() 
     : window_(nullptr),
@@ -68,9 +70,23 @@ bool Application::init() {
         
         // Load Inter font (modern, clean UI font)
         // Try relative path from build directory first, then from project root
-        ImFont* mainFont = io.Fonts->AddFontFromFileTTF("../assets/fonts/Inter-Variable.ttf", 16.0f);
-        if (!mainFont) {
-            mainFont = io.Fonts->AddFontFromFileTTF("assets/fonts/Inter-Variable.ttf", 16.0f);
+        // Load Inter font (modern, clean UI font)
+        // Check file existence first to avoid ImGui assertion crash
+        const char* fontPath1 = "../assets/fonts/Inter-Variable.ttf";
+        const char* fontPath2 = "assets/fonts/Inter-Variable.ttf";
+        
+        ImFont* mainFont = nullptr;
+        
+        // Helper to check file existence
+        auto fileExists = [](const char* path) {
+            std::ifstream f(path);
+            return f.good();
+        };
+
+        if (fileExists(fontPath1)) {
+            mainFont = io.Fonts->AddFontFromFileTTF(fontPath1, 16.0f);
+        } else if (fileExists(fontPath2)) {
+            mainFont = io.Fonts->AddFontFromFileTTF(fontPath2, 16.0f);
         }
         if (!mainFont) {
             Logger::getInstance().warn("Could not load Inter font, using default");
@@ -131,7 +147,7 @@ bool Application::init() {
         // ... (rest of init remains checking Application.cpp content - wait, replace_file_content replaces blocks. I need to be careful with "Services, Models..." lines if they are not in TargetContent)
         metadataReader_ = std::make_unique<TagLibMetadataReader>();
         fileSystem_ = std::make_unique<LocalFileSystem>();
-        playbackEngine_ = std::make_unique<SDL2PlaybackEngine>();
+        playbackEngine_ = std::make_unique<MpvPlaybackEngine>();
         
         Logger::getInstance().info("Services initialized");
         
@@ -258,6 +274,11 @@ void Application::run() {
             playbackController_->updateTime(deltaTime);
         }
         
+        // Update video frame for rendering
+        if (playbackEngine_) {
+            playbackEngine_->updateVideo();
+        }
+        
         SDL_Event event;
         while (SDL_PollEvent(&event)) {
             ImGui_ImplSDL2_ProcessEvent(&event);
@@ -320,6 +341,10 @@ void Application::shutdown() {
     // Save data
     if (library_) library_->save();
     
+    // Release specific controllers and engine BEFORE destroying GL context
+    playbackController_.reset();
+    playbackEngine_.reset();
+    
     // Cleanup ImGui
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplSDL2_Shutdown();
@@ -343,7 +368,7 @@ void Application::shutdown() {
     
     usbController_.reset();
     historyController_.reset();
-    playbackController_.reset();
+    // playbackController_.reset(); // Already reset
     playlistController_.reset();
     libraryController_.reset();
     
@@ -353,7 +378,7 @@ void Application::shutdown() {
     library_.reset();
     
     hardwareInterface_.reset();
-    playbackEngine_.reset();
+    // playbackEngine_.reset(); // Already reset
     fileSystem_.reset();
     metadataReader_.reset();
     persistence_.reset();

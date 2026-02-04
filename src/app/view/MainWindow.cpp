@@ -189,7 +189,24 @@ void MainWindow::renderAlbumArt() {
     float albumSize = availableWidth * 0.9f;
     if (albumSize > 500) albumSize = 500; // Max size cap
     
-    if (playbackState_ && playbackState_->getCurrentTrack()) {
+    // Check for video texture first
+    void* videoTexture = nullptr;
+    if (playbackController_ && playbackController_->getEngine()) {
+        videoTexture = playbackController_->getEngine()->getVideoTexture();
+    }
+
+    if (videoTexture) {
+        // Render Video
+        // 16:9 aspect ratio usually, or we could query params if accessible. 
+        // For now assume 16:9 or fit width
+        float videoHeight = albumSize * 9.0f / 16.0f;
+        
+        // Center video
+        float startX = (availableWidth - albumSize) / 2;
+        if (startX > 0) ImGui::SetCursorPosX(ImGui::GetCursorPosX() + startX);
+        
+        ImGui::Image((ImTextureID)videoTexture, ImVec2(albumSize, videoHeight));
+    } else if (playbackState_ && playbackState_->getCurrentTrack()) {
         auto track = playbackState_->getCurrentTrack();
         const auto& meta = track->getMetadata();
         
@@ -223,6 +240,9 @@ void MainWindow::renderAlbumArt() {
         }
         
         // Display album art
+        float startX = (availableWidth - albumSize) / 2;
+        if (startX > 0) ImGui::SetCursorPosX(ImGui::GetCursorPosX() + startX);
+
         if (albumArtTexture_) {
             ImGui::Image((ImTextureID)(intptr_t)albumArtTexture_, ImVec2(albumSize, albumSize));
         } else {
@@ -236,6 +256,9 @@ void MainWindow::renderAlbumArt() {
         }
     } else {
         // No track - placeholder
+        float startX = (availableWidth - albumSize) / 2;
+        if (startX > 0) ImGui::SetCursorPosX(ImGui::GetCursorPosX() + startX);
+
         ImGui::PushStyleColor(ImGuiCol_ChildBg, COLOR_BG_DARKER);
         ImGui::BeginChild("AlbumArtPlaceholder", ImVec2(albumSize, albumSize), true);
         ImGui::SetCursorPos(ImVec2(albumSize/2 - 30, albumSize/2 - 10));

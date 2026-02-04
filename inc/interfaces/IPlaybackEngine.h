@@ -95,6 +95,17 @@ public:
      * @return true if playback completed
      */
     virtual bool isFinished() const = 0;
+
+    /**
+     * @brief Get the current video frame texture for rendering
+     * @return OpenGL texture ID casting to void*, or nullptr if no video
+     */
+    virtual void* getVideoTexture() { return nullptr; }
+
+    /**
+     * @brief Update video frame (called every frame on main thread)
+     */
+    virtual void updateVideo() {}
 };
 
 #endif // IPLAYBACK_ENGINE_H

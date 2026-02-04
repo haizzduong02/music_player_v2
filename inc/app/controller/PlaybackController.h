@@ -136,6 +136,12 @@ public:
      */
     void updateTime(double deltaTime);
     
+    /**
+     * @brief Get the underlying playback engine
+     * @return Pointer to engine interface
+     */
+    IPlaybackEngine* getEngine() const { return engine_; }
+    
 private:
     IPlaybackEngine* engine_;
     PlaybackState* state_;
