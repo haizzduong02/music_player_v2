@@ -165,7 +165,19 @@ void Application::run() {
     // Main application loop
     ImGuiIO& io = ImGui::GetIO();
     
+    auto lastTime = std::chrono::high_resolution_clock::now();
+    
     while (!shouldQuit_) {
+        // Calculate delta time
+        auto currentTime = std::chrono::high_resolution_clock::now();
+        float deltaTime = std::chrono::duration<float>(currentTime - lastTime).count();
+        lastTime = currentTime;
+        
+        // Update playback controller
+        if (playbackController_) {
+            playbackController_->updateTime(deltaTime);
+        }
+        
         SDL_Event event;
         while (SDL_PollEvent(&event)) {
             ImGui_ImplSDL2_ProcessEvent(&event);

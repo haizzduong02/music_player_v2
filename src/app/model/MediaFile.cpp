@@ -22,12 +22,31 @@ std::string MediaFile::getDisplayName() const {
     if (!metadata_.title.empty()) {
         return metadata_.title;
     }
+    
     // Otherwise return filename without extension
-    size_t lastDot = filename_.find_last_of('.');
+    std::string cleanName = filename_;
+    
+    // Remove extension
+    size_t lastDot = cleanName.find_last_of('.');
     if (lastDot != std::string::npos) {
-        return filename_.substr(0, lastDot);
+        cleanName = cleanName.substr(0, lastDot);
     }
-    return filename_;
+    
+    // Clean up common download prefixes (case-insensitive check would be better but simple for now)
+    static const std::vector<std::string> prefixesToRemove = {
+        "y2mate.com - ",
+        "y2mate.is - "
+    };
+    
+    for (const auto& prefix : prefixesToRemove) {
+        if (cleanName.length() > prefix.length() && 
+            cleanName.compare(0, prefix.length(), prefix) == 0) {
+            cleanName = cleanName.substr(prefix.length());
+            break;
+        }
+    }
+    
+    return cleanName;
 }
 
 bool MediaFile::exists() const {

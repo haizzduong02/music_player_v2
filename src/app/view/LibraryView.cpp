@@ -53,10 +53,13 @@ void LibraryView::render() {
             
             bool isSelected = (static_cast<int>(i) == selectedIndex_);
             
-            // Display: "Artist - Title" or filename
+            // Display: "Artist - Title (Album)" or "Artist - Title" or "Title"
             std::string displayText = file->getDisplayName();
             if (!meta.artist.empty()) {
                 displayText = meta.artist + " - " + displayText;
+            }
+            if (!meta.album.empty()) {
+                displayText += " (" + meta.album + ")";
             }
             
             if (ImGui::Selectable(displayText.c_str(), isSelected, ImGuiSelectableFlags_AllowDoubleClick)) {

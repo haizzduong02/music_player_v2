@@ -122,6 +122,13 @@ public:
      */
     void handlePlaybackFinished();
     
+    /**
+     * @brief Update playback time
+     * Called from main loop with delta time
+     * @param deltaTime Time elapsed since last frame in seconds
+     */
+    void updateTime(double deltaTime);
+    
 private:
     IPlaybackEngine* engine_;
     PlaybackState* state_;

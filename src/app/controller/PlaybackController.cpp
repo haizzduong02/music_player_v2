@@ -25,6 +25,10 @@ bool PlaybackController::play(std::shared_ptr<MediaFile> track) {
     state_->setCurrentTrack(track);
     state_->setStatus(PlaybackStatus::PLAYING);
     
+    // Reset position and set duration from metadata
+    state_->setPosition(0.0);
+    state_->setDuration(static_cast<double>(track->getMetadata().duration));
+    
     // Add to history
     if (history_) {
         history_->addTrack(track);
@@ -44,9 +48,10 @@ void PlaybackController::pause() {
 }
 
 void PlaybackController::resume() {
-    auto current = state_->getCurrentTrack();
-    if (current && engine_) {
-        engine_->play(current->getPath());
+    if (engine_) {
+        engine_->resume();
+    }
+    if (state_) {
         state_->setStatus(PlaybackStatus::PLAYING);
     }
 }
@@ -108,4 +113,33 @@ void PlaybackController::setCurrentPlaylist(Playlist* playlist) {
 void PlaybackController::update(void* subject) {
     // Observer pattern - called when PlaybackState changes
     // Could update UI or respond to state changes here
+}
+
+void PlaybackController::updateTime(double deltaTime) {
+    if (!state_ || !engine_) return;
+    
+    // Only update if playing
+    if (state_->getStatus() == PlaybackStatus::PLAYING) {
+        double currentPos = state_->getPosition();
+        double duration = state_->getDuration();
+        
+        // Update position
+        double newPos = currentPos + deltaTime;
+        state_->setPosition(newPos);
+        
+        // Check for completion
+        // Use engine status as primary authority if available, time as fallback
+        if (engine_->isFinished()) {
+            handlePlaybackFinished();
+        } 
+        // Fallback: if duration is known and we exceeded it significantly (e.g. +1 sec buffer)
+        else if (duration > 0 && newPos > duration + 1.0) {
+            handlePlaybackFinished();
+        }
+    }
+}
+
+void PlaybackController::handlePlaybackFinished() {
+    Logger::getInstance().info("Playback finished");
+    next(); // Simple auto-next
 }

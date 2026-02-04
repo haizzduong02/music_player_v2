@@ -30,10 +30,15 @@ void NowPlayingView::render() {
     if (currentTrack) {
         const auto& meta = currentTrack->getMetadata();
         
-        // Display track info
-        ImGui::Text("Title: %s", meta.title.empty() ? currentTrack->getFileName().c_str() : meta.title.c_str());
-        ImGui::Text("Artist: %s", meta.artist.c_str());
-        ImGui::Text("Album: %s", meta.album.c_str());
+        // Display track info - consolidated header
+        std::string trackHeader = currentTrack->getDisplayName();
+        if (!meta.artist.empty()) {
+            trackHeader = meta.artist + " - " + trackHeader;
+        }
+        if (!meta.album.empty()) {
+            trackHeader += " (" + meta.album + ")";
+        }
+        ImGui::TextWrapped("%s", trackHeader.c_str());
         ImGui::Separator();
         
         // Progress bar
