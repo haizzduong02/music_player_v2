@@ -21,12 +21,14 @@ message(STATUS "")
 
 # Include directories
 include_directories(
-    ${CMAKE_SOURCE_DIR}/inc
-    ${CMAKE_SOURCE_DIR}/inc/interfaces
-    ${CMAKE_SOURCE_DIR}/inc/utils
-    ${CMAKE_SOURCE_DIR}/inc/app
-    ${CMAKE_SOURCE_DIR}/inc/service
-    ${CMAKE_SOURCE_DIR}/inc/hal
+    ${CMAKE_CURRENT_SOURCE_DIR}/inc
+    ${CMAKE_CURRENT_SOURCE_DIR}/inc/interfaces
+    ${CMAKE_CURRENT_SOURCE_DIR}/inc/utils
+    ${CMAKE_CURRENT_SOURCE_DIR}/inc/app
+    ${CMAKE_CURRENT_SOURCE_DIR}/inc/service
+    ${CMAKE_CURRENT_SOURCE_DIR}/inc/hal
+    ${CMAKE_CURRENT_SOURCE_DIR}/external/imgui
+    ${CMAKE_CURRENT_SOURCE_DIR}/external/stb
 )
 
 # Source files - Models

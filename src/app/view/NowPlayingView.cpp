@@ -2,6 +2,13 @@
 #include "../../../inc/utils/Logger.h"
 #include <imgui.h>
 
+#define STB_IMAGE_IMPLEMENTATION
+#include <stb_image.h>
+
+#ifdef USE_SDL2
+#include <SDL2/SDL_opengl.h>
+#endif
+
 NowPlayingView::NowPlayingView(PlaybackController* controller, PlaybackState* state)
     : controller_(controller), state_(state) {
     
@@ -15,6 +22,11 @@ NowPlayingView::~NowPlayingView() {
     // Detach from state
     if (state_) {
         state_->detach(this);
+    }
+    
+    // Cleanup texture
+    if (albumArtTexture_) {
+        glDeleteTextures(1, &albumArtTexture_);
     }
 }
 
@@ -30,16 +42,47 @@ void NowPlayingView::render() {
     if (currentTrack) {
         const auto& meta = currentTrack->getMetadata();
         
-        // Album art placeholder (150x150)
-        if (meta.hasAlbumArt) {
-            ImGui::BeginChild("AlbumArtFrame", ImVec2(154, 154), true);
-            ImGui::Text("[Album Art]");
-            ImGui::Text("Embedded");
-            ImGui::Text("Image");
-            ImGui::EndChild();
+        // Check if track changed, reload album art
+        if (currentTrackPath_ != currentTrack->getPath()) {
+            currentTrackPath_ = currentTrack->getPath();
+            
+            // Cleanup old texture
+            if (albumArtTexture_) {
+                glDeleteTextures(1, &albumArtTexture_);
+                albumArtTexture_ = 0;
+            }
+            
+            // Load new album art if available
+            if (meta.hasAlbumArt && !meta.albumArtData.empty()) {
+                int width, height, channels;
+                unsigned char* imageData = stbi_load_from_memory(
+                    meta.albumArtData.data(),
+                    static_cast<int>(meta.albumArtData.size()),
+                    &width, &height, &channels, 4);  // Force RGBA
+                
+                if (imageData) {
+                    glGenTextures(1, &albumArtTexture_);
+                    glBindTexture(GL_TEXTURE_2D, albumArtTexture_);
+                    
+                    // Setup filtering parameters for display
+                    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+                    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+                    
+                    // Upload pixels into texture
+                    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, imageData);
+                    
+                    stbi_image_free(imageData);
+                    Logger::getInstance().info("Album art loaded: " + std::to_string(width) + "x" + std::to_string(height));
+                }
+            }
+        }
+        
+        // Display album art if available, otherwise placeholder
+        if (albumArtTexture_) {
+            ImGui::Image((ImTextureID)(intptr_t)albumArtTexture_, ImVec2(150, 150));
             ImGui::SameLine();
         } else {
-            ImGui::BeginChild("AlbumArtFrame", ImVec2(154, 154), true);
+            ImGui::BeginChild("AlbumArtPlaceholder", ImVec2(154, 154), true);
             ImGui::Text("[No Art]");
             ImGui::EndChild();
             ImGui::SameLine();
