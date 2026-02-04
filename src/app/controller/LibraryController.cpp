@@ -17,7 +17,10 @@ int LibraryController::addMediaFilesFromDirectory(const std::string& directoryPa
     }
     
     // scanDirectory returns vector<string> of file paths
-    auto filepaths = fileSystem_->scanDirectory(directoryPath, {});
+    auto filepaths = fileSystem_->scanDirectory(
+        directoryPath, 
+        MediaFileFactory::getAllSupportedFormats()
+    );
     int addedCount = 0;
     
     for (const auto& filepath : filepaths) {

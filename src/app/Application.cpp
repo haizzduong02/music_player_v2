@@ -214,17 +214,20 @@ void Application::run() {
 }
 
 void Application::shutdown() {
+    if (!initialized_) {
+        // Already shut down or never initialized
+        return;
+    }
+    
     Logger::getInstance().info("Shutting down application...");
     
     // Save data
     if (library_) library_->save();
     
     // Cleanup ImGui
-    if (initialized_) {
-        ImGui_ImplOpenGL3_Shutdown();
-        ImGui_ImplSDL2_Shutdown();
-        ImGui::DestroyContext();
-    }
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplSDL2_Shutdown();
+    ImGui::DestroyContext();
 
     // Cleanup SDL
     if (glContext_) {
@@ -258,6 +261,8 @@ void Application::shutdown() {
     fileSystem_.reset();
     metadataReader_.reset();
     persistence_.reset();
+    
+    initialized_ = false; // Mark as shut down
     
     Logger::getInstance().info("Application shutdown complete");
 }
