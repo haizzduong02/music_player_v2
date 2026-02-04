@@ -88,6 +88,24 @@ public:
      */
     void setFileBrowserView(FileBrowserView* view) { fileBrowserView_ = view; }
     
+    /**
+     * @brief Get library view
+     * @return Library view pointer
+     */
+    LibraryView* getLibraryView() const { return libraryView_; }
+    
+    /**
+     * @brief Get file browser view
+     * @return File browser view pointer
+     */
+    FileBrowserView* getFileBrowserView() const { return fileBrowserView_; }
+    
+    /**
+     * @brief Get playlist view
+     * @return Playlist view pointer
+     */
+    PlaylistView* getPlaylistView() const { return playlistView_; }
+    
 private:
     std::vector<IView*> childViews_;
     

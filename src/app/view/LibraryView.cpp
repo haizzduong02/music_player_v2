@@ -1,4 +1,5 @@
 #include "../../../inc/app/view/LibraryView.h"
+#include "../../../inc/app/view/FileBrowserView.h"
 #include "../../../inc/utils/Logger.h"
 #include "../../../inc/app/controller/PlaybackController.h"
 
@@ -84,20 +85,15 @@ void LibraryView::render() {
     ImGui::EndChild();
     
     // Bottom buttons
-    if (ImGui::Button("Add File")) {
-        // TODO: Open file dialog
-        Logger::getInstance().info("Add File button clicked");
-    }
-    
-    ImGui::SameLine();
-    if (ImGui::Button("Add Directory")) {
-        // TODO: Open directory dialog
-        Logger::getInstance().info("Add Directory button clicked");
+    if (ImGui::Button("Add Files")) {
+        if (fileBrowserView_) {
+            fileBrowserView_->show();
+        }
     }
     
     ImGui::SameLine();
     if (ImGui::Button("Clear Library")) {
-        // TODO: Implement clearLibrary in controller
+        library_->clear();
         selectedIndex_ = -1;
     }
     

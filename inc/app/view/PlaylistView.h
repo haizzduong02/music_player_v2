@@ -6,6 +6,8 @@
 #include "../model/PlaylistManager.h"
 #include <string>
 
+class FileBrowserView;
+
 /**
  * @file PlaylistView.h
  * @brief Playlist view using ImGui
@@ -29,9 +31,12 @@ public:
     void handleInput() override;
     void update(void* subject) override;
     
+    void setFileBrowserView(FileBrowserView* browserView) { fileBrowserView_ = browserView; }
+    
 private:
     PlaylistController* controller_;
     PlaylistManager* manager_;
+    FileBrowserView* fileBrowserView_ = nullptr;
     
     // UI state
     std::string selectedPlaylistName_;

@@ -7,6 +7,7 @@
 #include <string>
 
 class PlaybackController;
+class FileBrowserView;
 
 /**
  * @file LibraryView.h
@@ -31,15 +32,24 @@ public:
     void handleInput() override;
     void update(void* subject) override;
     
+    void setFileBrowserView(FileBrowserView* browserView) { fileBrowserView_ = browserView; }
+    
 private:
     LibraryController* controller_;
     Library* library_;
     PlaybackController* playbackController_;
+    FileBrowserView* fileBrowserView_ = nullptr;
     
     // UI state
     std::string searchQuery_;
     std::vector<std::shared_ptr<MediaFile>> displayedFiles_;
     int selectedIndex_;
+    
+    // Popup state for Add File/Directory
+    bool showAddFilePopup_ = false;
+    bool showAddDirPopup_ = false;
+    char filePathBuffer_[512] = "";
+    char dirPathBuffer_[512] = "";
     
     /**
      * @brief Render search bar

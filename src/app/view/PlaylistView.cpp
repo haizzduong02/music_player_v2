@@ -1,4 +1,5 @@
 #include "../../../inc/app/view/PlaylistView.h"
+#include "../../../inc/app/view/FileBrowserView.h"
 #include "../../../inc/utils/Logger.h"
 
 #ifdef USE_IMGUI
@@ -87,6 +88,14 @@ void PlaylistView::render() {
         ImGui::Separator();
         
         // Playlist controls
+        if (ImGui::Button("Add Files")) {
+            if (fileBrowserView_) {
+                fileBrowserView_->show();
+            }
+        }
+        
+        ImGui::SameLine();
+        
         if (ImGui::Button("Shuffle")) {
             controller_->shufflePlaylist(selectedPlaylist_->getName());
         }

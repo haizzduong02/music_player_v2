@@ -135,6 +135,16 @@ bool Application::init() {
         mainWindow_->setHistoryView(dynamic_cast<HistoryView*>(viewFactory_->createHistoryView(historyController_.get(), history_.get())));
         mainWindow_->setFileBrowserView(dynamic_cast<FileBrowserView*>(viewFactory_->createFileBrowserView(fileSystem_.get(), libraryController_.get())));
         
+        // Connect FileBrowserView to LibraryView
+        if (mainWindow_->getLibraryView() && mainWindow_->getFileBrowserView()) {
+            mainWindow_->getLibraryView()->setFileBrowserView(mainWindow_->getFileBrowserView());
+        }
+        
+        // Connect FileBrowserView to PlaylistView
+        if (mainWindow_->getPlaylistView() && mainWindow_->getFileBrowserView()) {
+            mainWindow_->getPlaylistView()->setFileBrowserView(mainWindow_->getFileBrowserView());
+        }
+        
         Logger::getInstance().info("Views initialized");
         
         // Load data

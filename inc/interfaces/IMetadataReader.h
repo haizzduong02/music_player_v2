@@ -30,6 +30,10 @@ struct MediaMetadata {
     std::string codec;
     std::string comment;
     
+    // Album art data (raw bytes - typically JPEG or PNG)
+    std::vector<unsigned char> albumArtData;
+    std::string albumArtMimeType;  // e.g., "image/jpeg", "image/png"
+    
     // Additional fields can be stored here
     std::map<std::string, std::string> customFields;
 };

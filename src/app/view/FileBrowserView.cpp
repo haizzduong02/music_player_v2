@@ -1,6 +1,8 @@
 #include "../../../inc/app/view/FileBrowserView.h"
+#include "../../../inc/app/model/MediaFileFactory.h"
 #include "../../../inc/utils/Logger.h"
 #include <imgui.h>
+#include <algorithm>
 
 FileBrowserView::FileBrowserView(IFileSystem* fileSystem, LibraryController* libController)
     : fileSystem_(fileSystem), libController_(libController), selectedIndex_(-1) {
@@ -17,7 +19,7 @@ void FileBrowserView::render() {
     
     ImGui::Begin("File Browser", &visible_);
     
-    // Current path
+    // Current path and navigation
     ImGui::Text("Path: %s", currentPath_.c_str());
     
     if (ImGui::Button("Up")) {
@@ -30,34 +32,78 @@ void FileBrowserView::render() {
         refreshCurrentDirectory();
     }
     
+    ImGui::SameLine();
+    
+    if (ImGui::Button("Home")) {
+        navigateTo("/home");
+    }
+    
     ImGui::Separator();
     
-    // File list
-    if (ImGui::BeginChild("FileList", ImVec2(0, -30), true)) {
+    // Get available content size
+    ImVec2 availableSize = ImGui::GetContentRegionAvail();
+    float panelHeight = availableSize.y - 35; // Leave space for buttons
+    float leftPanelWidth = availableSize.x * 0.35f;
+    
+    // LEFT PANEL: Folders only
+    if (ImGui::BeginChild("FolderPanel", ImVec2(leftPanelWidth, panelHeight), true)) {
+        ImGui::Text("Folders");
+        ImGui::Separator();
+        
         for (size_t i = 0; i < currentFiles_.size(); ++i) {
             const auto& fileInfo = currentFiles_[i];
-            bool isSelected = (static_cast<int>(i) == selectedIndex_);
+            if (!fileInfo.isDirectory) continue;
             
-            // Icon prefix
-            std::string icon = fileInfo.isDirectory ? "[DIR] " : "[FILE] ";
-            std::string displayText = icon + fileInfo.name;
-            
-            if (ImGui::Selectable(displayText.c_str(), isSelected, ImGuiSelectableFlags_AllowDoubleClick)) {
-                selectedIndex_ = static_cast<int>(i);
-                
-                // Double-click to navigate
+            if (ImGui::Selectable(fileInfo.name.c_str(), false, ImGuiSelectableFlags_AllowDoubleClick)) {
                 if (ImGui::IsMouseDoubleClicked(0)) {
-                    if (fileInfo.isDirectory) {
-                        navigateTo(fileInfo.path);
-                    }
+                    navigateTo(fileInfo.path);
                 }
             }
         }
     }
     ImGui::EndChild();
     
+    ImGui::SameLine();
+    
+    // RIGHT PANEL: Media files only (filtered)
+    if (ImGui::BeginChild("FilePanel", ImVec2(0, panelHeight), true)) {
+        ImGui::Text("Media Files");
+        ImGui::Separator();
+        
+        int fileIndex = 0;
+        for (size_t i = 0; i < currentFiles_.size(); ++i) {
+            const auto& fileInfo = currentFiles_[i];
+            if (fileInfo.isDirectory) continue;
+            
+            // Check if supported format
+            std::string ext = fileInfo.name;
+            size_t dotPos = ext.find_last_of('.');
+            if (dotPos == std::string::npos) continue;
+            ext = ext.substr(dotPos);
+            if (!MediaFileFactory::isSupportedFormat(ext)) continue;
+            
+            bool isSelected = (static_cast<int>(i) == selectedIndex_);
+            
+            if (ImGui::Selectable(fileInfo.name.c_str(), isSelected, ImGuiSelectableFlags_AllowDoubleClick)) {
+                selectedIndex_ = static_cast<int>(i);
+                
+                // Double-click to add to library
+                if (ImGui::IsMouseDoubleClicked(0)) {
+                    libController_->addMediaFile(fileInfo.path);
+                    Logger::getInstance().info("Added: " + fileInfo.name);
+                }
+            }
+            fileIndex++;
+        }
+        
+        if (fileIndex == 0) {
+            ImGui::TextDisabled("No media files in this folder");
+        }
+    }
+    ImGui::EndChild();
+    
     // Bottom buttons
-    if (ImGui::Button("Add Selected to Library")) {
+    if (ImGui::Button("Add Selected")) {
         if (selectedIndex_ >= 0 && selectedIndex_ < static_cast<int>(currentFiles_.size())) {
             const auto& selected = currentFiles_[selectedIndex_];
             if (!selected.isDirectory) {
@@ -68,8 +114,8 @@ void FileBrowserView::render() {
     
     ImGui::SameLine();
     
-    if (ImGui::Button("Add Directory to Library")) {
-        libController_->addMediaFilesFromDirectory(currentPath_, true);
+    if (ImGui::Button("Add All in Folder")) {
+        libController_->addMediaFilesFromDirectory(currentPath_, false);
     }
     
     ImGui::End();

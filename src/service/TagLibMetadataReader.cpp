@@ -4,6 +4,11 @@
 #include <taglib/tag.h>
 #include <taglib/tpropertymap.h>
 #include <taglib/audioproperties.h>
+#include <taglib/mpegfile.h>
+#include <taglib/id3v2tag.h>
+#include <taglib/attachedpictureframe.h>
+#include <taglib/flacfile.h>
+#include <taglib/flacpicture.h>
 #include <algorithm>
 
 MediaMetadata TagLibMetadataReader::readMetadata(const std::string& filepath) {
@@ -45,9 +50,40 @@ MediaMetadata TagLibMetadataReader::readMetadata(const std::string& filepath) {
     else if (ext == ".ogg") metadata.codec = "Vorbis";
     else metadata.codec = "Unknown";
     
-    // Check for album art (basic check)
-    // TagLib doesn't provide direct album art in FileRef, would need specific file type handling
+    // Extract album art
     metadata.hasAlbumArt = false;
+    
+    // Try MP3 (ID3v2)
+    if (ext == ".mp3") {
+        TagLib::MPEG::File mpegFile(filepath.c_str());
+        if (mpegFile.isValid() && mpegFile.ID3v2Tag()) {
+            TagLib::ID3v2::Tag* id3v2 = mpegFile.ID3v2Tag();
+            auto frames = id3v2->frameList("APIC");
+            if (!frames.isEmpty()) {
+                auto* pictureFrame = dynamic_cast<TagLib::ID3v2::AttachedPictureFrame*>(frames.front());
+                if (pictureFrame) {
+                    auto pictureData = pictureFrame->picture();
+                    metadata.albumArtData.assign(pictureData.begin(), pictureData.end());
+                    metadata.albumArtMimeType = pictureFrame->mimeType().to8Bit(true);
+                    metadata.hasAlbumArt = true;
+                }
+            }
+        }
+    }
+    // Try FLAC
+    else if (ext == ".flac") {
+        TagLib::FLAC::File flacFile(filepath.c_str());
+        if (flacFile.isValid()) {
+            auto pictures = flacFile.pictureList();
+            if (!pictures.isEmpty()) {
+                auto* picture = pictures.front();
+                auto pictureData = picture->data();
+                metadata.albumArtData.assign(pictureData.begin(), pictureData.end());
+                metadata.albumArtMimeType = picture->mimeType().to8Bit(true);
+                metadata.hasAlbumArt = true;
+            }
+        }
+    }
     
     return metadata;
 }

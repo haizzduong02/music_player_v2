@@ -37,6 +37,10 @@ private:
     bool isDraggingSeek_;
     float seekPosition_;
     
+    // Album art OpenGL texture
+    unsigned int albumArtTexture_ = 0;
+    std::string currentTrackPath_;  // To detect track changes
+    
     /**
      * @brief Render track metadata
      */
