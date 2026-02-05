@@ -13,11 +13,20 @@
 
 MediaMetadata TagLibMetadataReader::readMetadata(const std::string& filepath) {
     MediaMetadata metadata;
+
+    // Determine codec from file extension first (fallback if TagLib fails)
+    std::string ext = getExtension(filepath);
+    if (ext == ".mp3") metadata.codec = "MP3";
+    else if (ext == ".flac") metadata.codec = "FLAC";
+    else if (ext == ".wav") metadata.codec = "WAV";
+    else if (ext == ".m4a") metadata.codec = "AAC";
+    else if (ext == ".ogg") metadata.codec = "Vorbis";
+    else metadata.codec = "Unknown";
     
     TagLib::FileRef file(filepath.c_str());
     
     if (file.isNull() || !file.tag()) {
-        Logger::getInstance().warn("Failed to read metadata from: " + filepath);
+        Logger::getInstance().warn("Failed to read detailed metadata from: " + filepath);
         return metadata;
     }
     
@@ -41,14 +50,9 @@ MediaMetadata TagLibMetadataReader::readMetadata(const std::string& filepath) {
         metadata.channels = props->channels();
     }
     
-    // Determine codec from file extension
-    std::string ext = getExtension(filepath);
-    if (ext == ".mp3") metadata.codec = "MP3";
-    else if (ext == ".flac") metadata.codec = "FLAC";
-    else if (ext == ".wav") metadata.codec = "WAV";
-    else if (ext == ".m4a") metadata.codec = "AAC";
-    else if (ext == ".ogg") metadata.codec = "Vorbis";
-    else metadata.codec = "Unknown";
+    // Audio properties read above
+    
+    // Codec already determined at start of function
     
     // Extract album art
     metadata.hasAlbumArt = false;

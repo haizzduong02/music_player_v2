@@ -1,0 +1,167 @@
+[
+{
+  "directory": "/home/duong/music_player/build_verify",
+  "command": "/usr/bin/c++  -I/home/duong/music_player/inc -I/home/duong/music_player/inc/interfaces -I/home/duong/music_player/inc/utils -I/home/duong/music_player/inc/app -I/home/duong/music_player/inc/service -I/home/duong/music_player/inc/hal -I/home/duong/music_player/external/imgui -I/home/duong/music_player/external/stb -I/usr/include/SDL2 -I/home/duong/music_player/external/imgui/backends -g -std=gnu++17 -o CMakeFiles/imgui.dir/external/imgui/imgui.cpp.o -c /home/duong/music_player/external/imgui/imgui.cpp",
+  "file": "/home/duong/music_player/external/imgui/imgui.cpp"
+},
+{
+  "directory": "/home/duong/music_player/build_verify",
+  "command": "/usr/bin/c++  -I/home/duong/music_player/inc -I/home/duong/music_player/inc/interfaces -I/home/duong/music_player/inc/utils -I/home/duong/music_player/inc/app -I/home/duong/music_player/inc/service -I/home/duong/music_player/inc/hal -I/home/duong/music_player/external/imgui -I/home/duong/music_player/external/stb -I/usr/include/SDL2 -I/home/duong/music_player/external/imgui/backends -g -std=gnu++17 -o CMakeFiles/imgui.dir/external/imgui/imgui_draw.cpp.o -c /home/duong/music_player/external/imgui/imgui_draw.cpp",
+  "file": "/home/duong/music_player/external/imgui/imgui_draw.cpp"
+},
+{
+  "directory": "/home/duong/music_player/build_verify",
+  "command": "/usr/bin/c++  -I/home/duong/music_player/inc -I/home/duong/music_player/inc/interfaces -I/home/duong/music_player/inc/utils -I/home/duong/music_player/inc/app -I/home/duong/music_player/inc/service -I/home/duong/music_player/inc/hal -I/home/duong/music_player/external/imgui -I/home/duong/music_player/external/stb -I/usr/include/SDL2 -I/home/duong/music_player/external/imgui/backends -g -std=gnu++17 -o CMakeFiles/imgui.dir/external/imgui/imgui_tables.cpp.o -c /home/duong/music_player/external/imgui/imgui_tables.cpp",
+  "file": "/home/duong/music_player/external/imgui/imgui_tables.cpp"
+},
+{
+  "directory": "/home/duong/music_player/build_verify",
+  "command": "/usr/bin/c++  -I/home/duong/music_player/inc -I/home/duong/music_player/inc/interfaces -I/home/duong/music_player/inc/utils -I/home/duong/music_player/inc/app -I/home/duong/music_player/inc/service -I/home/duong/music_player/inc/hal -I/home/duong/music_player/external/imgui -I/home/duong/music_player/external/stb -I/usr/include/SDL2 -I/home/duong/music_player/external/imgui/backends -g -std=gnu++17 -o CMakeFiles/imgui.dir/external/imgui/imgui_widgets.cpp.o -c /home/duong/music_player/external/imgui/imgui_widgets.cpp",
+  "file": "/home/duong/music_player/external/imgui/imgui_widgets.cpp"
+},
+{
+  "directory": "/home/duong/music_player/build_verify",
+  "command": "/usr/bin/c++  -I/home/duong/music_player/inc -I/home/duong/music_player/inc/interfaces -I/home/duong/music_player/inc/utils -I/home/duong/music_player/inc/app -I/home/duong/music_player/inc/service -I/home/duong/music_player/inc/hal -I/home/duong/music_player/external/imgui -I/home/duong/music_player/external/stb -I/usr/include/SDL2 -I/home/duong/music_player/external/imgui/backends -g -std=gnu++17 -o CMakeFiles/imgui.dir/external/imgui/backends/imgui_impl_sdl2.cpp.o -c /home/duong/music_player/external/imgui/backends/imgui_impl_sdl2.cpp",
+  "file": "/home/duong/music_player/external/imgui/backends/imgui_impl_sdl2.cpp"
+},
+{
+  "directory": "/home/duong/music_player/build_verify",
+  "command": "/usr/bin/c++  -I/home/duong/music_player/inc -I/home/duong/music_player/inc/interfaces -I/home/duong/music_player/inc/utils -I/home/duong/music_player/inc/app -I/home/duong/music_player/inc/service -I/home/duong/music_player/inc/hal -I/home/duong/music_player/external/imgui -I/home/duong/music_player/external/stb -I/usr/include/SDL2 -I/home/duong/music_player/external/imgui/backends -g -std=gnu++17 -o CMakeFiles/imgui.dir/external/imgui/backends/imgui_impl_opengl3.cpp.o -c /home/duong/music_player/external/imgui/backends/imgui_impl_opengl3.cpp",
+  "file": "/home/duong/music_player/external/imgui/backends/imgui_impl_opengl3.cpp"
+},
+{
+  "directory": "/home/duong/music_player/build_verify",
+  "command": "/usr/bin/c++ -DUSE_IMGUI -DUSE_SDL2 -I/home/duong/music_player/inc -I/home/duong/music_player/inc/interfaces -I/home/duong/music_player/inc/utils -I/home/duong/music_player/inc/app -I/home/duong/music_player/inc/service -I/home/duong/music_player/inc/hal -I/home/duong/music_player/external/imgui -I/home/duong/music_player/external/stb -I/usr/include/taglib -I/usr/include/SDL2 -I/home/duong/music_player/external/imgui/backends -g -Wall -Wextra -Wpedantic -g -O0 -std=gnu++17 -o CMakeFiles/music_player.dir/src/main.cpp.o -c /home/duong/music_player/src/main.cpp",
+  "file": "/home/duong/music_player/src/main.cpp"
+},
+{
+  "directory": "/home/duong/music_player/build_verify",
+  "command": "/usr/bin/c++ -DUSE_IMGUI -DUSE_SDL2 -I/home/duong/music_player/inc -I/home/duong/music_player/inc/interfaces -I/home/duong/music_player/inc/utils -I/home/duong/music_player/inc/app -I/home/duong/music_player/inc/service -I/home/duong/music_player/inc/hal -I/home/duong/music_player/external/imgui -I/home/duong/music_player/external/stb -I/usr/include/taglib -I/usr/include/SDL2 -I/home/duong/music_player/external/imgui/backends -g -Wall -Wextra -Wpedantic -g -O0 -std=gnu++17 -o CMakeFiles/music_player.dir/src/app/model/MediaFile.cpp.o -c /home/duong/music_player/src/app/model/MediaFile.cpp",
+  "file": "/home/duong/music_player/src/app/model/MediaFile.cpp"
+},
+{
+  "directory": "/home/duong/music_player/build_verify",
+  "command": "/usr/bin/c++ -DUSE_IMGUI -DUSE_SDL2 -I/home/duong/music_player/inc -I/home/duong/music_player/inc/interfaces -I/home/duong/music_player/inc/utils -I/home/duong/music_player/inc/app -I/home/duong/music_player/inc/service -I/home/duong/music_player/inc/hal -I/home/duong/music_player/external/imgui -I/home/duong/music_player/external/stb -I/usr/include/taglib -I/usr/include/SDL2 -I/home/duong/music_player/external/imgui/backends -g -Wall -Wextra -Wpedantic -g -O0 -std=gnu++17 -o CMakeFiles/music_player.dir/src/app/model/Playlist.cpp.o -c /home/duong/music_player/src/app/model/Playlist.cpp",
+  "file": "/home/duong/music_player/src/app/model/Playlist.cpp"
+},
+{
+  "directory": "/home/duong/music_player/build_verify",
+  "command": "/usr/bin/c++ -DUSE_IMGUI -DUSE_SDL2 -I/home/duong/music_player/inc -I/home/duong/music_player/inc/interfaces -I/home/duong/music_player/inc/utils -I/home/duong/music_player/inc/app -I/home/duong/music_player/inc/service -I/home/duong/music_player/inc/hal -I/home/duong/music_player/external/imgui -I/home/duong/music_player/external/stb -I/usr/include/taglib -I/usr/include/SDL2 -I/home/duong/music_player/external/imgui/backends -g -Wall -Wextra -Wpedantic -g -O0 -std=gnu++17 -o CMakeFiles/music_player.dir/src/app/model/Library.cpp.o -c /home/duong/music_player/src/app/model/Library.cpp",
+  "file": "/home/duong/music_player/src/app/model/Library.cpp"
+},
+{
+  "directory": "/home/duong/music_player/build_verify",
+  "command": "/usr/bin/c++ -DUSE_IMGUI -DUSE_SDL2 -I/home/duong/music_player/inc -I/home/duong/music_player/inc/interfaces -I/home/duong/music_player/inc/utils -I/home/duong/music_player/inc/app -I/home/duong/music_player/inc/service -I/home/duong/music_player/inc/hal -I/home/duong/music_player/external/imgui -I/home/duong/music_player/external/stb -I/usr/include/taglib -I/usr/include/SDL2 -I/home/duong/music_player/external/imgui/backends -g -Wall -Wextra -Wpedantic -g -O0 -std=gnu++17 -o CMakeFiles/music_player.dir/src/app/model/PlaybackState.cpp.o -c /home/duong/music_player/src/app/model/PlaybackState.cpp",
+  "file": "/home/duong/music_player/src/app/model/PlaybackState.cpp"
+},
+{
+  "directory": "/home/duong/music_player/build_verify",
+  "command": "/usr/bin/c++ -DUSE_IMGUI -DUSE_SDL2 -I/home/duong/music_player/inc -I/home/duong/music_player/inc/interfaces -I/home/duong/music_player/inc/utils -I/home/duong/music_player/inc/app -I/home/duong/music_player/inc/service -I/home/duong/music_player/inc/hal -I/home/duong/music_player/external/imgui -I/home/duong/music_player/external/stb -I/usr/include/taglib -I/usr/include/SDL2 -I/home/duong/music_player/external/imgui/backends -g -Wall -Wextra -Wpedantic -g -O0 -std=gnu++17 -o CMakeFiles/music_player.dir/src/app/model/History.cpp.o -c /home/duong/music_player/src/app/model/History.cpp",
+  "file": "/home/duong/music_player/src/app/model/History.cpp"
+},
+{
+  "directory": "/home/duong/music_player/build_verify",
+  "command": "/usr/bin/c++ -DUSE_IMGUI -DUSE_SDL2 -I/home/duong/music_player/inc -I/home/duong/music_player/inc/interfaces -I/home/duong/music_player/inc/utils -I/home/duong/music_player/inc/app -I/home/duong/music_player/inc/service -I/home/duong/music_player/inc/hal -I/home/duong/music_player/external/imgui -I/home/duong/music_player/external/stb -I/usr/include/taglib -I/usr/include/SDL2 -I/home/duong/music_player/external/imgui/backends -g -Wall -Wextra -Wpedantic -g -O0 -std=gnu++17 -o CMakeFiles/music_player.dir/src/app/model/PlaylistManager.cpp.o -c /home/duong/music_player/src/app/model/PlaylistManager.cpp",
+  "file": "/home/duong/music_player/src/app/model/PlaylistManager.cpp"
+},
+{
+  "directory": "/home/duong/music_player/build_verify",
+  "command": "/usr/bin/c++ -DUSE_IMGUI -DUSE_SDL2 -I/home/duong/music_player/inc -I/home/duong/music_player/inc/interfaces -I/home/duong/music_player/inc/utils -I/home/duong/music_player/inc/app -I/home/duong/music_player/inc/service -I/home/duong/music_player/inc/hal -I/home/duong/music_player/external/imgui -I/home/duong/music_player/external/stb -I/usr/include/taglib -I/usr/include/SDL2 -I/home/duong/music_player/external/imgui/backends -g -Wall -Wextra -Wpedantic -g -O0 -std=gnu++17 -o CMakeFiles/music_player.dir/src/app/model/MediaFileFactory.cpp.o -c /home/duong/music_player/src/app/model/MediaFileFactory.cpp",
+  "file": "/home/duong/music_player/src/app/model/MediaFileFactory.cpp"
+},
+{
+  "directory": "/home/duong/music_player/build_verify",
+  "command": "/usr/bin/c++ -DUSE_IMGUI -DUSE_SDL2 -I/home/duong/music_player/inc -I/home/duong/music_player/inc/interfaces -I/home/duong/music_player/inc/utils -I/home/duong/music_player/inc/app -I/home/duong/music_player/inc/service -I/home/duong/music_player/inc/hal -I/home/duong/music_player/external/imgui -I/home/duong/music_player/external/stb -I/usr/include/taglib -I/usr/include/SDL2 -I/home/duong/music_player/external/imgui/backends -g -Wall -Wextra -Wpedantic -g -O0 -std=gnu++17 -o CMakeFiles/music_player.dir/src/app/controller/LibraryController.cpp.o -c /home/duong/music_player/src/app/controller/LibraryController.cpp",
+  "file": "/home/duong/music_player/src/app/controller/LibraryController.cpp"
+},
+{
+  "directory": "/home/duong/music_player/build_verify",
+  "command": "/usr/bin/c++ -DUSE_IMGUI -DUSE_SDL2 -I/home/duong/music_player/inc -I/home/duong/music_player/inc/interfaces -I/home/duong/music_player/inc/utils -I/home/duong/music_player/inc/app -I/home/duong/music_player/inc/service -I/home/duong/music_player/inc/hal -I/home/duong/music_player/external/imgui -I/home/duong/music_player/external/stb -I/usr/include/taglib -I/usr/include/SDL2 -I/home/duong/music_player/external/imgui/backends -g -Wall -Wextra -Wpedantic -g -O0 -std=gnu++17 -o CMakeFiles/music_player.dir/src/app/controller/PlaylistController.cpp.o -c /home/duong/music_player/src/app/controller/PlaylistController.cpp",
+  "file": "/home/duong/music_player/src/app/controller/PlaylistController.cpp"
+},
+{
+  "directory": "/home/duong/music_player/build_verify",
+  "command": "/usr/bin/c++ -DUSE_IMGUI -DUSE_SDL2 -I/home/duong/music_player/inc -I/home/duong/music_player/inc/interfaces -I/home/duong/music_player/inc/utils -I/home/duong/music_player/inc/app -I/home/duong/music_player/inc/service -I/home/duong/music_player/inc/hal -I/home/duong/music_player/external/imgui -I/home/duong/music_player/external/stb -I/usr/include/taglib -I/usr/include/SDL2 -I/home/duong/music_player/external/imgui/backends -g -Wall -Wextra -Wpedantic -g -O0 -std=gnu++17 -o CMakeFiles/music_player.dir/src/app/controller/PlaybackController.cpp.o -c /home/duong/music_player/src/app/controller/PlaybackController.cpp",
+  "file": "/home/duong/music_player/src/app/controller/PlaybackController.cpp"
+},
+{
+  "directory": "/home/duong/music_player/build_verify",
+  "command": "/usr/bin/c++ -DUSE_IMGUI -DUSE_SDL2 -I/home/duong/music_player/inc -I/home/duong/music_player/inc/interfaces -I/home/duong/music_player/inc/utils -I/home/duong/music_player/inc/app -I/home/duong/music_player/inc/service -I/home/duong/music_player/inc/hal -I/home/duong/music_player/external/imgui -I/home/duong/music_player/external/stb -I/usr/include/taglib -I/usr/include/SDL2 -I/home/duong/music_player/external/imgui/backends -g -Wall -Wextra -Wpedantic -g -O0 -std=gnu++17 -o CMakeFiles/music_player.dir/src/app/controller/HistoryController.cpp.o -c /home/duong/music_player/src/app/controller/HistoryController.cpp",
+  "file": "/home/duong/music_player/src/app/controller/HistoryController.cpp"
+},
+{
+  "directory": "/home/duong/music_player/build_verify",
+  "command": "/usr/bin/c++ -DUSE_IMGUI -DUSE_SDL2 -I/home/duong/music_player/inc -I/home/duong/music_player/inc/interfaces -I/home/duong/music_player/inc/utils -I/home/duong/music_player/inc/app -I/home/duong/music_player/inc/service -I/home/duong/music_player/inc/hal -I/home/duong/music_player/external/imgui -I/home/duong/music_player/external/stb -I/usr/include/taglib -I/usr/include/SDL2 -I/home/duong/music_player/external/imgui/backends -g -Wall -Wextra -Wpedantic -g -O0 -std=gnu++17 -o CMakeFiles/music_player.dir/src/app/controller/USBController.cpp.o -c /home/duong/music_player/src/app/controller/USBController.cpp",
+  "file": "/home/duong/music_player/src/app/controller/USBController.cpp"
+},
+{
+  "directory": "/home/duong/music_player/build_verify",
+  "command": "/usr/bin/c++ -DUSE_IMGUI -DUSE_SDL2 -I/home/duong/music_player/inc -I/home/duong/music_player/inc/interfaces -I/home/duong/music_player/inc/utils -I/home/duong/music_player/inc/app -I/home/duong/music_player/inc/service -I/home/duong/music_player/inc/hal -I/home/duong/music_player/external/imgui -I/home/duong/music_player/external/stb -I/usr/include/taglib -I/usr/include/SDL2 -I/home/duong/music_player/external/imgui/backends -g -Wall -Wextra -Wpedantic -g -O0 -std=gnu++17 -o CMakeFiles/music_player.dir/src/app/view/BaseView.cpp.o -c /home/duong/music_player/src/app/view/BaseView.cpp",
+  "file": "/home/duong/music_player/src/app/view/BaseView.cpp"
+},
+{
+  "directory": "/home/duong/music_player/build_verify",
+  "command": "/usr/bin/c++ -DUSE_IMGUI -DUSE_SDL2 -I/home/duong/music_player/inc -I/home/duong/music_player/inc/interfaces -I/home/duong/music_player/inc/utils -I/home/duong/music_player/inc/app -I/home/duong/music_player/inc/service -I/home/duong/music_player/inc/hal -I/home/duong/music_player/external/imgui -I/home/duong/music_player/external/stb -I/usr/include/taglib -I/usr/include/SDL2 -I/home/duong/music_player/external/imgui/backends -g -Wall -Wextra -Wpedantic -g -O0 -std=gnu++17 -o CMakeFiles/music_player.dir/src/app/view/LibraryView.cpp.o -c /home/duong/music_player/src/app/view/LibraryView.cpp",
+  "file": "/home/duong/music_player/src/app/view/LibraryView.cpp"
+},
+{
+  "directory": "/home/duong/music_player/build_verify",
+  "command": "/usr/bin/c++ -DUSE_IMGUI -DUSE_SDL2 -I/home/duong/music_player/inc -I/home/duong/music_player/inc/interfaces -I/home/duong/music_player/inc/utils -I/home/duong/music_player/inc/app -I/home/duong/music_player/inc/service -I/home/duong/music_player/inc/hal -I/home/duong/music_player/external/imgui -I/home/duong/music_player/external/stb -I/usr/include/taglib -I/usr/include/SDL2 -I/home/duong/music_player/external/imgui/backends -g -Wall -Wextra -Wpedantic -g -O0 -std=gnu++17 -o CMakeFiles/music_player.dir/src/app/view/PlaylistView.cpp.o -c /home/duong/music_player/src/app/view/PlaylistView.cpp",
+  "file": "/home/duong/music_player/src/app/view/PlaylistView.cpp"
+},
+{
+  "directory": "/home/duong/music_player/build_verify",
+  "command": "/usr/bin/c++ -DUSE_IMGUI -DUSE_SDL2 -I/home/duong/music_player/inc -I/home/duong/music_player/inc/interfaces -I/home/duong/music_player/inc/utils -I/home/duong/music_player/inc/app -I/home/duong/music_player/inc/service -I/home/duong/music_player/inc/hal -I/home/duong/music_player/external/imgui -I/home/duong/music_player/external/stb -I/usr/include/taglib -I/usr/include/SDL2 -I/home/duong/music_player/external/imgui/backends -g -Wall -Wextra -Wpedantic -g -O0 -std=gnu++17 -o CMakeFiles/music_player.dir/src/app/view/NowPlayingView.cpp.o -c /home/duong/music_player/src/app/view/NowPlayingView.cpp",
+  "file": "/home/duong/music_player/src/app/view/NowPlayingView.cpp"
+},
+{
+  "directory": "/home/duong/music_player/build_verify",
+  "command": "/usr/bin/c++ -DUSE_IMGUI -DUSE_SDL2 -I/home/duong/music_player/inc -I/home/duong/music_player/inc/interfaces -I/home/duong/music_player/inc/utils -I/home/duong/music_player/inc/app -I/home/duong/music_player/inc/service -I/home/duong/music_player/inc/hal -I/home/duong/music_player/external/imgui -I/home/duong/music_player/external/stb -I/usr/include/taglib -I/usr/include/SDL2 -I/home/duong/music_player/external/imgui/backends -g -Wall -Wextra -Wpedantic -g -O0 -std=gnu++17 -o CMakeFiles/music_player.dir/src/app/view/HistoryView.cpp.o -c /home/duong/music_player/src/app/view/HistoryView.cpp",
+  "file": "/home/duong/music_player/src/app/view/HistoryView.cpp"
+},
+{
+  "directory": "/home/duong/music_player/build_verify",
+  "command": "/usr/bin/c++ -DUSE_IMGUI -DUSE_SDL2 -I/home/duong/music_player/inc -I/home/duong/music_player/inc/interfaces -I/home/duong/music_player/inc/utils -I/home/duong/music_player/inc/app -I/home/duong/music_player/inc/service -I/home/duong/music_player/inc/hal -I/home/duong/music_player/external/imgui -I/home/duong/music_player/external/stb -I/usr/include/taglib -I/usr/include/SDL2 -I/home/duong/music_player/external/imgui/backends -g -Wall -Wextra -Wpedantic -g -O0 -std=gnu++17 -o CMakeFiles/music_player.dir/src/app/view/FileBrowserView.cpp.o -c /home/duong/music_player/src/app/view/FileBrowserView.cpp",
+  "file": "/home/duong/music_player/src/app/view/FileBrowserView.cpp"
+},
+{
+  "directory": "/home/duong/music_player/build_verify",
+  "command": "/usr/bin/c++ -DUSE_IMGUI -DUSE_SDL2 -I/home/duong/music_player/inc -I/home/duong/music_player/inc/interfaces -I/home/duong/music_player/inc/utils -I/home/duong/music_player/inc/app -I/home/duong/music_player/inc/service -I/home/duong/music_player/inc/hal -I/home/duong/music_player/external/imgui -I/home/duong/music_player/external/stb -I/usr/include/taglib -I/usr/include/SDL2 -I/home/duong/music_player/external/imgui/backends -g -Wall -Wextra -Wpedantic -g -O0 -std=gnu++17 -o CMakeFiles/music_player.dir/src/app/view/ViewFactory.cpp.o -c /home/duong/music_player/src/app/view/ViewFactory.cpp",
+  "file": "/home/duong/music_player/src/app/view/ViewFactory.cpp"
+},
+{
+  "directory": "/home/duong/music_player/build_verify",
+  "command": "/usr/bin/c++ -DUSE_IMGUI -DUSE_SDL2 -I/home/duong/music_player/inc -I/home/duong/music_player/inc/interfaces -I/home/duong/music_player/inc/utils -I/home/duong/music_player/inc/app -I/home/duong/music_player/inc/service -I/home/duong/music_player/inc/hal -I/home/duong/music_player/external/imgui -I/home/duong/music_player/external/stb -I/usr/include/taglib -I/usr/include/SDL2 -I/home/duong/music_player/external/imgui/backends -g -Wall -Wextra -Wpedantic -g -O0 -std=gnu++17 -o CMakeFiles/music_player.dir/src/app/view/MainWindow.cpp.o -c /home/duong/music_player/src/app/view/MainWindow.cpp",
+  "file": "/home/duong/music_player/src/app/view/MainWindow.cpp"
+},
+{
+  "directory": "/home/duong/music_player/build_verify",
+  "command": "/usr/bin/c++ -DUSE_IMGUI -DUSE_SDL2 -I/home/duong/music_player/inc -I/home/duong/music_player/inc/interfaces -I/home/duong/music_player/inc/utils -I/home/duong/music_player/inc/app -I/home/duong/music_player/inc/service -I/home/duong/music_player/inc/hal -I/home/duong/music_player/external/imgui -I/home/duong/music_player/external/stb -I/usr/include/taglib -I/usr/include/SDL2 -I/home/duong/music_player/external/imgui/backends -g -Wall -Wextra -Wpedantic -g -O0 -std=gnu++17 -o CMakeFiles/music_player.dir/src/service/LocalFileSystem.cpp.o -c /home/duong/music_player/src/service/LocalFileSystem.cpp",
+  "file": "/home/duong/music_player/src/service/LocalFileSystem.cpp"
+},
+{
+  "directory": "/home/duong/music_player/build_verify",
+  "command": "/usr/bin/c++ -DUSE_IMGUI -DUSE_SDL2 -I/home/duong/music_player/inc -I/home/duong/music_player/inc/interfaces -I/home/duong/music_player/inc/utils -I/home/duong/music_player/inc/app -I/home/duong/music_player/inc/service -I/home/duong/music_player/inc/hal -I/home/duong/music_player/external/imgui -I/home/duong/music_player/external/stb -I/usr/include/taglib -I/usr/include/SDL2 -I/home/duong/music_player/external/imgui/backends -g -Wall -Wextra -Wpedantic -g -O0 -std=gnu++17 -o CMakeFiles/music_player.dir/src/service/TagLibMetadataReader.cpp.o -c /home/duong/music_player/src/service/TagLibMetadataReader.cpp",
+  "file": "/home/duong/music_player/src/service/TagLibMetadataReader.cpp"
+},
+{
+  "directory": "/home/duong/music_player/build_verify",
+  "command": "/usr/bin/c++ -DUSE_IMGUI -DUSE_SDL2 -I/home/duong/music_player/inc -I/home/duong/music_player/inc/interfaces -I/home/duong/music_player/inc/utils -I/home/duong/music_player/inc/app -I/home/duong/music_player/inc/service -I/home/duong/music_player/inc/hal -I/home/duong/music_player/external/imgui -I/home/duong/music_player/external/stb -I/usr/include/taglib -I/usr/include/SDL2 -I/home/duong/music_player/external/imgui/backends -g -Wall -Wextra -Wpedantic -g -O0 -std=gnu++17 -o CMakeFiles/music_player.dir/src/service/MpvPlaybackEngine.cpp.o -c /home/duong/music_player/src/service/MpvPlaybackEngine.cpp",
+  "file": "/home/duong/music_player/src/service/MpvPlaybackEngine.cpp"
+},
+{
+  "directory": "/home/duong/music_player/build_verify",
+  "command": "/usr/bin/c++ -DUSE_IMGUI -DUSE_SDL2 -I/home/duong/music_player/inc -I/home/duong/music_player/inc/interfaces -I/home/duong/music_player/inc/utils -I/home/duong/music_player/inc/app -I/home/duong/music_player/inc/service -I/home/duong/music_player/inc/hal -I/home/duong/music_player/external/imgui -I/home/duong/music_player/external/stb -I/usr/include/taglib -I/usr/include/SDL2 -I/home/duong/music_player/external/imgui/backends -g -Wall -Wextra -Wpedantic -g -O0 -std=gnu++17 -o CMakeFiles/music_player.dir/src/service/JsonPersistence.cpp.o -c /home/duong/music_player/src/service/JsonPersistence.cpp",
+  "file": "/home/duong/music_player/src/service/JsonPersistence.cpp"
+},
+{
+  "directory": "/home/duong/music_player/build_verify",
+  "command": "/usr/bin/c++ -DUSE_IMGUI -DUSE_SDL2 -I/home/duong/music_player/inc -I/home/duong/music_player/inc/interfaces -I/home/duong/music_player/inc/utils -I/home/duong/music_player/inc/app -I/home/duong/music_player/inc/service -I/home/duong/music_player/inc/hal -I/home/duong/music_player/external/imgui -I/home/duong/music_player/external/stb -I/usr/include/taglib -I/usr/include/SDL2 -I/home/duong/music_player/external/imgui/backends -g -Wall -Wextra -Wpedantic -g -O0 -std=gnu++17 -o CMakeFiles/music_player.dir/src/hal/LinuxHardware.cpp.o -c /home/duong/music_player/src/hal/LinuxHardware.cpp",
+  "file": "/home/duong/music_player/src/hal/LinuxHardware.cpp"
+},
+{
+  "directory": "/home/duong/music_player/build_verify",
+  "command": "/usr/bin/c++ -DUSE_IMGUI -DUSE_SDL2 -I/home/duong/music_player/inc -I/home/duong/music_player/inc/interfaces -I/home/duong/music_player/inc/utils -I/home/duong/music_player/inc/app -I/home/duong/music_player/inc/service -I/home/duong/music_player/inc/hal -I/home/duong/music_player/external/imgui -I/home/duong/music_player/external/stb -I/usr/include/taglib -I/usr/include/SDL2 -I/home/duong/music_player/external/imgui/backends -g -Wall -Wextra -Wpedantic -g -O0 -std=gnu++17 -o CMakeFiles/music_player.dir/src/app/Application.cpp.o -c /home/duong/music_player/src/app/Application.cpp",
+  "file": "/home/duong/music_player/src/app/Application.cpp"
+}
+]

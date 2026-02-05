@@ -208,6 +208,11 @@ bool Application::init() {
             playbackController_.get()
         )));
         mainWindow_->setNowPlayingView(dynamic_cast<NowPlayingView*>(viewFactory_->createNowPlayingView(playbackController_.get(), playbackState_.get())));
+        // Inject PlaylistManager into NowPlayingView
+        if (auto* npView = dynamic_cast<NowPlayingView*>(mainWindow_->getNowPlayingView())) {
+            npView->setPlaylistManager(playlistManager_.get());
+        }
+
         mainWindow_->setHistoryView(dynamic_cast<HistoryView*>(viewFactory_->createHistoryView(
             historyController_.get(), 
             history_.get(),
@@ -345,6 +350,12 @@ void Application::shutdown() {
     if (library_) library_->save();
     
     // Release specific controllers and engine BEFORE destroying GL context
+    if (playbackController_) {
+        playbackController_->stop();
+        // Give a tiny moment for the async stop to register if needed, 
+        // though strictly not required if mpv handles it well.
+    }
+    
     playbackController_.reset();
     playbackEngine_.reset();
     

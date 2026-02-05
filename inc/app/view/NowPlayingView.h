@@ -3,26 +3,16 @@
 
 #include "BaseView.h"
 #include "../controller/PlaybackController.h"
-#include "../model/PlaybackState.h"
+#include "../model/PlaylistManager.h"
 
-/**
- * @file NowPlayingView.h
- * @brief Now playing view using ImGui
- * 
- * Displays currently playing track with controls.
- * Observes PlaybackState for automatic updates.
- */
+// ... (existing comments)
 
-/**
- * @brief Now playing view class
- * 
- * ImGui-based view for current playback.
- * Shows metadata, progress, and playback controls.
- */
 class NowPlayingView : public BaseView {
 public:
     NowPlayingView(PlaybackController* controller, PlaybackState* state);
     ~NowPlayingView() override;
+    
+    void setPlaylistManager(PlaylistManager* manager) { playlistManager_ = manager; }
     
     void render() override;
     void handleInput() override;
@@ -31,6 +21,7 @@ public:
 private:
     PlaybackController* controller_;
     PlaybackState* state_;
+    PlaylistManager* playlistManager_ = nullptr;
     
     // UI state
     float volumeSlider_;

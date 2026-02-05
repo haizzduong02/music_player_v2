@@ -31,30 +31,29 @@ A modern, cross-platform music player built with C++17 featuring MVC architectur
 
 ### Manual Build
 
+### Manual Build
+
 ```bash
 # Install dependencies
-sudo apt-get install build-essential cmake pkg-config libtag1-dev
+sudo apt-get install build-essential pkg-config libtag1-dev libsdl2-dev libmpv-dev
 
 # Build
-mkdir build && cd build
-cmake ..
 make -j$(nproc)
 
 # Run
-./music_player
+./build/music_player
 ```
 
 ## 📋 Requirements
 
 ### Essential
-- C++17 compatible compiler (GCC 8+, Clang 7+, MSVC 2017+)
-- CMake 3.15+
+- C++17 compatible compiler (GCC 8+, Clang 7+)
 - TagLib
+- SDL2 (for windowing)
+- libmpv (for playback)
 
 ### Optional
-- SDL2 + SDL2_mixer (for audio playback)
-- ImGui (for graphical interface)
-- OpenGL (for ImGui rendering)
+- ImGui (included in tree or downloaded)
 
 See [`docs/BUILD.md`](docs/BUILD.md) for detailed installation instructions.
 
@@ -76,24 +75,21 @@ music_player/
 │   ├── service/           # Service implementations
 │   └── hal/               # Hardware implementations
 ├── docs/                  # Documentation
-├── CMakeLists.txt         # Build configuration
+├── Makefile               # Build configuration
 └── build.sh               # Quick build script
 ```
 
 ## 🔧 Build Options
 
 ```bash
-# Full build with all features
-cmake .. -DUSE_SDL2=ON -DUSE_IMGUI=ON
-
-# Minimal build (TagLib only)
-cmake .. -DUSE_SDL2=OFF -DUSE_IMGUI=OFF
-
-# Debug build
-cmake .. -DCMAKE_BUILD_TYPE=Debug
+# Debug build (default)
+make
 
 # Release build
-cmake .. -DCMAKE_BUILD_TYPE=Release
+make BUILD_TYPE=Release
+
+# Clean build
+make clean
 ```
 
 ## 📚 Documentation

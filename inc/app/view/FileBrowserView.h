@@ -6,6 +6,7 @@
 #include "../../interfaces/IFileSystem.h"
 #include <string>
 #include <vector>
+#include <set>
 
 /**
  * @file FileBrowserView.h
@@ -52,8 +53,8 @@ private:
     // UI state
     std::string currentPath_;
     std::vector<FileInfo> currentFiles_;
-    int selectedIndex_;
-    std::vector<std::string> selectedFiles_;  // For multi-select
+    // int selectedIndex_; // Removed single selection index
+    std::set<std::string> selectedFiles_;  // For multi-select using set
     
     // Mode state
     BrowserMode mode_ = BrowserMode::LIBRARY;

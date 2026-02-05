@@ -6,7 +6,7 @@
 #include <algorithm>
 
 FileBrowserView::FileBrowserView(IFileSystem* fileSystem, LibraryController* libController)
-    : fileSystem_(fileSystem), libController_(libController), selectedIndex_(-1) {
+    : fileSystem_(fileSystem), libController_(libController) {
     
     // Start at current directory or home
     currentPath_ = fileSystem_->exists(".") ? "." : "/";
@@ -87,41 +87,70 @@ void FileBrowserView::render() {
         ImGui::Text("Media Files");
         ImGui::Separator();
         
-        int fileIndex = 0;
-        for (size_t i = 0; i < currentFiles_.size(); ++i) {
-            const auto& fileInfo = currentFiles_[i];
-            if (fileInfo.isDirectory) continue;
+        // Table: [Select] [Name] [Extension]
+        if (ImGui::BeginTable("FilesTable", 3, ImGuiTableFlags_BordersInnerH | ImGuiTableFlags_Resizable | ImGuiTableFlags_RowBg)) {
+            ImGui::TableSetupColumn("##Select", ImGuiTableColumnFlags_WidthFixed, 30.0f);
+            ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_NoHide);
+            ImGui::TableSetupColumn("Type", ImGuiTableColumnFlags_WidthFixed, 60.0f);
+            ImGui::TableHeadersRow();
             
-            // Check if supported format
-            std::string ext = fileInfo.name;
-            size_t dotPos = ext.find_last_of('.');
-            if (dotPos == std::string::npos) continue;
-            ext = ext.substr(dotPos);
-            if (!MediaFileFactory::isSupportedFormat(ext)) continue;
-            
-            bool isSelected = (static_cast<int>(i) == selectedIndex_);
-            
-            if (ImGui::Selectable(fileInfo.name.c_str(), isSelected, ImGuiSelectableFlags_AllowDoubleClick)) {
-                selectedIndex_ = static_cast<int>(i);
+            int fileIndex = 0;
+            for (size_t i = 0; i < currentFiles_.size(); ++i) {
+                const auto& fileInfo = currentFiles_[i];
+                if (fileInfo.isDirectory) continue;
                 
-                // Double-click to add to library or playlist
-                if (ImGui::IsMouseDoubleClicked(0)) {
-                    if (mode_ == BrowserMode::PLAYLIST_SELECTION && playlistController_ && !targetPlaylistName_.empty()) {
-                        // Add to playlist
-                        playlistController_->addToPlaylistAndLibrary(targetPlaylistName_, fileInfo.path);
-                        Logger::getInstance().info("Added to playlist '" + targetPlaylistName_ + "': " + fileInfo.name);
+                // Check if supported format
+                std::string filename = fileInfo.name;
+                std::string ext = "";
+                size_t dotPos = filename.find_last_of('.');
+                if (dotPos == std::string::npos) continue;
+                ext = filename.substr(dotPos); // keep dot for check
+                
+                if (!MediaFileFactory::isSupportedFormat(ext)) continue;
+                
+                // Pure extension for display (remove dot)
+                std::string displayExt = (ext.length() > 0) ? ext.substr(1) : "";
+                // Name without extension (optional, user requested fields: Name, Extension)
+                // Let's keep full name in Name col or strip it? usually Name includes ext.
+                // User asked for "file ... fields: name, extension". 
+                // I will show name (full) and extension in separate col.
+                
+                ImGui::TableNextRow();
+                ImGui::TableNextColumn();
+                
+                // 1. Checkbox
+                bool isSelected = (selectedFiles_.find(fileInfo.path) != selectedFiles_.end());
+                ImGui::PushID((int)i);
+                if (ImGui::Checkbox("##check", &isSelected)) {
+                    if (isSelected) {
+                        selectedFiles_.insert(fileInfo.path);
                     } else {
-                        // Default: Add to library
-                        libController_->addMediaFile(fileInfo.path);
-                        Logger::getInstance().info("Added to Library: " + fileInfo.name);
+                        selectedFiles_.erase(fileInfo.path);
                     }
                 }
+                ImGui::PopID();
+                
+                ImGui::TableNextColumn();
+                // 2. Name
+                ImGui::Text("%s", fileInfo.name.c_str());
+                
+                ImGui::TableNextColumn();
+                // 3. Extension
+                ImGui::Text("%s", displayExt.c_str());
+                
+                fileIndex++;
             }
-            fileIndex++;
+            
+             if (fileIndex == 0) {
+                 // ImGui::TableNextRow(); ImGui::TableNextColumn();
+                 // ImGui::TextDisabled("No media files");
+             }
+             
+            ImGui::EndTable();
         }
         
-        if (fileIndex == 0) {
-            ImGui::TextDisabled("No media files in this folder");
+        if (currentFiles_.empty()) {
+            ImGui::TextDisabled("Empty folder");
         }
     }
     ImGui::EndChild();
@@ -135,17 +164,23 @@ void FileBrowserView::render() {
     }
     
     if (ImGui::Button(addBtnText.c_str())) {
-        if (selectedIndex_ >= 0 && selectedIndex_ < static_cast<int>(currentFiles_.size())) {
-            const auto& selected = currentFiles_[selectedIndex_];
-            if (!selected.isDirectory) {
-                if (mode_ == BrowserMode::PLAYLIST_SELECTION && playlistController_ && !targetPlaylistName_.empty()) {
-                    playlistController_->addToPlaylistAndLibrary(targetPlaylistName_, selected.path);
-                    Logger::getInstance().info("Added to playlist '" + targetPlaylistName_ + "': " + selected.name);
-                } else {
-                    libController_->addMediaFile(selected.path);
-                    Logger::getInstance().info("Added to Library: " + selected.name);
-                }
-            }
+        // Add all selected files
+        int addedCount = 0;
+        for (const auto& path : selectedFiles_) {
+             if (mode_ == BrowserMode::PLAYLIST_SELECTION && playlistController_ && !targetPlaylistName_.empty()) {
+                 playlistController_->addToPlaylistAndLibrary(targetPlaylistName_, path);
+             } else {
+                 libController_->addMediaFile(path);
+             }
+             addedCount++;
+        }
+        
+        if (addedCount > 0) {
+            Logger::getInstance().info("Added " + std::to_string(addedCount) + " files.");
+            // Optional: Clear selection after add?
+            // selectedFiles_.clear(); 
+        } else {
+            Logger::getInstance().warn("No files selected.");
         }
     }
     
@@ -202,5 +237,5 @@ void FileBrowserView::navigateTo(const std::string& path) {
 
 void FileBrowserView::refreshCurrentDirectory() {
     currentFiles_ = fileSystem_->browse(currentPath_);
-    selectedIndex_ = -1;
+    selectedFiles_.clear();
 }

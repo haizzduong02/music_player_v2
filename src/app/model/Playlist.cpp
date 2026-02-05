@@ -12,6 +12,12 @@ bool Playlist::addTrack(std::shared_ptr<MediaFile> track) {
         return false;
     }
     
+    // Prevent duplicates
+    if (contains(track->getPath())) {
+        Logger::getInstance().warn("Track already exists in playlist '" + name_ + "': " + track->getPath());
+        return false;
+    }
+    
     std::lock_guard<std::mutex> lock(dataMutex_);
     tracks_.push_back(track);
     

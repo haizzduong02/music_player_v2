@@ -73,11 +73,13 @@ void MpvPlaybackEngine::initGL() {
 }
 
 void MpvPlaybackEngine::cleanup() {
+    Logger::getInstance().info("MpvPlaybackEngine::cleanup started");
+    
     if (texture_ != 0) {
         glDeleteTextures(1, &texture_);
         texture_ = 0;
     }
-    // FBO is not used in SW mode, but good to clean if it was somehow created
+    
     if (fbo_ != 0) {
         typedef void (APIENTRY * PFNGLDELETEFRAMEBUFFERSPROC) (GLsizei n, const GLuint* framebuffers);
         PFNGLDELETEFRAMEBUFFERSPROC glDeleteFramebuffers = (PFNGLDELETEFRAMEBUFFERSPROC)SDL_GL_GetProcAddress("glDeleteFramebuffers");
@@ -86,13 +88,20 @@ void MpvPlaybackEngine::cleanup() {
     }
 
     if (mpv_gl_) {
+        Logger::getInstance().info("Freeing mpv render context...");
         mpv_render_context_free(mpv_gl_);
         mpv_gl_ = nullptr;
+        Logger::getInstance().info("mpv render context freed");
     }
+    
     if (mpv_) {
+        Logger::getInstance().info("Terminating mpv core...");
         mpv_terminate_destroy(mpv_);
         mpv_ = nullptr;
+        Logger::getInstance().info("mpv core terminated");
     }
+    
+    Logger::getInstance().info("MpvPlaybackEngine::cleanup finished");
 }
 
 void MpvPlaybackEngine::updateVideo() {
@@ -135,12 +144,21 @@ void MpvPlaybackEngine::updateVideo() {
             // Fallback or early exit
             mpv_get_property(mpv_, "video-params/w", MPV_FORMAT_INT64, &w);
             mpv_get_property(mpv_, "video-params/h", MPV_FORMAT_INT64, &h);
-            if (w <= 0 || h <= 0) return;
+            if (w <= 0 || h <= 0) {
+                Logger::getInstance().warn("Video update frame received but dimensions invalid: " + std::to_string(w) + "x" + std::to_string(h));
+                return;
+            }
         }
 
         int width = (int)w;
         int height = (int)h;
         int stride = width * 4; // ARGB/RGBA usually 4 bytes per pixel
+
+        // Log occasionally
+        static int frameCount = 0;
+        if (frameCount++ % 300 == 0) {
+             Logger::getInstance().debug("Rendering video frame: " + std::to_string(width) + "x" + std::to_string(height));
+        }
 
         // Resize buffer if needed (using member vector would be better for performance, 
         // but for safety in this refactor we can just use a static or member if we had one.
@@ -176,6 +194,11 @@ void MpvPlaybackEngine::updateVideo() {
             
             glBindTexture(GL_TEXTURE_2D, texture_);
             glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixelBuffer.data());
+            
+            // Should report swap to mpv
+            mpv_render_context_report_swap(mpv_gl_);
+        } else {
+             Logger::getInstance().error("mpv_render_context_render failed");
         }
     }
 }

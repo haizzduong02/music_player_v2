@@ -21,8 +21,8 @@ If the automatic script doesn't work:
 
 ```bash
 sudo apt-get update
-sudo apt-get install build-essential cmake pkg-config \
-    libtag1-dev libsdl2-dev libsdl2-mixer-dev
+sudo apt-get install build-essential pkg-config \
+    libtag1-dev libsdl2-dev libmpv-dev
 ```
 
 ### 2. Download ImGui Manually
@@ -38,8 +38,6 @@ cd ..
 ### 3. Build
 
 ```bash
-mkdir -p build && cd build
-cmake -DCMAKE_BUILD_TYPE=Release ..
 make -j$(nproc)
 ```
 

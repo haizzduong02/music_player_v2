@@ -56,8 +56,8 @@ fi
 # Check for required tools
 print_info "Checking build tools..."
 
-if ! command -v cmake &> /dev/null; then
-    print_error "CMake not found. Please install CMake 3.15 or higher"
+if ! command -v make &> /dev/null; then
+    print_error "Make not found. Please install build-essential"
     exit 1
 fi
 
@@ -76,19 +76,24 @@ else
     exit 1
 fi
 
-# Create build directory
-print_info "Creating build directory..."
-rm -rf build
-mkdir build
-cd build
+# Check for SDL2
+if pkg-config --exists sdl2; then
+    print_info "✓ SDL2 found"
+else
+    print_error "SDL2 not found. Please install libsdl2-dev"
+    exit 1
+fi
 
-# Configure CMake
-print_info "Configuring CMake..."
-cmake .. \
-    -DCMAKE_BUILD_TYPE=Release \
-    -DUSE_SDL2=ON \
-    -DUSE_IMGUI=OFF \
-    || { print_error "CMake configuration failed"; exit 1; }
+# Check for MPV
+if pkg-config --exists mpv; then
+    print_info "✓ libmpv found"
+else
+    print_error "libmpv not found. Please install libmpv-dev"
+    exit 1
+fi
+
+# Create build directory (optional, Makefile handles this, but good for clean)
+# print_info "Preparing build..."
 
 # Build
 print_info "Building project..."
