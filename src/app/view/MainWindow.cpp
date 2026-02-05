@@ -59,34 +59,48 @@ void MainWindow::render() {
         
         ImGui::Separator();
         
-        // Calculate layout sizes - Album art takes 75%, track list takes 25%
+        // Calculate layout sizes
         float availableWidth = ImGui::GetContentRegionAvail().x;
-        float availableHeight = ImGui::GetContentRegionAvail().y - 120.0f; // Reserve for controls
-        float albumPanelWidth = availableWidth * 0.75f;  // Increased to 75%
-        float trackListWidth = availableWidth * 0.24f;   // Reduced to 24% (keep some margin)
+        float availableHeight = ImGui::GetContentRegionAvail().y; // Use full remaining height
         
-        // Main content area - Force no scrollbar
-        // Main content area - Force no scrollbar
-        ImGui::BeginChild("ContentArea", ImVec2(0, availableHeight), false, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
+        // Left Panel: Track List (~35%)
+        float leftPanelWidth = availableWidth * 0.25f;
+        
+        // Right Panel: Art + Controls (~65%)
+        float rightPanelWidth = availableWidth - leftPanelWidth - 8.0f; // Subtract spacing
+        
+        // --- Left Panel ---
+        ImGui::PushStyleColor(ImGuiCol_ChildBg, COLOR_BG_TEAL);
+        ImGui::BeginChild("LeftPanel", ImVec2(leftPanelWidth, availableHeight), true, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
+        renderTrackList();
+        ImGui::EndChild();
+        ImGui::PopStyleColor();
+        
+        ImGui::SameLine();
+        
+        // --- Right Panel ---
+        ImGui::BeginGroup();
         {
-            // Left side: Track list (25% of width) - TEAL Background
-            ImGui::PushStyleColor(ImGuiCol_ChildBg, COLOR_BG_TEAL);
-            ImGui::BeginChild("LeftPanel", ImVec2(trackListWidth, 0), true, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
-            renderTrackList();
-            ImGui::EndChild();
-            ImGui::PopStyleColor(); // Pop ChildBg
+            // Bottom Controls Height
+            // NowPlayingView contains progress bar, slider, buttons, volume, metadata... 
+            // It needs significant vertical space. Let's reserve ~200px for it, or use remaining height for Art.
+            float controlsHeight = 100.0f;
+            float artHeight = availableHeight - controlsHeight - 8.0f; // Spacing
             
-            ImGui::SameLine();
-            
-            // Right side: Album art (75% of width) - Keep Black
-            ImGui::BeginChild("RightPanel", ImVec2(albumPanelWidth, 0), false, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
+            // 1. Album Art / Video (Top Right) - Keep Black Logic inside renderAlbumArt or here?
+            // renderAlbumArt uses transparent or inferred BG. 
+            // MainWindow originally used a black child for Right Panel.
+            // Let's create a child for it.
+            ImGui::BeginChild("ArtPanel", ImVec2(rightPanelWidth, artHeight > 50.0f ? artHeight : 50.0f), false, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
             renderAlbumArt();
             ImGui::EndChild();
+            
+            // 2. Playback Controls (Bottom Right)
+            ImGui::BeginChild("ControlsPanel", ImVec2(rightPanelWidth, controlsHeight), true); // Using frame
+            renderPlaybackControls();
+            ImGui::EndChild();
         }
-        ImGui::EndChild();
-        
-        // Bottom: Playback controls
-        renderPlaybackControls();
+        ImGui::EndGroup(); // End Right Panel Group
     }
     ImGui::End();
     
@@ -619,233 +633,11 @@ void MainWindow::renderTrackList() {
 
 void MainWindow::renderPlaybackControls() {
 #ifdef USE_IMGUI
-    ImGui::Separator();
-    
-    // Style settings
-    ImGui::PushStyleColor(ImGuiCol_Button, COLOR_BG_TEAL);
-    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, COLOR_ACCENT);
-    ImGui::PushStyleColor(ImGuiCol_SliderGrab, ImVec4(1.0f, 1.0f, 1.0f, 1.0f)); 
-    ImGui::PushStyleColor(ImGuiCol_SliderGrabActive, ImVec4(0.8f, 0.8f, 0.8f, 1.0f)); 
-    ImGui::PushStyleColor(ImGuiCol_FrameBg, COLOR_BG_TEAL);
-    ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, COLOR_BG_TEAL);
-    
-    // --- ROW 1: Progress Bar ---
-    if (playbackState_) {
-        double position = playbackState_->getPosition();
-        double duration = playbackState_->getDuration();
-        
-        int posMin = static_cast<int>(position) / 60;
-        int posSec = static_cast<int>(position) % 60;
-        int durMin = static_cast<int>(duration) / 60;
-        int durSec = static_cast<int>(duration) % 60;
-        
-        ImGui::AlignTextToFramePadding();
-        ImGui::Text("%02d:%02d", posMin, posSec);
-        ImGui::SameLine();
-        
-        float availableWidth = ImGui::GetContentRegionAvail().x;
-        float timeTextWidth = 50.0f; 
-        ImGui::PushItemWidth(availableWidth - timeTextWidth * 1.5f); 
-        
-        float seekPos = static_cast<float>(position);
-        if (ImGui::SliderFloat("##seek", &seekPos, 0.0f, static_cast<float>(duration), "")) {
-            if (playbackController_) playbackController_->seek(seekPos);
-        }
-        ImGui::PopItemWidth();
-        
-        ImGui::SameLine();
-        ImGui::AlignTextToFramePadding();
-        ImGui::Text("%02d:%02d", durMin, durSec);
+    if (nowPlayingView_) {
+        nowPlayingView_->render();
+    } else {
+        ImGui::Text("Now Playing View not initialized");
     }
-    
-    ImGui::Spacing();
-    
-    // --- ROW 2: Info | Controls | Volume ---
-    ImGui::Columns(3, "PlaybackColumns", false); 
-    
-    // Column 1: Now Playing Info (Left) + Advanced Controls
-    if (playbackState_ && playbackState_->getCurrentTrack()) {
-        auto track = playbackState_->getCurrentTrack();
-        const auto& meta = track->getMetadata();
-        
-        float colWidth = ImGui::GetColumnWidth();
-        float buttonsWidth = 60.0f; // Approx for 2 buttons + spacing
-        
-        // Max widths
-        float maxTitleWidth = colWidth - buttonsWidth - 20.0f; 
-        float maxArtistWidth = colWidth - 20.0f;
-        
-        // Helper to truncate text
-        auto truncate = [&](const std::string& text, float maxWidth) -> std::string {
-            if (ImGui::CalcTextSize(text.c_str()).x <= maxWidth) return text;
-            std::string s = text;
-            while (s.length() > 3 && ImGui::CalcTextSize((s + "...").c_str()).x > maxWidth) {
-                s.pop_back();
-            }
-            return s + "...";
-        };
-
-        // Line 1: Title + Buttons
-        ImGui::AlignTextToFramePadding();
-        ImGui::Text("%s", truncate(track->getDisplayName(), maxTitleWidth).c_str());
-        
-        ImGui::SameLine();
-        
-        // --- Buttons (+) and (:) ---
-        float iconBtnSize = 24.0f;
-        ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 2));
-        
-        // (+) Add to Playlist
-        if (ImGui::Button("+", ImVec2(iconBtnSize, iconBtnSize))) {
-            ImGui::OpenPopup("AddToPlaylistPopup");
-        }
-        
-        // Popup logic... (retained, but ensuring it's efficient)
-        if (ImGui::BeginPopup("AddToPlaylistPopup")) {
-             ImGui::Text("Add to Playlist");
-             ImGui::Separator();
-             if (playlistView_ && playlistView_->getManager()) {
-                 auto playlists = playlistView_->getManager()->getAllPlaylists();
-                 bool found = false;
-                 for (const auto& playlist : playlists) {
-                     if (playlist->getName() == "Now Playing") continue;
-                     found = true;
-                     if (ImGui::Selectable(playlist->getName().c_str())) {
-                         playlist->addTrack(track);
-                         playlist->save();
-                         ImGui::CloseCurrentPopup();
-                     }
-                 }
-                 if (!found) ImGui::TextDisabled("No custom playlists");
-             } else {
-                 ImGui::TextDisabled("Unavailable");
-             }
-             ImGui::EndPopup();
-        }
-        
-        ImGui::SameLine();
-        
-        // (:) Metadata
-        if (ImGui::Button(":", ImVec2(iconBtnSize, iconBtnSize))) {
-            ImGui::OpenPopup("MetadataPopup");
-        }
-        
-        if (ImGui::BeginPopup("MetadataPopup")) {
-            ImGui::Text("Track Details");
-            ImGui::Separator();
-            ImGui::Text("File: %s", track->getDisplayName().c_str());
-            ImGui::Text("Codec: %s", meta.codec.c_str());
-            ImGui::Text("Bitrate: %d kbps", meta.bitrate);
-            ImGui::Text("Sample Rate: %d Hz", meta.sampleRate);
-            ImGui::Text("Channels: %d", meta.channels);
-            if (meta.year > 0) ImGui::Text("Year: %d", meta.year);
-            if (!meta.genre.empty()) ImGui::Text("Genre: %s", meta.genre.c_str());
-            ImGui::EndPopup();
-        }
-        
-        ImGui::PopStyleVar();
-        
-        // Line 2: Artist
-        // Manually move cursor down to ensure it's on a new line distinct from the buttons
-        ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 2.0f); 
-        
-        ImGui::PushStyleColor(ImGuiCol_Text, COLOR_TEXT_DIM);
-        if (!meta.artist.empty()) {
-            ImGui::Text("%s", truncate(meta.artist, maxArtistWidth).c_str());
-        } else {
-            ImGui::Text("Unknown Artist"); // Placeholder to ensure layout stability
-        }
-        ImGui::PopStyleColor();
-    }
-    
-    ImGui::NextColumn();
-    
-    // Column 2: Playback Controls (Center)
-    float buttonWidth = 35.0f;
-    float buttonHeight = 35.0f;
-    float spacing = ImGui::GetStyle().ItemSpacing.x;
-    float totalButtonsWidth = (buttonWidth * 4) + (spacing * 3);
-    
-    float colWidth = ImGui::GetColumnWidth();
-    if (colWidth > totalButtonsWidth) {
-        float startX = (colWidth - totalButtonsWidth) / 2.0f;
-        ImGui::SetCursorPosX(ImGui::GetCursorPosX() + startX);
-    }
-    
-    if (ImGui::Button("<<", ImVec2(buttonWidth, buttonHeight))) {
-        if (playbackController_) playbackController_->previous();
-    }
-    ImGui::SameLine();
-    
-    bool isPlaying = false;
-    const char* playIcon = ">";
-    if (playbackState_) {
-         auto status = playbackState_->getStatus();
-         if (status == PlaybackStatus::PLAYING) {
-             isPlaying = true;
-             playIcon = "||";
-         }
-    }
-    
-    if (ImGui::Button(playIcon, ImVec2(buttonWidth, buttonHeight))) {
-         if (playbackController_) {
-             if (isPlaying) playbackController_->pause();
-             else if (playbackState_ && playbackState_->getStatus() == PlaybackStatus::PAUSED) playbackController_->resume();
-             else if (playbackState_) playbackController_->play(playbackState_->getCurrentTrack());
-         }
-    }
-    
-    ImGui::SameLine();
-    
-    if (ImGui::Button(">>", ImVec2(buttonWidth, buttonHeight))) {
-        if (playbackController_) playbackController_->next();
-    }
-    
-    ImGui::SameLine();
-    
-    // Repeat One
-    bool isOne = false;
-    if (playbackController_ && playbackController_->getCurrentPlaylist()) {
-        isOne = (playbackController_->getCurrentPlaylist()->getRepeatMode() == RepeatMode::ONE);
-    }
-    
-    if (isOne) ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.2f, 0.7f, 0.3f, 1.0f));
-    if (ImGui::Button("1", ImVec2(buttonWidth, buttonHeight))) {
-         if (playbackController_) {
-             RepeatMode mode = isOne ? RepeatMode::NONE : RepeatMode::ONE;
-             playbackController_->setRepeatMode(mode);
-         }
-    }
-    if (isOne) ImGui::PopStyleColor();
-    
-    ImGui::NextColumn();
-    
-    // Column 3: Volume (Right)
-    float volumeWidth = 120.0f;
-    float volTotalWidth = volumeWidth + 30.0f;
-    
-    float volColWidth = ImGui::GetColumnWidth();
-    // Align right
-    if (volColWidth > volTotalWidth) {
-         float volStartX = volColWidth - volTotalWidth - 10.0f;
-         ImGui::SetCursorPosX(ImGui::GetCursorPosX() + volStartX);
-    }
-    
-    ImGui::AlignTextToFramePadding();
-    ImGui::Text("Vol");
-    ImGui::SameLine();
-    
-    if (playbackState_) {
-        float volume = playbackState_->getVolume();
-        ImGui::PushItemWidth(volumeWidth);
-        if (ImGui::SliderFloat("##volume", &volume, 0.0f, 1.0f, "")) {
-            if (playbackController_) playbackController_->setVolume(volume);
-        }
-        ImGui::PopItemWidth();
-    }
-    
-    ImGui::Columns(1);
-    ImGui::PopStyleColor(6);
 #endif
 }
 

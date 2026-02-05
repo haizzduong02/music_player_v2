@@ -57,6 +57,7 @@ public:
     LibraryView* getLibraryView() const { return libraryView_; }
     FileBrowserView* getFileBrowserView() const { return fileBrowserView_; }
     PlaylistView* getPlaylistView() const { return playlistView_; }
+    NowPlayingView* getNowPlayingView() const { return nowPlayingView_; }
     
     // Screen navigation
     void switchScreen(Screen screen);
