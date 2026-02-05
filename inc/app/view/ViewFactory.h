@@ -49,7 +49,8 @@ public:
     IView* createLibraryView(
         LibraryController* controller,
         Library* library,
-        PlaybackController* playbackController) override;
+        PlaybackController* playbackController,
+        class PlaylistManager* playlistManager) override;
     
     /**
      * @brief Create playlist view

@@ -4,7 +4,7 @@
 #include <random>
 
 Playlist::Playlist(const std::string& name, IPersistence* persistence)
-    : name_(name), loopEnabled_(false), persistence_(persistence) {
+    : name_(name), repeatMode_(RepeatMode::NONE), persistence_(persistence) {
 }
 
 bool Playlist::addTrack(std::shared_ptr<MediaFile> track) {
@@ -150,3 +150,16 @@ bool Playlist::load() {
         return false;
     }
 }
+
+bool Playlist::contains(const std::string& filepath) const {
+    std::lock_guard<std::mutex> lock(dataMutex_);
+    
+    for (const auto& track : tracks_) {
+        if (track && track->getPath() == filepath) {
+            return true;
+        }
+    }
+    
+    return false;
+}
+

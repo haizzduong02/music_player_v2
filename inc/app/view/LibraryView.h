@@ -25,7 +25,7 @@ class FileBrowserView;
  */
 class LibraryView : public BaseView {
 public:
-    LibraryView(LibraryController* controller, Library* library, PlaybackController* playbackController);
+    LibraryView(LibraryController* controller, Library* library, PlaybackController* playbackController, class PlaylistManager* playlistManager);
     ~LibraryView() override;
     
     void render() override;
@@ -40,6 +40,7 @@ private:
     LibraryController* controller_;
     Library* library_;
     PlaybackController* playbackController_;
+    class PlaylistManager* playlistManager_;
     FileBrowserView* fileBrowserView_ = nullptr;
     
     // UI state

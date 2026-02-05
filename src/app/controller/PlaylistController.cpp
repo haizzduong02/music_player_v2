@@ -114,6 +114,6 @@ bool PlaylistController::setPlaylistLoop(const std::string& name, bool loop) {
         return false;
     }
     
-    playlist->setLoop(loop);
+    playlist->setRepeatMode(loop ? RepeatMode::ALL : RepeatMode::NONE);
     return true;
 }

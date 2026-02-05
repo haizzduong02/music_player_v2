@@ -37,11 +37,13 @@ bool Application::init() {
     Logger::getInstance().info("Initializing application...");
     
     try {
-        // Step 1: Initialize SDL Video and Audio
-        if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_GAMECONTROLLER | SDL_INIT_AUDIO) != 0) {
+        // Step 1: Initialize SDL Video (Audio handled by MPV)
+        Logger::getInstance().info("Initializing SDL...");
+        if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_GAMECONTROLLER) != 0) {
             Logger::getInstance().error("Error: " + std::string(SDL_GetError()));
             return false;
         }
+        Logger::getInstance().info("SDL Initialized");
 
         // Setup window
         SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
@@ -60,6 +62,7 @@ bool Application::init() {
         glContext_ = SDL_GL_CreateContext(window_);
         SDL_GL_MakeCurrent(window_, glContext_);
         SDL_GL_SetSwapInterval(1); // Enable vsync
+        Logger::getInstance().info("Window and GL Context Created");
 
         // Step 2: Initialize ImGui
         IMGUI_CHECKVERSION();
@@ -70,7 +73,6 @@ bool Application::init() {
         
         // Load Inter font (modern, clean UI font)
         // Try relative path from build directory first, then from project root
-        // Load Inter font (modern, clean UI font)
         // Check file existence first to avoid ImGui assertion crash
         const char* fontPath1 = "../assets/fonts/Inter-Variable.ttf";
         const char* fontPath2 = "assets/fonts/Inter-Variable.ttf";
@@ -197,7 +199,8 @@ bool Application::init() {
         mainWindow_->setLibraryView(dynamic_cast<LibraryView*>(viewFactory_->createLibraryView(
             libraryController_.get(), 
             library_.get(),
-            playbackController_.get()
+            playbackController_.get(),
+            playlistManager_.get()
         )));
         mainWindow_->setPlaylistView(dynamic_cast<PlaylistView*>(viewFactory_->createPlaylistView(
             playlistController_.get(), 

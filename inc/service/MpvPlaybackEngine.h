@@ -55,6 +55,7 @@ private:
     unsigned int texture_ = 0;
     int videoWidth_ = 0;
     int videoHeight_ = 0;
+    bool eofReached_ = false;  // Track EOF for auto-advance
     
     std::vector<IObserver*> observers_;
     std::mutex observerMutex_;

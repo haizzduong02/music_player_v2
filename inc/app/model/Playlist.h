@@ -23,6 +23,15 @@
  * Supports shuffle and loop modes.
  * Implements Observer pattern (extends Subject).
  */
+/**
+ * @brief Repeat mode for playback
+ */
+enum class RepeatMode {
+    NONE,
+    ALL,
+    ONE
+};
+
 class Playlist : public Subject {
 public:
     /**
@@ -68,9 +77,7 @@ public:
      */
     std::shared_ptr<MediaFile> getTrack(size_t index) const;
     
-    const std::vector<std::shared_ptr<MediaFile>>& getTracks() const {
-        return tracks_;
-    }
+    const std::vector<std::shared_ptr<MediaFile>>& getTracks() const { return tracks_; }
     
     const std::string& getName() const { return name_; }
     
@@ -94,8 +101,11 @@ public:
      */
     void shuffle();
     
-    void setLoop(bool loop) { loopEnabled_ = loop; }
-    bool isLoopEnabled() const { return loopEnabled_; }
+    void setRepeatMode(RepeatMode mode) { repeatMode_ = mode; }
+    RepeatMode getRepeatMode() const { return repeatMode_; }
+    
+    // Legacy support (optional, or just remove)
+    bool isLoopEnabled() const { return repeatMode_ != RepeatMode::NONE; }
     
     /**
      * @brief Save playlist to disk
@@ -119,7 +129,7 @@ public:
 private:
     std::string name_;
     std::vector<std::shared_ptr<MediaFile>> tracks_;
-    bool loopEnabled_;
+    RepeatMode repeatMode_;
     IPersistence* persistence_;
     mutable std::mutex dataMutex_;  ///< Thread-safety for playlist operations
 };

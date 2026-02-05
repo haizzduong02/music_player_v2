@@ -79,7 +79,7 @@ bool PlaybackController::next() {
             
             // Loop if enabled
             if (nextIndex >= tracks.size()) {
-                if (currentPlaylist_->isLoopEnabled()) {
+                if (currentPlaylist_->getRepeatMode() == RepeatMode::ALL) {
                     nextIndex = 0;
                 } else {
                     return false; // End of playlist
@@ -235,5 +235,53 @@ void PlaybackController::updateTime(double deltaTime) {
 
 void PlaybackController::handlePlaybackFinished() {
     Logger::getInstance().info("Playback finished");
+    
+    if (currentPlaylist_) {
+        RepeatMode mode = currentPlaylist_->getRepeatMode();
+        Logger::getInstance().info("Current RepeatMode: " + std::to_string(static_cast<int>(mode)));
+        
+        // Check RepeatMode::ONE
+        if (mode == RepeatMode::ONE) {
+             if (state_ && state_->getCurrentTrack()) {
+                 Logger::getInstance().info("RepeatMode::ONE active, repeating track: " + state_->getCurrentTrack()->getDisplayName());
+                 play(state_->getCurrentTrack());
+                 return;
+             } else {
+                 Logger::getInstance().warn("RepeatMode::ONE active but no current track available");
+             }
+        }
+    } else {
+        Logger::getInstance().warn("handlePlaybackFinished: No current playlist");
+    }
+    
+    Logger::getInstance().info("Calling next() (Auto-advance)");
     next(); // Simple auto-next
+}
+
+void PlaybackController::toggleRepeatMode() {
+    if (currentPlaylist_) {
+        RepeatMode current = currentPlaylist_->getRepeatMode();
+        RepeatMode nextMode = RepeatMode::NONE;
+        
+        // Cycle: NONE -> ALL -> ONE -> NONE
+        switch (current) {
+            case RepeatMode::NONE: nextMode = RepeatMode::ALL; break;
+            case RepeatMode::ALL: nextMode = RepeatMode::ONE; break;
+            case RepeatMode::ONE: nextMode = RepeatMode::NONE; break;
+        }
+        
+        currentPlaylist_->setRepeatMode(nextMode);
+        
+        std::string modeStr = "NONE";
+        if (nextMode == RepeatMode::ALL) modeStr = "ALL";
+        else if (nextMode == RepeatMode::ONE) modeStr = "ONE";
+        
+        Logger::getInstance().info("Repeat mode set to: " + modeStr);
+    }
+}
+
+void PlaybackController::setRepeatMode(RepeatMode mode) {
+    if (currentPlaylist_) {
+        currentPlaylist_->setRepeatMode(mode);
+    }
 }

@@ -66,22 +66,23 @@ void MainWindow::render() {
         float trackListWidth = availableWidth * 0.24f;   // Reduced to 24% (keep some margin)
         
         // Main content area - Force no scrollbar
+        // Main content area - Force no scrollbar
         ImGui::BeginChild("ContentArea", ImVec2(0, availableHeight), false, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
         {
-            // Left side: Album art (75% of width) - Keep Black or Transparent
-            ImGui::BeginChild("LeftPanel", ImVec2(albumPanelWidth, 0), false, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
-            renderNowPlayingInfo();
-            renderAlbumArt();
-            ImGui::EndChild();
-            
-            ImGui::SameLine();
-            
-            // Right side: Track list (24% of width) - TEAL Background
+            // Left side: Track list (25% of width) - TEAL Background
             ImGui::PushStyleColor(ImGuiCol_ChildBg, COLOR_BG_TEAL);
-            ImGui::BeginChild("RightPanel", ImVec2(trackListWidth, 0), true, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
+            ImGui::BeginChild("LeftPanel", ImVec2(trackListWidth, 0), true, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
             renderTrackList();
             ImGui::EndChild();
             ImGui::PopStyleColor(); // Pop ChildBg
+            
+            ImGui::SameLine();
+            
+            // Right side: Album art (75% of width) - Keep Black
+            ImGui::BeginChild("RightPanel", ImVec2(albumPanelWidth, 0), false, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
+            renderNowPlayingInfo();
+            renderAlbumArt();
+            ImGui::EndChild();
         }
         ImGui::EndChild();
         
@@ -325,6 +326,36 @@ void MainWindow::renderTrackList() {
                     }
                 }
                 
+                ImGui::SameLine();
+                
+                // Loop button (Moved to Library Header)
+                if (playbackController_ && playbackController_->getCurrentPlaylist()) {
+                    auto currentPlaylist = playbackController_->getCurrentPlaylist();
+                    RepeatMode mode = currentPlaylist->getRepeatMode();
+                    bool isAll = (mode == RepeatMode::ALL);
+                    
+                    // Visual feedback
+                    if (isAll) {
+                        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.2f, 0.7f, 0.3f, 1.0f));  // Green when ALL
+                    } else if (mode == RepeatMode::ONE) {
+                        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.8f, 0.6f, 0.1f, 1.0f));  // Orange when ONE (indication)
+                    }
+                    
+                    const char* label = isAll ? "Loop: ALL" : (mode == RepeatMode::ONE ? "Loop: ONE" : "Loop: OFF");
+                    
+                    if (ImGui::Button(label)) { 
+                         // Toggle ALL <-> NONE (Override ONE if set)
+                         if (isAll)
+                             playbackController_->setRepeatMode(RepeatMode::NONE);
+                         else
+                             playbackController_->setRepeatMode(RepeatMode::ALL);
+                    }
+                    
+                    if (isAll || mode == RepeatMode::ONE) {
+                        ImGui::PopStyleColor();
+                    }
+                }
+                
                 ImGui::Text("Library: %zu tracks", files.size());
                 ImGui::Separator();
                 
@@ -371,8 +402,16 @@ void MainWindow::renderTrackList() {
                     
                     // Single click to play
                     if (clicked && playbackController_) {
-                        playbackController_->setCurrentPlaylist(nullptr);
-                        playbackController_->playContext(files, i);
+                        // Use Now Playing playlist for library mode
+                        if (playlistView_ && playlistView_->getManager()) {
+                            auto nowPlaying = playlistView_->getManager()->getNowPlayingPlaylist();
+                            nowPlaying->clear();
+                            for (const auto& file : files) {
+                                nowPlaying->addTrack(file);
+                            }
+                            playbackController_->setCurrentPlaylist(nowPlaying.get());
+                            playbackController_->play(files[i]);
+                        }
                     }
                     
                     // Scroll to current
@@ -409,7 +448,6 @@ void MainWindow::renderTrackList() {
                         newPlaylistName[0] = '\0';
                         ImGui::CloseCurrentPopup();
                     }
-                    ImGui::SameLine();
                     if (ImGui::Button("Cancel")) {
                         newPlaylistName[0] = '\0';
                         ImGui::CloseCurrentPopup();
@@ -552,8 +590,16 @@ void MainWindow::renderTrackList() {
                     }
                     
                     if (clicked && playbackController_) {
-                        playbackController_->setCurrentPlaylist(nullptr);
-                        playbackController_->play(track);
+                        // Use Now Playing playlist for history mode
+                        if (playlistView_ && playlistView_->getManager()) {
+                            auto nowPlaying = playlistView_->getManager()->getNowPlayingPlaylist();
+                            nowPlaying->clear();
+                            for (const auto& track : historyTracks) {
+                                nowPlaying->addTrack(track);
+                            }
+                            playbackController_->setCurrentPlaylist(nowPlaying.get());
+                            playbackController_->play(track);
+                        }
                     }
                     
                     if (isPlaying && ImGui::IsWindowAppearing()) {
@@ -578,9 +624,10 @@ void MainWindow::renderPlaybackControls() {
     
     ImGui::PushStyleColor(ImGuiCol_Button, COLOR_BG_TEAL);
     ImGui::PushStyleColor(ImGuiCol_ButtonHovered, COLOR_ACCENT);
-    ImGui::PushStyleColor(ImGuiCol_SliderGrab, COLOR_ACCENT);
-    ImGui::PushStyleColor(ImGuiCol_SliderGrabActive, COLOR_ACCENT);
+    ImGui::PushStyleColor(ImGuiCol_SliderGrab, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));  // White thumb
+    ImGui::PushStyleColor(ImGuiCol_SliderGrabActive, ImVec4(0.8f, 0.8f, 0.8f, 1.0f));  // Light gray when grabbing
     ImGui::PushStyleColor(ImGuiCol_FrameBg, COLOR_BG_TEAL);
+    ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, COLOR_BG_TEAL);  // Same as FrameBg - no hover effect
     
     // Progress bar
     if (playbackState_) {
@@ -652,6 +699,35 @@ void MainWindow::renderPlaybackControls() {
     }
     
     ImGui::SameLine();
+    
+    // Repeat Track button (Label: "1")
+    if (playbackController_ && playbackController_->getCurrentPlaylist()) {
+        auto currentPlaylist = playbackController_->getCurrentPlaylist();
+        RepeatMode mode = currentPlaylist->getRepeatMode();
+        bool isOne = (mode == RepeatMode::ONE);
+        
+        if (isOne) {
+            ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.2f, 0.7f, 0.3f, 1.0f)); // Green when Active
+        }
+        
+        if (ImGui::Button("1", ImVec2(buttonWidth, 30))) {
+             // Toggle ONE <-> NONE
+             if (isOne)
+                 playbackController_->setRepeatMode(RepeatMode::NONE);
+             else
+                 playbackController_->setRepeatMode(RepeatMode::ONE);
+        }
+        
+        if (isOne) {
+            ImGui::PopStyleColor();
+        }
+    }
+    
+    ImGui::SameLine();
+    
+    // Loop button moved to Library Header
+    
+    ImGui::SameLine();
     ImGui::Spacing();
     ImGui::SameLine();
     
@@ -667,7 +743,7 @@ void MainWindow::renderPlaybackControls() {
         ImGui::PopItemWidth();
     }
     
-    ImGui::PopStyleColor(5);
+    ImGui::PopStyleColor(6);  // Changed from 5 to 6
 #endif
 }
 

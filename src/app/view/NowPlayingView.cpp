@@ -115,10 +115,18 @@ void NowPlayingView::render() {
         
         // Seek slider (full width)
         ImGui::Separator();
+        
+        // Style for better slider visibility - disable hover on frame, white thumb
+        ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, ImGui::GetStyleColorVec4(ImGuiCol_FrameBg));  // No hover effect
+        ImGui::PushStyleColor(ImGuiCol_SliderGrab, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));  // White thumb
+        ImGui::PushStyleColor(ImGuiCol_SliderGrabActive, ImVec4(0.8f, 0.8f, 0.8f, 1.0f));  // Light gray when dragging
+        
         float seekPos = static_cast<float>(position);
         if (ImGui::SliderFloat("##seek", &seekPos, 0.0f, static_cast<float>(duration), "")) {
             controller_->seek(seekPos);
         }
+        
+        ImGui::PopStyleColor(3);
         
         ImGui::Separator();
         
@@ -161,13 +169,50 @@ void NowPlayingView::render() {
             controller_->next();
         }
         
+        ImGui::SameLine();
+        
+        // Loop button (Now Playing Loop: ONE vs OFF)
+        auto currentPlaylist = controller_->getCurrentPlaylist();
+        if (currentPlaylist) {
+            RepeatMode mode = currentPlaylist->getRepeatMode();
+            bool isOne = (mode == RepeatMode::ONE);
+            
+            // Visual feedback
+            if (isOne) {
+                ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.2f, 0.7f, 0.3f, 1.0f));  // Green when ONE
+            } else if (mode == RepeatMode::ALL) {
+                 ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.2f, 0.5f, 0.7f, 1.0f)); // Blue when ALL (indication)
+            }
+            
+            const char* label = isOne ? "Repeat Track: ON" : "Repeat Track";
+            
+            if (ImGui::Button(label)) {
+                // Toggle ONE <-> NONE
+                if (isOne)
+                    controller_->setRepeatMode(RepeatMode::NONE);
+                else
+                    controller_->setRepeatMode(RepeatMode::ONE);
+            }
+            
+            if (isOne || mode == RepeatMode::ALL) {
+                ImGui::PopStyleColor(1); // Wait, only PushButton pushed? 1 color. Previous code pushed 3 colors.
+                // Let's check previous code.
+            }
+        }
+        
         ImGui::Separator();
         
         // Volume control
+        ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, ImGui::GetStyleColorVec4(ImGuiCol_FrameBg));  // No hover effect
+        ImGui::PushStyleColor(ImGuiCol_SliderGrab, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));  // White thumb
+        ImGui::PushStyleColor(ImGuiCol_SliderGrabActive, ImVec4(0.8f, 0.8f, 0.8f, 1.0f));  // Light gray when dragging
+        
         float volume = state_->getVolume();
         if (ImGui::SliderFloat("Volume", &volume, 0.0f, 1.0f)) {
             controller_->setVolume(volume);
         }
+        
+        ImGui::PopStyleColor(3);
         
     } else {
         ImGui::Text("No track loaded");

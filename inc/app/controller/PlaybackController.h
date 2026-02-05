@@ -104,6 +104,17 @@ public:
     }
     
     /**
+     * @brief Toggle repeat mode (NONE -> ALL -> ONE -> NONE)
+     */
+    void toggleRepeatMode();
+
+    /**
+     * @brief Set repeat mode directly
+     * @param mode Repeat mode to set
+     */
+    void setRepeatMode(RepeatMode mode);
+    
+    /**
      * @brief Play a track within a context (queue)
      * @param context List of tracks (queue)
      * @param startIndex Index of track to start playing

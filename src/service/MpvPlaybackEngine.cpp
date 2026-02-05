@@ -45,9 +45,11 @@ void MpvPlaybackEngine::initMpv() {
     // Enable video output but don't spawn a window (we render to texture)
     mpv_set_option_string(mpv_, "vo", "libmpv");
 
+    Logger::getInstance().info("Calling mpv_initialize...");
     if (mpv_initialize(mpv_) < 0) {
         throw std::runtime_error("Failed to initialize mpv");
     }
+    Logger::getInstance().info("mpv_initialize success");
     
     mpv_set_wakeup_callback(mpv_, on_mpv_wakeup, this);
     Logger::getInstance().info("MpvPlaybackEngine initialized");
@@ -102,10 +104,18 @@ void MpvPlaybackEngine::updateVideo() {
         if (event->event_id == MPV_EVENT_NONE) break;
         
         switch (event->event_id) {
-            case MPV_EVENT_END_FILE:
-                // Handle end of file
-                notify();
+            case MPV_EVENT_END_FILE: {
+                mpv_event_end_file* end_file = (mpv_event_end_file*)event->data;
+                if (end_file->reason == MPV_END_FILE_REASON_EOF) {
+                    // Only auto-advance if file ended naturally
+                    eofReached_ = true;
+                    Logger::getInstance().info("MPV_EVENT_END_FILE (EOF) detected");
+                    notify();
+                } else {
+                    Logger::getInstance().info("MPV_EVENT_END_FILE (Reason: " + std::to_string(end_file->reason) + ") - ignored");
+                }
                 break;
+            }
             case MPV_EVENT_PROPERTY_CHANGE:
                 break;
             default:
@@ -182,41 +192,44 @@ void MpvPlaybackEngine::getVideoSize(int& width, int& height) {
 
 // Implement standard IPlaybackEngine methods
 bool MpvPlaybackEngine::play(const std::string& filepath) {
+    // Reset EOF flag when starting new file
+    eofReached_ = false;
+    
     const char* cmd[] = {"loadfile", filepath.c_str(), NULL};
-    int res = mpv_command(mpv_, cmd);
+    // Use async command to avoid blocking on audio drain (e.g. pulse timeout)
+    int res = mpv_command_async(mpv_, 0, cmd);
     if (res < 0) {
-        Logger::getInstance().error("mpv failed to load file");
+        Logger::getInstance().error("mpv failed to load file (async)");
         return false;
     }
     
-    // Auto-play implicitly
-    notify();
+    // Resume if was paused
+    int flag = 0;
+    mpv_set_property_async(mpv_, 0, "pause", MPV_FORMAT_FLAG, &flag);
     return true;
 }
 
 void MpvPlaybackEngine::pause() {
     int flag = 1;
-    mpv_set_property(mpv_, "pause", MPV_FORMAT_FLAG, &flag);
-    notify();
+    mpv_set_property_async(mpv_, 0, "pause", MPV_FORMAT_FLAG, &flag);
 }
 
 void MpvPlaybackEngine::resume() {
     int flag = 0;
-    mpv_set_property(mpv_, "pause", MPV_FORMAT_FLAG, &flag);
+    mpv_set_property_async(mpv_, 0, "pause", MPV_FORMAT_FLAG, &flag);
     notify();
 }
 
 void MpvPlaybackEngine::stop() {
     const char* cmd[] = {"stop", NULL};
-    mpv_command(mpv_, cmd);
+    mpv_command_async(mpv_, 0, cmd);
     notify();
 }
 
-void MpvPlaybackEngine::seek(double positionSeconds) {
-    // "seek" cmd: seek <target> [flags]
-    std::string pos = std::to_string(positionSeconds);
-    const char* cmd[] = {"seek", pos.c_str(), "absolute", NULL};
-    mpv_command(mpv_, cmd);
+void MpvPlaybackEngine::seek(double seconds) {
+    std::string secStr = std::to_string(seconds);
+    const char* cmd[] = {"seek", secStr.c_str(), "absolute", NULL};
+    mpv_command_async(mpv_, 0, cmd);
 }
 
 void MpvPlaybackEngine::setVolume(float volume) {
@@ -256,10 +269,8 @@ float MpvPlaybackEngine::getVolume() const {
 }
 
 bool MpvPlaybackEngine::isFinished() const {
-    // Rudimentary check; "eof-reached" could be used
-    int eof = 0;
-    mpv_get_property(mpv_, "eof-reached", MPV_FORMAT_FLAG, &eof);
-    return eof != 0;
+    // Check our tracked state - STRICTLY rely on event flag
+    return eofReached_;
 }
 
 void MpvPlaybackEngine::attach(IObserver* observer) {

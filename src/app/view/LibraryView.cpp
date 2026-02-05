@@ -1,5 +1,6 @@
 #include "../../../inc/app/view/LibraryView.h"
 #include "../../../inc/app/view/FileBrowserView.h"
+#include "../../../inc/app/model/PlaylistManager.h"
 #include "../../../inc/utils/Logger.h"
 #include "../../../inc/app/controller/PlaybackController.h"
 
@@ -8,8 +9,8 @@
 #endif
 #include <algorithm>
 
-LibraryView::LibraryView(LibraryController* controller, Library* library, PlaybackController* playbackController)
-    : controller_(controller), library_(library), playbackController_(playbackController), selectedIndex_(-1) {
+LibraryView::LibraryView(LibraryController* controller, Library* library, PlaybackController* playbackController, PlaylistManager* playlistManager)
+    : controller_(controller), library_(library), playbackController_(playbackController), playlistManager_(playlistManager), selectedIndex_(-1) {
     
     // Attach as observer to library
     if (library_) {
@@ -67,12 +68,21 @@ void LibraryView::render() {
                 selectedIndex_ = static_cast<int>(i);
                 
                 if (ImGui::IsMouseDoubleClicked(0)) {
-                    if (playbackController_) {
-                        // Clear playlist context (Library mode)
-                        playbackController_->setCurrentPlaylist(nullptr);
+                    if (playbackController_ && playlistManager_) {
+                        // Get Now Playing playlist
+                        auto nowPlaying = playlistManager_->getNowPlayingPlaylist();
                         
-                        // Play with context/queue
-                        playbackController_->playContext(files, i);
+                        // Clear and populate with library files
+                        nowPlaying->clear();
+                        for (const auto& file : files) {
+                            nowPlaying->addTrack(file);
+                        }
+                        
+                        // Set as current playlist for loop/auto-advance
+                        playbackController_->setCurrentPlaylist(nowPlaying.get());
+                        
+                        // Play the selected track
+                        playbackController_->play(files[i]);
                     }
                 }
             }
