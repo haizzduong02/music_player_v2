@@ -159,6 +159,8 @@ void FileBrowserView::render() {
     std::string addBtnText = "Add Selected";
     if (mode_ == BrowserMode::PLAYLIST_SELECTION) {
         addBtnText = "Add to Playlist";
+    } else if (mode_ == BrowserMode::LIBRARY_ADD_AND_RETURN) {
+        addBtnText = "Add & Return";
     } else {
         addBtnText = "Add to Library";
     }
@@ -166,13 +168,25 @@ void FileBrowserView::render() {
     if (ImGui::Button(addBtnText.c_str())) {
         // Add all selected files
         int addedCount = 0;
+        std::vector<std::string> addedPaths; 
+        
         for (const auto& path : selectedFiles_) {
              if (mode_ == BrowserMode::PLAYLIST_SELECTION && playlistController_ && !targetPlaylistName_.empty()) {
                  playlistController_->addToPlaylistAndLibrary(targetPlaylistName_, path);
              } else {
+                 // Add to library (both for LIBRARY and LIBRARY_ADD_AND_RETURN)
                  libController_->addMediaFile(path);
+                 addedPaths.push_back(path);
              }
              addedCount++;
+        }
+        
+        if (mode_ == BrowserMode::LIBRARY_ADD_AND_RETURN) {
+            if (onFilesAddedCallback_) {
+                onFilesAddedCallback_(addedPaths);
+            }
+            // Hide after adding
+            visible_ = false;
         }
         
         if (addedCount > 0) {

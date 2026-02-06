@@ -16,12 +16,12 @@
 
 // Color scheme
 // Color scheme - Swapped (Black Window, Teal Panels)
-static const ImVec4 COLOR_BG_BLACK = ImVec4(0.00f, 0.00f, 0.00f, 1.0f);      // #000000 (Pure Black)
-static const ImVec4 COLOR_BG_TEAL = ImVec4(0.11f, 0.40f, 0.35f, 1.0f);       // #1C6758 (Original Teal)
-static const ImVec4 COLOR_ACCENT = ImVec4(0.94f, 0.35f, 0.49f, 1.0f);        // #F05A7E
-static const ImVec4 COLOR_ACCENT_HOVER = ImVec4(0.94f, 0.35f, 0.49f, 0.5f);   // #dbb9c2ff
-static const ImVec4 COLOR_TEXT = ImVec4(0.95f, 0.95f, 0.95f, 1.0f);          // #FFFFFF
-static const ImVec4 COLOR_TEXT_DIM = ImVec4(0.70f, 0.70f, 0.70f, 1.0f);      
+static const ImVec4 COLOR_BG_BLACK = ImVec4(0.12f, 0.12f, 0.12f, 1.0f);      // Dark Grey instead of Pitch Black
+static const ImVec4 COLOR_BG_TEAL = ImVec4(0.08f, 0.25f, 0.25f, 1.0f);       // Darker Teal for better text contrast
+static const ImVec4 COLOR_ACCENT = ImVec4(0.00f, 0.70f, 0.60f, 1.0f);        // Brighter Teal/Cyan for Accent
+static const ImVec4 COLOR_ACCENT_HOVER = ImVec4(0.00f, 0.70f, 0.60f, 0.6f);
+static const ImVec4 COLOR_TEXT = ImVec4(1.00f, 1.00f, 1.00f, 1.0f);          // Pure White
+static const ImVec4 COLOR_TEXT_DIM = ImVec4(0.75f, 0.75f, 0.75f, 1.0f);      // Brighter Dim Text      
 
 MainWindow::MainWindow() {
     Logger::getInstance().info("MainWindow created");
@@ -73,7 +73,20 @@ void MainWindow::render() {
         // --- Left Panel ---
         ImGui::PushStyleColor(ImGuiCol_ChildBg, COLOR_BG_TEAL);
         ImGui::BeginChild("LeftPanel", ImVec2(leftPanelWidth, availableHeight), true, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
-        renderTrackList();
+        // Delegate rendering to sub-views
+        switch (currentScreen_) {
+            case Screen::LIBRARY:
+                if (libraryView_) libraryView_->render();
+                break;
+            case Screen::HISTORY:
+                if (historyView_) historyView_->render();
+                break;
+            case Screen::PLAYLIST:
+                if (playlistView_) playlistView_->render();
+                break;
+            default:
+                break;
+        }
         ImGui::EndChild();
         ImGui::PopStyleColor();
         
@@ -82,6 +95,7 @@ void MainWindow::render() {
         // --- Right Panel ---
         ImGui::BeginGroup();
         {
+            ImGui::PushStyleColor(ImGuiCol_TextDisabled, COLOR_TEXT_DIM);
             // Bottom Controls Height
             // NowPlayingView contains progress bar, slider, buttons, volume, metadata... 
             // It needs significant vertical space. Let's reserve ~200px for it, or use remaining height for Art.
@@ -101,6 +115,7 @@ void MainWindow::render() {
             ImGui::BeginChild("ControlsPanel", ImVec2(rightPanelWidth, controlsHeight), true); // Using frame
             renderPlaybackControls();
             ImGui::EndChild();
+            ImGui::PopStyleColor(); // Pop TextDisabled
         }
         ImGui::EndGroup(); // End Right Panel Group
     }
@@ -110,6 +125,11 @@ void MainWindow::render() {
     
     // Render file browser if open
     if (fileBrowserView_) fileBrowserView_->render();
+    
+    // Render View Popups (Root Level)
+    if (currentScreen_ == Screen::LIBRARY && libraryView_) libraryView_->renderPopups();
+    if (currentScreen_ == Screen::PLAYLIST && playlistView_) playlistView_->renderPopups();
+    if (currentScreen_ == Screen::HISTORY && historyView_) historyView_->renderPopups();
 #endif
 }
 
@@ -345,330 +365,6 @@ void MainWindow::renderAlbumArt() {
 #endif
 }
 
-void MainWindow::renderTrackList() {
-#ifdef USE_IMGUI
-    ImGui::PushStyleColor(ImGuiCol_ChildBg, COLOR_BG_TEAL);
-    ImGui::PushStyleColor(ImGuiCol_Header, COLOR_BG_TEAL);
-    ImGui::PushStyleColor(ImGuiCol_HeaderHovered, COLOR_ACCENT_HOVER);
-    ImGui::PushStyleColor(ImGuiCol_HeaderActive, COLOR_ACCENT);
-    
-    std::string currentPlayingPath = "";
-    if (playbackState_ && playbackState_->getCurrentTrack()) {
-        currentPlayingPath = playbackState_->getCurrentTrack()->getPath();
-    }
-    
-    switch (currentScreen_) {
-        case Screen::LIBRARY:
-            if (libraryView_ && libraryView_->getLibrary()) {
-                auto files = libraryView_->getLibrary()->getAll();
-                
-                // Search bar
-                static char searchBuffer[256] = "";
-                ImGui::PushStyleColor(ImGuiCol_FrameBg, COLOR_BG_TEAL);
-                if (ImGui::InputText("Search", searchBuffer, sizeof(searchBuffer))) {
-                    // Filter handled below
-                }
-                ImGui::PopStyleColor();
-                
-                std::string searchQuery(searchBuffer);
-                if (!searchQuery.empty()) {
-                    files = libraryView_->getLibrary()->search(searchQuery);
-                }
-                
-                // Buttons FIRST (outside scroll)
-                if (ImGui::Button("Add Files")) {
-                    if (fileBrowserView_) {
-                        fileBrowserView_->setMode(FileBrowserView::BrowserMode::LIBRARY);
-                        fileBrowserView_->show();
-                    }
-                }
-                ImGui::SameLine();
-                if (ImGui::Button("Clear Library")) {
-                    if (libraryView_ && libraryView_->getLibrary()) {
-                        libraryView_->getLibrary()->clear();
-                    }
-                }
-                
-                
-                
-                ImGui::Text("Library: %zu tracks", files.size());
-                ImGui::Separator();
-                
-                // Calculate remaining height for scroll area
-                float scrollHeight = ImGui::GetContentRegionAvail().y;
-                ImGui::BeginChild("TrackListScroll", ImVec2(0, scrollHeight), true);
-                
-                for (size_t i = 0; i < files.size(); ++i) {
-                    const auto& file = files[i];
-                    const auto& meta = file->getMetadata();
-                    bool isPlaying = (file->getPath() == currentPlayingPath);
-                    
-                    ImGui::PushID(static_cast<int>(i));
-                    
-                    // Two-line display with full-width selectable
-                    std::string title = file->getDisplayName();
-                    std::string subtitle = meta.artist;
-
-                    // Tính kích thước text bằng ImGui
-                    float spacing = ImGui::GetStyle().ItemSpacing.y;
-                    ImVec2 titleSize = ImGui::CalcTextSize(title.c_str());
-                    ImVec2 subtitleSize = ImGui::CalcTextSize(subtitle.c_str());
-
-                    // Tổng chiều cao
-                    float itemHeight = titleSize.y + spacing + subtitleSize.y;
-                    if (!meta.album.empty()) {
-                        if (!subtitle.empty()) subtitle += " - ";
-                        subtitle += meta.album;
-                    }
-                    
-                    // Full width selectable with highlight
-                    if (isPlaying) {
-                        ImGui::PushStyleColor(ImGuiCol_Header, COLOR_ACCENT);
-                        ImGui::PushStyleColor(ImGuiCol_HeaderHovered, COLOR_ACCENT);
-                    }
-                    
-                    bool clicked = ImGui::Selectable("##track", isPlaying, ImGuiSelectableFlags_SpanAllColumns, ImVec2(0, itemHeight));
-                    
-                    // Draw text over selectable
-                    ImVec2 itemPos = ImGui::GetItemRectMin();
-                    ImGui::SetCursorScreenPos(ImVec2(itemPos.x + 10, itemPos.y + 5));
-                    ImGui::Text("%s", title.c_str());
-                    ImGui::SetCursorScreenPos(ImVec2(itemPos.x + 10, itemPos.y + 24));
-                    ImGui::PushStyleColor(ImGuiCol_Text, COLOR_TEXT_DIM);
-                    ImGui::Text("%s", subtitle.c_str());
-                    ImGui::PopStyleColor();
-                    
-                    if (isPlaying) {
-                        ImGui::PopStyleColor(2);
-                    }
-                    
-                    // Single click to play
-                    if (clicked && playbackController_) {
-                        // Use Now Playing playlist for library mode
-                        if (playlistView_ && playlistView_->getManager()) {
-                            auto nowPlaying = playlistView_->getManager()->getNowPlayingPlaylist();
-                            nowPlaying->clear();
-                            for (const auto& file : files) {
-                                nowPlaying->addTrack(file);
-                            }
-                            playbackController_->setCurrentPlaylist(nowPlaying.get());
-                            playbackController_->play(files[i]);
-                        }
-                    }
-                    
-                    // Scroll to current
-                    if (isPlaying && ImGui::IsWindowAppearing()) {
-                        ImGui::SetScrollHereY(0.5f);
-                    }
-                    
-                    ImGui::PopID();
-                }
-                
-                ImGui::EndChild();
-            }
-            break;
-            
-        case Screen::PLAYLIST:
-            if (playlistView_ && playlistView_->getManager()) {
-                auto allPlaylists = playlistView_->getManager()->getAllPlaylists();
-                std::vector<std::shared_ptr<Playlist>> playlists;
-                for (const auto& p : allPlaylists) {
-                     if (p->getName() != "Now Playing") {
-                         playlists.push_back(p);
-                     }
-                }
-                
-                static int selectedPlaylistIdx = 0;
-                if (selectedPlaylistIdx >= static_cast<int>(playlists.size())) {
-                    selectedPlaylistIdx = 0;
-                }
-                
-                // Playlist selector
-                ImGui::Text("Playlists:");
-                ImGui::SameLine();
-                static char newPlaylistName[64] = "";
-                static bool showNewPlaylistPopup = false;
-                if (ImGui::Button("+")) {
-                    showNewPlaylistPopup = true;
-                    ImGui::OpenPopup("New Playlist");
-                }
-                
-                if (ImGui::BeginPopup("New Playlist")) {
-                    ImGui::InputText("Name", newPlaylistName, sizeof(newPlaylistName));
-                    if (ImGui::Button("Create") && strlen(newPlaylistName) > 0) {
-                        playlistView_->getManager()->createPlaylist(newPlaylistName);
-                        newPlaylistName[0] = '\0';
-                        ImGui::CloseCurrentPopup();
-                    }
-                    if (ImGui::Button("Cancel")) {
-                        newPlaylistName[0] = '\0';
-                        ImGui::CloseCurrentPopup();
-                    }
-                    ImGui::EndPopup();
-                }
-                
-                ImGui::BeginChild("PlaylistSelector", ImVec2(0, 50), true);
-                for (size_t i = 0; i < playlists.size(); ++i) {
-                    bool isSelected = (static_cast<int>(i) == selectedPlaylistIdx);
-                    if (ImGui::Selectable(playlists[i]->getName().c_str(), isSelected, 0, ImVec2(100, 25))) {
-                        selectedPlaylistIdx = static_cast<int>(i);
-                    }
-                    ImGui::SameLine();
-                }
-                ImGui::EndChild();
-                
-                // Tracks in selected playlist
-                if (selectedPlaylistIdx < static_cast<int>(playlists.size())) {
-                    auto playlist = playlists[selectedPlaylistIdx];
-                    auto tracks = playlist->getTracks();
-                    
-                    // Buttons FIRST
-                    if (ImGui::Button("Add Files")) {
-                        if (fileBrowserView_) {
-                            fileBrowserView_->setMode(FileBrowserView::BrowserMode::PLAYLIST_SELECTION);
-                            fileBrowserView_->setTargetPlaylist(playlist->getName());
-                            fileBrowserView_->show();
-                        }
-                    }
-                    ImGui::SameLine();
-                    if (ImGui::Button("Clear")) {
-                        playlist->clear();
-                    }
-                    
-                    ImGui::Text("%s: %zu tracks", playlist->getName().c_str(), tracks.size());
-                    ImGui::Separator();
-                    
-                    float scrollHeight = ImGui::GetContentRegionAvail().y;
-                    ImGui::BeginChild("TrackListScroll", ImVec2(0, scrollHeight), true);
-                    
-                    for (size_t i = 0; i < tracks.size(); ++i) {
-                        const auto& track = tracks[i];
-                        const auto& meta = track->getMetadata();
-                        bool isPlaying = (track->getPath() == currentPlayingPath);
-                        
-                        ImGui::PushID(static_cast<int>(i) + 10000);
-                        
-                        float itemHeight = 45.0f;
-                        std::string title = track->getDisplayName();
-                        std::string subtitle = meta.artist;
-                        if (!meta.album.empty()) {
-                            if (!subtitle.empty()) subtitle += " - ";
-                            subtitle += meta.album;
-                        }
-                        
-                        if (isPlaying) {
-                            ImGui::PushStyleColor(ImGuiCol_Header, COLOR_ACCENT);
-                            ImGui::PushStyleColor(ImGuiCol_HeaderHovered, COLOR_ACCENT);
-                        }
-                        
-                        bool clicked = ImGui::Selectable("##track", isPlaying, ImGuiSelectableFlags_SpanAllColumns, ImVec2(0, itemHeight));
-                        
-                        ImVec2 itemPos = ImGui::GetItemRectMin();
-                        ImGui::SetCursorScreenPos(ImVec2(itemPos.x + 10, itemPos.y + 5));
-                        ImGui::Text("%s", title.c_str());
-                        ImGui::SetCursorScreenPos(ImVec2(itemPos.x + 10, itemPos.y + 24));
-                        ImGui::PushStyleColor(ImGuiCol_Text, COLOR_TEXT_DIM);
-                        ImGui::Text("%s", subtitle.c_str());
-                        ImGui::PopStyleColor();
-                        
-                        if (isPlaying) {
-                            ImGui::PopStyleColor(2);
-                        }
-                        
-                        if (clicked && playbackController_) {
-                            playbackController_->setCurrentPlaylist(playlist.get());
-                            playbackController_->play(track);
-                        }
-                        
-                        if (isPlaying && ImGui::IsWindowAppearing()) {
-                            ImGui::SetScrollHereY(0.5f);
-                        }
-                        
-                        ImGui::PopID();
-                    }
-                    
-                    ImGui::EndChild();
-                }
-            }
-            break;
-            
-        case Screen::HISTORY:
-            if (historyView_ && historyView_->getHistory()) {
-                auto historyTracks = historyView_->getHistory()->getAll();
-                
-                // Button FIRST
-                if (ImGui::Button("Clear History")) {
-                    historyView_->getHistory()->clear();
-                }
-                
-                ImGui::Text("History: %zu tracks", historyTracks.size());
-                ImGui::Separator();
-                
-                float scrollHeight = ImGui::GetContentRegionAvail().y;
-                ImGui::BeginChild("TrackListScroll", ImVec2(0, scrollHeight), true);
-                
-                for (size_t i = 0; i < historyTracks.size(); ++i) {
-                    const auto& track = historyTracks[i];
-                    const auto& meta = track->getMetadata();
-                    bool isPlaying = (track->getPath() == currentPlayingPath);
-                    
-                    ImGui::PushID(static_cast<int>(i) + 20000);
-                    
-                    float itemHeight = 45.0f;
-                    std::string title = track->getDisplayName();
-                    std::string subtitle = meta.artist;
-                    if (!meta.album.empty()) {
-                        if (!subtitle.empty()) subtitle += " - ";
-                        subtitle += meta.album;
-                    }
-                    
-                    if (isPlaying) {
-                        ImGui::PushStyleColor(ImGuiCol_Header, COLOR_ACCENT);
-                        ImGui::PushStyleColor(ImGuiCol_HeaderHovered, COLOR_ACCENT);
-                    }
-                    
-                    bool clicked = ImGui::Selectable("##track", isPlaying, ImGuiSelectableFlags_SpanAllColumns, ImVec2(0, itemHeight));
-                    
-                    ImVec2 itemPos = ImGui::GetItemRectMin();
-                    ImGui::SetCursorScreenPos(ImVec2(itemPos.x + 10, itemPos.y + 5));
-                    ImGui::Text("%s", title.c_str());
-                    ImGui::SetCursorScreenPos(ImVec2(itemPos.x + 10, itemPos.y + 24));
-                    ImGui::PushStyleColor(ImGuiCol_Text, COLOR_TEXT_DIM);
-                    ImGui::Text("%s", subtitle.c_str());
-                    ImGui::PopStyleColor();
-                    
-                    if (isPlaying) {
-                        ImGui::PopStyleColor(2);
-                    }
-                    
-                    if (clicked && playbackController_) {
-                        // Use Now Playing playlist for history mode
-                        if (playlistView_ && playlistView_->getManager()) {
-                            auto nowPlaying = playlistView_->getManager()->getNowPlayingPlaylist();
-                            nowPlaying->clear();
-                            for (const auto& track : historyTracks) {
-                                nowPlaying->addTrack(track);
-                            }
-                            playbackController_->setCurrentPlaylist(nowPlaying.get());
-                            playbackController_->play(track);
-                        }
-                    }
-                    
-                    if (isPlaying && ImGui::IsWindowAppearing()) {
-                        ImGui::SetScrollHereY(0.5f);
-                    }
-                    
-                    ImGui::PopID();
-                }
-                
-                ImGui::EndChild();
-            }
-            break;
-    }
-    
-    ImGui::PopStyleColor(4);
-#endif
-}
 
 void MainWindow::renderPlaybackControls() {
 #ifdef USE_IMGUI

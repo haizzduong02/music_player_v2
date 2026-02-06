@@ -6,6 +6,7 @@
 #include <cstring>
 #include <algorithm>
 #include <vector>
+#include <thread>
 
 struct MpvPlaybackEngine::Impl {
     // Hidden implementation if needed
@@ -42,6 +43,10 @@ void MpvPlaybackEngine::initMpv() {
     mpv_set_option_string(mpv_, "msg-level", "all=v");
     mpv_set_option_string(mpv_, "vd-lavc-threads", "4");
     
+    // Explicitly prioritize PulseAudio, then ALSA, then SDL
+    mpv_set_option_string(mpv_, "ao", "pulse,alsa,sdl");
+    mpv_set_option_string(mpv_, "audio-client-name", "MusicPlayer");
+    
     // Enable video output but don't spawn a window (we render to texture)
     mpv_set_option_string(mpv_, "vo", "libmpv");
 
@@ -73,8 +78,7 @@ void MpvPlaybackEngine::initGL() {
 }
 
 void MpvPlaybackEngine::cleanup() {
-    Logger::getInstance().info("MpvPlaybackEngine::cleanup started");
-    
+    // Release GL resources on main thread (must be done here)
     if (texture_ != 0) {
         glDeleteTextures(1, &texture_);
         texture_ = 0;
@@ -87,21 +91,33 @@ void MpvPlaybackEngine::cleanup() {
         fbo_ = 0;
     }
 
-    if (mpv_gl_) {
-        Logger::getInstance().info("Freeing mpv render context...");
-        mpv_render_context_free(mpv_gl_);
-        mpv_gl_ = nullptr;
-        Logger::getInstance().info("mpv render context freed");
-    }
-    
+    // Offload MPV destruction to detached thread to avoid blocking UI on audio timeouts
     if (mpv_) {
-        Logger::getInstance().info("Terminating mpv core...");
-        mpv_terminate_destroy(mpv_);
+        // Capture pointers by value
+        mpv_handle* mpv = mpv_;
+        mpv_render_context* mpv_gl = mpv_gl_;
+        
         mpv_ = nullptr;
-        Logger::getInstance().info("mpv core terminated");
+        mpv_gl_ = nullptr;
+        
+        std::thread([mpv, mpv_gl]() {
+            Logger::getInstance().info("Async cleanup thread started");
+            
+            if (mpv_gl) {
+                Logger::getInstance().info("Freeing mpv render context (async)...");
+                mpv_render_context_free(mpv_gl);
+                Logger::getInstance().info("mpv render context freed (async)");
+            }
+            
+            if (mpv) {
+                Logger::getInstance().info("Terminating mpv core (async)...");
+                mpv_terminate_destroy(mpv);
+                Logger::getInstance().info("mpv core terminated (async)");
+            }
+        }).detach();
     }
     
-    Logger::getInstance().info("MpvPlaybackEngine::cleanup finished");
+    Logger::getInstance().info("MpvPlaybackEngine::cleanup finished (main thread)");
 }
 
 void MpvPlaybackEngine::updateVideo() {

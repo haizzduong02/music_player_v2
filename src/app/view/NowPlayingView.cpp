@@ -111,64 +111,9 @@ void NowPlayingView::render() {
             return s + "...";
         };
 
-        // Line 1: Title + Buttons
+        // Line 1: Title
         ImGui::AlignTextToFramePadding();
         ImGui::Text("%s", truncate(track->getDisplayName(), maxTitleWidth).c_str());
-        
-        ImGui::SameLine();
-        
-        // --- Buttons (+) and (:) ---
-        float iconBtnSize = 24.0f;
-        ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 2));
-        
-        // (+) Add to Playlist
-        if (ImGui::Button("+", ImVec2(iconBtnSize, iconBtnSize))) {
-            ImGui::OpenPopup("AddToPlaylistPopup");
-        }
-        
-        if (ImGui::BeginPopup("AddToPlaylistPopup")) {
-             ImGui::Text("Add to Playlist");
-             ImGui::Separator();
-             if (playlistManager_) {
-                 auto playlists = playlistManager_->getAllPlaylists();
-                 bool found = false;
-                 for (const auto& playlist : playlists) {
-                     if (playlist->getName() == "Now Playing") continue;
-                     found = true;
-                     if (ImGui::Selectable(playlist->getName().c_str())) {
-                         playlist->addTrack(track);
-                         playlist->save();
-                         ImGui::CloseCurrentPopup();
-                     }
-                 }
-                 if (!found) ImGui::TextDisabled("No custom playlists");
-             } else {
-                 ImGui::TextDisabled("Unavailable");
-             }
-             ImGui::EndPopup();
-        }
-        
-        ImGui::SameLine();
-        
-        // (:) Metadata
-        if (ImGui::Button(":", ImVec2(iconBtnSize, iconBtnSize))) {
-            ImGui::OpenPopup("MetadataPopup");
-        }
-        
-        if (ImGui::BeginPopup("MetadataPopup")) {
-            ImGui::Text("Track Details");
-            ImGui::Separator();
-            ImGui::Text("File: %s", track->getDisplayName().c_str());
-            ImGui::Text("Codec: %s", meta.codec.c_str());
-            ImGui::Text("Bitrate: %d kbps", meta.bitrate);
-            ImGui::Text("Sample Rate: %d Hz", meta.sampleRate);
-            ImGui::Text("Channels: %d", meta.channels);
-            if (meta.year > 0) ImGui::Text("Year: %d", meta.year);
-            if (!meta.genre.empty()) ImGui::Text("Genre: %s", meta.genre.c_str());
-            ImGui::EndPopup();
-        }
-        
-        ImGui::PopStyleVar();
         
         // Line 2: Artist
         // Manually move cursor down to ensure it's on a new line distinct from the buttons
@@ -229,9 +174,9 @@ void NowPlayingView::render() {
     ImGui::SameLine();
     
     // Repeat One
-    if (controller_ && controller_->getCurrentPlaylist()) {
-        auto currentPlaylist = controller_->getCurrentPlaylist();
-        RepeatMode mode = currentPlaylist->getRepeatMode();
+    if (controller_) {
+        // Use unified getter for both Playlist and Global/Library modes
+        RepeatMode mode = controller_->getRepeatMode();
         
         // Visual feedback based on mode
         if (mode == RepeatMode::ALL) {

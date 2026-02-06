@@ -102,6 +102,14 @@ public:
     Playlist* getCurrentPlaylist() const {
         return currentPlaylist_;
     }
+
+    /**
+     * @brief Get playback state
+     * @return Current playback state
+     */
+    PlaybackState* getPlaybackState() const {
+        return state_;
+    }
     
     /**
      * @brief Toggle repeat mode (NONE -> ALL -> ONE -> NONE)
@@ -113,6 +121,17 @@ public:
      * @param mode Repeat mode to set
      */
     void setRepeatMode(RepeatMode mode);
+
+    /**
+     * @brief Get current repeat mode (Playlist or Global)
+     * @return Current RepeatMode
+     */
+    RepeatMode getRepeatMode() const {
+        if (currentPlaylist_) {
+            return currentPlaylist_->getRepeatMode();
+        }
+        return globalRepeatMode_;
+    }
     
     /**
      * @brief Play a track within a context (queue)
@@ -159,6 +178,7 @@ private:
     History* history_;
     IHardwareInterface* hardware_;  // For writing LCD display, metadata
     Playlist* currentPlaylist_;
+    RepeatMode globalRepeatMode_ = RepeatMode::NONE; // Fallback for Queue/Library mode
     size_t currentTrackIndex_;
     
     /**

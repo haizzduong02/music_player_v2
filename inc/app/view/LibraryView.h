@@ -5,6 +5,7 @@
 #include "../controller/LibraryController.h"
 #include "../model/Library.h"
 #include <string>
+#include <cmath>
 
 class PlaybackController;
 class FileBrowserView;

@@ -7,6 +7,7 @@
 #include <string>
 #include <vector>
 #include <set>
+#include <functional>
 
 /**
  * @file FileBrowserView.h
@@ -38,12 +39,16 @@ public:
      */
     enum class BrowserMode {
         LIBRARY,            // Default: managing library
-        PLAYLIST_SELECTION  // Selecting files for a playlist
+        PLAYLIST_SELECTION,  // Selecting files for a playlist
+        LIBRARY_ADD_AND_RETURN // Add to library and return selected files (callback)
     };
     
     void setPlaylistController(class PlaylistController* controller); // Forward decl in cpp or include
     void setMode(BrowserMode mode);
     void setTargetPlaylist(const std::string& playlistName);
+    
+    // Callback for when files are added in LIBRARY_ADD_AND_RETURN mode
+    void setOnFilesAddedCallback(std::function<void(const std::vector<std::string>&)> callback) { onFilesAddedCallback_ = callback; }
     
 private:
     IFileSystem* fileSystem_;
@@ -59,6 +64,7 @@ private:
     // Mode state
     BrowserMode mode_ = BrowserMode::LIBRARY;
     std::string targetPlaylistName_;
+    std::function<void(const std::vector<std::string>&)> onFilesAddedCallback_;
     
     /**
      * @brief Render directory tree (left panel)

@@ -26,6 +26,11 @@ public:
     virtual void handleInput() override {}  // Default: empty
     virtual void update(void* subject) override {}  // Default: empty
     
+    /**
+     * @brief Render popups/modals that need to be at root level
+     */
+    virtual void renderPopups() {}
+    
     virtual void show() override { visible_ = true; }
     virtual void hide() override { visible_ = false; }
     virtual bool isVisible() const override { return visible_; }

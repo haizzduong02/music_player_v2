@@ -89,7 +89,7 @@ private:
     // Render helpers
     void renderTabBar();
     void renderAlbumArt();
-    void renderTrackList();
+
     void renderPlaybackControls();
     void renderNowPlayingInfo();
     

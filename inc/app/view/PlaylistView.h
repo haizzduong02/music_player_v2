@@ -5,7 +5,10 @@
 #include "../controller/PlaylistController.h"
 #include "../controller/PlaybackController.h"
 #include "../model/PlaylistManager.h"
+#include "../model/PlaylistManager.h"
 #include <string>
+#include <cmath>
+#include <set>
 
 class FileBrowserView;
 
@@ -31,6 +34,7 @@ public:
     void render() override;
     void handleInput() override;
     void update(void* subject) override;
+    void renderPopups() override;
     
     void setFileBrowserView(FileBrowserView* browserView) { fileBrowserView_ = browserView; }
     
@@ -50,6 +54,19 @@ private:
     bool showCreateDialog_;
     bool showRenameDialog_;
     std::string renameBuffer_;
+    
+    // Add Songs Popup State
+    bool showAddSongsPopup_ = false;
+    bool shouldReopenAddPopup_ = false; // Flag to reopen popup after browsing
+    bool shouldOpenAddPopup_ = false;   // Flag to open popup from button (fix ID stack)
+    bool isBrowsingForPlaylist_ = false; // Flag to track if we are currently browsing
+    std::string songSearchQuery_;
+    std::set<std::string> selectedTracksForAdd_;
+    
+    /**
+     * @brief Render Add Songs Popup
+     */
+    void renderAddSongsPopup();
     
     /**
      * @brief Render playlist list (left panel)

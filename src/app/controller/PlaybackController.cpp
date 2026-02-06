@@ -97,6 +97,14 @@ bool PlaybackController::next() {
     
     // 2. Queue Mode (Fallback)
     auto nextTrack = state_->getNextTrack();
+    
+    // Check for Loop ALL in Queue mode
+    if (!nextTrack && !currentPlaylist_ && globalRepeatMode_ == RepeatMode::ALL) {
+        // Loop back to start of queue
+        state_->setQueueIndex(0);
+        nextTrack = state_->getNextTrack();
+    }
+    
     if (nextTrack) {
         return play(nextTrack);
     }
@@ -236,22 +244,17 @@ void PlaybackController::updateTime(double deltaTime) {
 void PlaybackController::handlePlaybackFinished() {
     Logger::getInstance().info("Playback finished");
     
-    if (currentPlaylist_) {
-        RepeatMode mode = currentPlaylist_->getRepeatMode();
-        Logger::getInstance().info("Current RepeatMode: " + std::to_string(static_cast<int>(mode)));
-        
-        // Check RepeatMode::ONE
-        if (mode == RepeatMode::ONE) {
-             if (state_ && state_->getCurrentTrack()) {
-                 Logger::getInstance().info("RepeatMode::ONE active, repeating track: " + state_->getCurrentTrack()->getDisplayName());
-                 play(state_->getCurrentTrack());
-                 return;
-             } else {
-                 Logger::getInstance().warn("RepeatMode::ONE active but no current track available");
-             }
-        }
-    } else {
-        Logger::getInstance().warn("handlePlaybackFinished: No current playlist");
+    RepeatMode mode = currentPlaylist_ ? currentPlaylist_->getRepeatMode() : globalRepeatMode_;
+    
+    Logger::getInstance().info("Current RepeatMode: " + std::to_string(static_cast<int>(mode)));
+    
+    // Check RepeatMode::ONE
+    if (mode == RepeatMode::ONE) {
+         if (state_ && state_->getCurrentTrack()) {
+             Logger::getInstance().info("RepeatMode::ONE active, repeating track: " + state_->getCurrentTrack()->getDisplayName());
+             play(state_->getCurrentTrack());
+             return;
+         }
     }
     
     Logger::getInstance().info("Calling next() (Auto-advance)");
@@ -259,29 +262,39 @@ void PlaybackController::handlePlaybackFinished() {
 }
 
 void PlaybackController::toggleRepeatMode() {
+    RepeatMode* targetMode = &globalRepeatMode_;
     if (currentPlaylist_) {
-        RepeatMode current = currentPlaylist_->getRepeatMode();
-        RepeatMode nextMode = RepeatMode::NONE;
-        
-        // Cycle: NONE -> ALL -> ONE -> NONE
-        switch (current) {
-            case RepeatMode::NONE: nextMode = RepeatMode::ALL; break;
-            case RepeatMode::ALL: nextMode = RepeatMode::ONE; break;
-            case RepeatMode::ONE: nextMode = RepeatMode::NONE; break;
-        }
-        
-        currentPlaylist_->setRepeatMode(nextMode);
-        
-        std::string modeStr = "NONE";
-        if (nextMode == RepeatMode::ALL) modeStr = "ALL";
-        else if (nextMode == RepeatMode::ONE) modeStr = "ONE";
-        
-        Logger::getInstance().info("Repeat mode set to: " + modeStr);
+        targetMode = nullptr; // Use setter
     }
+    
+    // Determine current mode
+    RepeatMode current = currentPlaylist_ ? currentPlaylist_->getRepeatMode() : globalRepeatMode_;
+    RepeatMode nextMode = RepeatMode::NONE;
+    
+    // Cycle: NONE -> ALL -> ONE -> NONE
+    switch (current) {
+        case RepeatMode::NONE: nextMode = RepeatMode::ALL; break;
+        case RepeatMode::ALL: nextMode = RepeatMode::ONE; break;
+        case RepeatMode::ONE: nextMode = RepeatMode::NONE; break;
+    }
+    
+    if (currentPlaylist_) {
+        currentPlaylist_->setRepeatMode(nextMode);
+    } else {
+        globalRepeatMode_ = nextMode;
+    }
+    
+    std::string modeStr = "NONE";
+    if (nextMode == RepeatMode::ALL) modeStr = "ALL";
+    else if (nextMode == RepeatMode::ONE) modeStr = "ONE";
+    
+    Logger::getInstance().info("Repeat mode set to: " + modeStr);
 }
 
 void PlaybackController::setRepeatMode(RepeatMode mode) {
     if (currentPlaylist_) {
         currentPlaylist_->setRepeatMode(mode);
+    } else {
+        globalRepeatMode_ = mode;
     }
 }

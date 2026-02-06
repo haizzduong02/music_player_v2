@@ -8,6 +8,13 @@
  */
 
 int main(int argc, char* argv[]) {
+    // WSL Audio Fix: Explicitly set PULSE_SERVER if not set
+    // Check if /mnt/wslg/PulseServer exists is implied by typical WSLg setup
+    setenv("PULSE_SERVER", "unix:/mnt/wslg/PulseServer", 0); // 0 = do not overwrite if already set
+    
+    // Force SDL to use PulseAudio as well
+    setenv("SDL_AUDIODRIVER", "pulseaudio", 1);
+    
     // Initialize logger
     Logger::getInstance().info("=================================");
     Logger::getInstance().info("Music Player Application Starting");

@@ -119,6 +119,12 @@ public:
      */
     bool setPlaylistLoop(const std::string& name, bool loop);
     
+    /**
+     * @brief Get Library instance
+     * @return Pointer to Library model
+     */
+    Library* getLibrary() const { return library_; }
+    
 private:
     PlaylistManager* playlistManager_;
     Library* library_;

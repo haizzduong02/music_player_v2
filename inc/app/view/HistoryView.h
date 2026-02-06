@@ -5,6 +5,7 @@
 #include "../controller/HistoryController.h"
 #include "../controller/PlaybackController.h"
 #include "../model/History.h"
+#include <cmath>
 
 /**
  * @file HistoryView.h

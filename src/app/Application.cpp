@@ -85,52 +85,65 @@ bool Application::init() {
             return f.good();
         };
 
+        ImFontConfig boldConfig;
+        boldConfig.RasterizerMultiply = 1.6f; // Simulate bold (thicker glyphs)
+
         if (fileExists(fontPath1)) {
             mainFont = io.Fonts->AddFontFromFileTTF(fontPath1, 16.0f);
+            // Index 1: Large Font
+            io.Fonts->AddFontFromFileTTF(fontPath1, 22.0f);
+            // Index 2: Large Bold Font
+            io.Fonts->AddFontFromFileTTF(fontPath1, 22.0f, &boldConfig);
         } else if (fileExists(fontPath2)) {
             mainFont = io.Fonts->AddFontFromFileTTF(fontPath2, 16.0f);
+            // Index 1: Large Font
+            io.Fonts->AddFontFromFileTTF(fontPath2, 22.0f);
+            // Index 2: Large Bold Font
+            io.Fonts->AddFontFromFileTTF(fontPath2, 22.0f, &boldConfig);
         }
         if (!mainFont) {
             Logger::getInstance().warn("Could not load Inter font, using default");
             io.Fonts->AddFontDefault();
+            io.Fonts->AddFontDefault(); // Index 1
+            io.Fonts->AddFontDefault(); // Index 2
         }
 
         // Setup Dear ImGui style
         ImGui::StyleColorsDark();
         
-        // Apply custom color scheme: #1C6758, #F05A7E, #3D8361
+        // Apply custom color scheme
         ImGuiStyle& style = ImGui::GetStyle();
         
-        // Background colors - dark teal
-        style.Colors[ImGuiCol_WindowBg] = ImVec4(0.08f, 0.28f, 0.24f, 1.0f);
-        style.Colors[ImGuiCol_ChildBg] = ImVec4(0.11f, 0.40f, 0.35f, 0.5f);
-        style.Colors[ImGuiCol_PopupBg] = ImVec4(0.11f, 0.40f, 0.35f, 0.95f);
+        // Background colors - Darker Teal/Green
+        style.Colors[ImGuiCol_WindowBg] = ImVec4(0.08f, 0.20f, 0.18f, 1.0f); // Darker
+        style.Colors[ImGuiCol_ChildBg] = ImVec4(0.05f, 0.15f, 0.14f, 1.0f);  // Darker for contrast
+        style.Colors[ImGuiCol_PopupBg] = ImVec4(0.08f, 0.20f, 0.18f, 0.95f);
         
         // Frame colors
-        style.Colors[ImGuiCol_FrameBg] = ImVec4(0.08f, 0.28f, 0.24f, 1.0f);
-        style.Colors[ImGuiCol_FrameBgHovered] = ImVec4(0.24f, 0.51f, 0.38f, 1.0f);
-        style.Colors[ImGuiCol_FrameBgActive] = ImVec4(0.94f, 0.35f, 0.49f, 1.0f);
+        style.Colors[ImGuiCol_FrameBg] = ImVec4(0.15f, 0.35f, 0.30f, 1.0f);
+        style.Colors[ImGuiCol_FrameBgHovered] = ImVec4(0.25f, 0.55f, 0.45f, 1.0f);
+        style.Colors[ImGuiCol_FrameBgActive] = ImVec4(0.00f, 0.70f, 0.60f, 1.0f); // Bright Cyan
         
         // Button colors
-        style.Colors[ImGuiCol_Button] = ImVec4(0.24f, 0.51f, 0.38f, 1.0f);
-        style.Colors[ImGuiCol_ButtonHovered] = ImVec4(0.94f, 0.35f, 0.49f, 0.8f);
-        style.Colors[ImGuiCol_ButtonActive] = ImVec4(0.94f, 0.35f, 0.49f, 1.0f);
+        style.Colors[ImGuiCol_Button] = ImVec4(0.15f, 0.35f, 0.30f, 1.0f);
+        style.Colors[ImGuiCol_ButtonHovered] = ImVec4(0.25f, 0.50f, 0.45f, 1.0f); // More visible hover
+        style.Colors[ImGuiCol_ButtonActive] = ImVec4(0.00f, 0.70f, 0.60f, 1.0f);
         
-        // Header colors (for selectables)
-        style.Colors[ImGuiCol_Header] = ImVec4(0.24f, 0.51f, 0.38f, 0.6f);
-        style.Colors[ImGuiCol_HeaderHovered] = ImVec4(0.94f, 0.35f, 0.49f, 0.6f);
-        style.Colors[ImGuiCol_HeaderActive] = ImVec4(0.94f, 0.35f, 0.49f, 1.0f);
+        // Header colors (Selectables) - High Contrast
+        style.Colors[ImGuiCol_Header] = ImVec4(0.15f, 0.35f, 0.30f, 0.6f);
+        style.Colors[ImGuiCol_HeaderHovered] = ImVec4(0.30f, 0.60f, 0.50f, 0.8f); // Brighter and less transparent
+        style.Colors[ImGuiCol_HeaderActive] = ImVec4(0.00f, 0.70f, 0.60f, 1.0f); // Bright active state
         
         // Slider colors
-        style.Colors[ImGuiCol_SliderGrab] = ImVec4(0.94f, 0.35f, 0.49f, 1.0f);
-        style.Colors[ImGuiCol_SliderGrabActive] = ImVec4(0.94f, 0.35f, 0.49f, 1.0f);
+        style.Colors[ImGuiCol_SliderGrab] = ImVec4(0.00f, 0.70f, 0.60f, 1.0f);
+        style.Colors[ImGuiCol_SliderGrabActive] = ImVec4(0.00f, 0.80f, 0.70f, 1.0f);
         
         // Text
-        style.Colors[ImGuiCol_Text] = ImVec4(0.95f, 0.95f, 0.95f, 1.0f);
-        style.Colors[ImGuiCol_TextDisabled] = ImVec4(0.5f, 0.5f, 0.5f, 1.0f);
+        style.Colors[ImGuiCol_Text] = ImVec4(1.00f, 1.00f, 1.00f, 1.0f);
+        style.Colors[ImGuiCol_TextDisabled] = ImVec4(0.70f, 0.70f, 0.70f, 1.0f); // Brighter disabled text
         
         // Separator
-        style.Colors[ImGuiCol_Separator] = ImVec4(0.24f, 0.51f, 0.38f, 0.5f);
+        style.Colors[ImGuiCol_Separator] = ImVec4(0.30f, 0.60f, 0.50f, 0.5f);
         
         // Style tweaks
         style.WindowRounding = 0.0f;
