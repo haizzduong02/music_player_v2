@@ -72,10 +72,12 @@ void NowPlayingView::render() {
         
         float seekPos = static_cast<float>(position);
         // Detect if user is interacting to avoid fighting with update
+        ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0, 2.0f));
         if (ImGui::SliderFloat("##seek", &seekPos, 0.0f, static_cast<float>(duration), "")) {
             if (controller_) controller_->seek(seekPos);
         }
         ImGui::PopItemWidth();
+        ImGui::PopStyleVar();
         
         ImGui::SameLine();
         ImGui::AlignTextToFramePadding();
@@ -227,19 +229,32 @@ void NowPlayingView::render() {
     ImGui::SameLine();
     
     // Repeat One
-    bool isOne = false;
     if (controller_ && controller_->getCurrentPlaylist()) {
-        isOne = (controller_->getCurrentPlaylist()->getRepeatMode() == RepeatMode::ONE);
+        auto currentPlaylist = controller_->getCurrentPlaylist();
+        RepeatMode mode = currentPlaylist->getRepeatMode();
+        
+        // Visual feedback based on mode
+        if (mode == RepeatMode::ALL) {
+            ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.2f, 0.7f, 0.3f, 1.0f));  // Green when ALL
+        } else if (mode == RepeatMode::ONE) {
+            ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.8f, 0.6f, 0.1f, 1.0f));  // Orange when ONE
+        }
+        
+        const char* label = "Loop: OFF";
+        if (mode == RepeatMode::ALL) label = "Loop: ALL";
+        else if (mode == RepeatMode::ONE) label = "Loop: ONE";
+        
+        // Using wider button for text label
+        float loopBtnWidth = 80.0f;
+        
+        if (ImGui::Button(label, ImVec2(loopBtnWidth, buttonHeight))) { 
+             controller_->toggleRepeatMode();
+        }
+        
+        if (mode == RepeatMode::ALL || mode == RepeatMode::ONE) {
+            ImGui::PopStyleColor();
+        }
     }
-    
-    if (isOne) ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.2f, 0.7f, 0.3f, 1.0f));
-    if (ImGui::Button("1", ImVec2(buttonWidth, buttonHeight))) {
-         if (controller_) {
-             RepeatMode mode = isOne ? RepeatMode::NONE : RepeatMode::ONE;
-             controller_->setRepeatMode(mode);
-         }
-    }
-    if (isOne) ImGui::PopStyleColor();
     
     ImGui::NextColumn();
     

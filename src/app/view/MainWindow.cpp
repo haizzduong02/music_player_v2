@@ -19,7 +19,8 @@
 static const ImVec4 COLOR_BG_BLACK = ImVec4(0.00f, 0.00f, 0.00f, 1.0f);      // #000000 (Pure Black)
 static const ImVec4 COLOR_BG_TEAL = ImVec4(0.11f, 0.40f, 0.35f, 1.0f);       // #1C6758 (Original Teal)
 static const ImVec4 COLOR_ACCENT = ImVec4(0.94f, 0.35f, 0.49f, 1.0f);        // #F05A7E
-static const ImVec4 COLOR_TEXT = ImVec4(0.95f, 0.95f, 0.95f, 1.0f);          
+static const ImVec4 COLOR_ACCENT_HOVER = ImVec4(0.94f, 0.35f, 0.49f, 0.5f);   // #dbb9c2ff
+static const ImVec4 COLOR_TEXT = ImVec4(0.95f, 0.95f, 0.95f, 1.0f);          // #FFFFFF
 static const ImVec4 COLOR_TEXT_DIM = ImVec4(0.70f, 0.70f, 0.70f, 1.0f);      
 
 MainWindow::MainWindow() {
@@ -63,11 +64,11 @@ void MainWindow::render() {
         float availableWidth = ImGui::GetContentRegionAvail().x;
         float availableHeight = ImGui::GetContentRegionAvail().y; // Use full remaining height
         
-        // Left Panel: Track List (~35%)
+        // Left Panel: Track List (~25%)
         float leftPanelWidth = availableWidth * 0.25f;
         
         // Right Panel: Art + Controls (~65%)
-        float rightPanelWidth = availableWidth - leftPanelWidth - 8.0f; // Subtract spacing
+        float rightPanelWidth = availableWidth - leftPanelWidth - 5.0f; // Subtract spacing
         
         // --- Left Panel ---
         ImGui::PushStyleColor(ImGuiCol_ChildBg, COLOR_BG_TEAL);
@@ -85,13 +86,14 @@ void MainWindow::render() {
             // NowPlayingView contains progress bar, slider, buttons, volume, metadata... 
             // It needs significant vertical space. Let's reserve ~200px for it, or use remaining height for Art.
             float controlsHeight = 100.0f;
-            float artHeight = availableHeight - controlsHeight - 8.0f; // Spacing
+            float artHeight = availableHeight - controlsHeight;
+            float artWidth = rightPanelWidth;
             
             // 1. Album Art / Video (Top Right) - Keep Black Logic inside renderAlbumArt or here?
             // renderAlbumArt uses transparent or inferred BG. 
             // MainWindow originally used a black child for Right Panel.
             // Let's create a child for it.
-            ImGui::BeginChild("ArtPanel", ImVec2(rightPanelWidth, artHeight > 50.0f ? artHeight : 50.0f), false, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
+            ImGui::BeginChild("ArtPanel", ImVec2(artWidth, artHeight), false, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
             renderAlbumArt();
             ImGui::EndChild();
             
@@ -119,15 +121,15 @@ void MainWindow::renderTabBar() {
     
     float buttonWidth = 100.0f;
     float buttonHeight = 30.0f;
-    
-    // History button
-    bool isHistoryActive = (currentScreen_ == Screen::HISTORY);
-    if (isHistoryActive) ImGui::PushStyleColor(ImGuiCol_Button, COLOR_ACCENT);
-    if (ImGui::Button("History", ImVec2(buttonWidth, buttonHeight))) {
-        switchScreen(Screen::HISTORY);
+
+    // Library button
+    bool isLibraryActive = (currentScreen_ == Screen::LIBRARY);
+    if (isLibraryActive) ImGui::PushStyleColor(ImGuiCol_Button, COLOR_ACCENT);
+    if (ImGui::Button("Library", ImVec2(buttonWidth, buttonHeight))) {
+        switchScreen(Screen::LIBRARY);
     }
-    if (isHistoryActive) ImGui::PopStyleColor();
-    
+    if (isLibraryActive) ImGui::PopStyleColor();
+
     ImGui::SameLine();
     
     // Playlist button
@@ -137,71 +139,80 @@ void MainWindow::renderTabBar() {
         switchScreen(Screen::PLAYLIST);
     }
     if (isPlaylistActive) ImGui::PopStyleColor();
-    
+
     ImGui::SameLine();
-    
-    // Library button
-    bool isLibraryActive = (currentScreen_ == Screen::LIBRARY);
-    if (isLibraryActive) ImGui::PushStyleColor(ImGuiCol_Button, COLOR_ACCENT);
-    if (ImGui::Button("Library", ImVec2(buttonWidth, buttonHeight))) {
-        switchScreen(Screen::LIBRARY);
+
+    // History button
+    bool isHistoryActive = (currentScreen_ == Screen::HISTORY);
+    if (isHistoryActive) ImGui::PushStyleColor(ImGuiCol_Button, COLOR_ACCENT);
+    if (ImGui::Button("History", ImVec2(buttonWidth, buttonHeight))) {
+        switchScreen(Screen::HISTORY);
     }
-    if (isLibraryActive) ImGui::PopStyleColor();
+    if (isHistoryActive) ImGui::PopStyleColor();
+    
+    //ImGui::SameLine();
     
     // Now Playing info on the right
-    if (playbackState_ && playbackState_->getCurrentTrack()) {
-        auto track = playbackState_->getCurrentTrack();
-        std::string nowPlayingText = "Now Playing: " + track->getDisplayName();
-        float textWidth = ImGui::CalcTextSize(nowPlayingText.c_str()).x;
-        ImGui::SameLine(ImGui::GetWindowWidth() - textWidth - 20);
-        ImGui::PushStyleColor(ImGuiCol_Text, COLOR_ACCENT);
-        ImGui::Text("%s", nowPlayingText.c_str());
-        ImGui::PopStyleColor();
-    }
+    // if (playbackState_ && playbackState_->getCurrentTrack()) {
+    //     auto track = playbackState_->getCurrentTrack();
+    //     std::string nowPlayingText = "Now Playing: " + track->getDisplayName();
+    //     float textWidth = ImGui::CalcTextSize(nowPlayingText.c_str()).x;
+    //     ImGui::SameLine(ImGui::GetWindowWidth() - textWidth - 20);
+    //     ImGui::PushStyleColor(ImGuiCol_Text, COLOR_ACCENT);
+    //     ImGui::Text("%s", nowPlayingText.c_str());
+    //     ImGui::PopStyleColor();
+    // }
     
     ImGui::PopStyleColor(3);
 #endif
 }
 
-void MainWindow::renderNowPlayingInfo() {
-#ifdef USE_IMGUI
-    if (playbackState_ && playbackState_->getCurrentTrack()) {
-        auto track = playbackState_->getCurrentTrack();
-        const auto& meta = track->getMetadata();
+// void MainWindow::renderNowPlayingInfo() {
+// #ifdef USE_IMGUI
+//     if (playbackState_ && playbackState_->getCurrentTrack()) {
+//         auto track = playbackState_->getCurrentTrack();
+//         const auto& meta = track->getMetadata();
         
-        // Title (large)
-        ImGui::PushFont(ImGui::GetIO().Fonts->Fonts.Size > 0 ? ImGui::GetIO().Fonts->Fonts[0] : nullptr);
-        ImGui::TextWrapped("%s", track->getDisplayName().c_str());
-        ImGui::PopFont();
+//         // Title (large)
+//         ImGui::PushFont(ImGui::GetIO().Fonts->Fonts.Size > 0 ? ImGui::GetIO().Fonts->Fonts[0] : nullptr);
+//         ImGui::TextWrapped("%s", track->getDisplayName().c_str());
+//         ImGui::PopFont();
         
-        // Artist - Album (smaller, dimmed)
-        ImGui::PushStyleColor(ImGuiCol_Text, COLOR_TEXT_DIM);
-        std::string subtitle;
-        if (!meta.artist.empty()) subtitle = meta.artist;
-        if (!meta.album.empty()) {
-            if (!subtitle.empty()) subtitle += " - ";
-            subtitle += meta.album;
-        }
-        if (!subtitle.empty()) {
-            ImGui::TextWrapped("%s", subtitle.c_str());
-        }
-        ImGui::PopStyleColor();
+//         // Artist - Album (smaller, dimmed)
+//         ImGui::PushStyleColor(ImGuiCol_Text, COLOR_TEXT_DIM);
+//         std::string subtitle;
+//         if (!meta.artist.empty()) subtitle = meta.artist;
+//         if (!meta.album.empty()) {
+//             if (!subtitle.empty()) subtitle += " - ";
+//             subtitle += meta.album;
+//         }
+//         if (!subtitle.empty()) {
+//             ImGui::TextWrapped("%s", subtitle.c_str());
+//         }
+//         ImGui::PopStyleColor();
         
-        ImGui::Spacing();
-    } else {
-        ImGui::Text("No track playing");
-        ImGui::Spacing();
-    }
-#endif
-}
+//         ImGui::Spacing();
+//     } else {
+//         ImGui::Text("No track playing");
+//         ImGui::Spacing();
+//     }
+// #endif
+// }
 
 void MainWindow::renderAlbumArt() {
 #ifdef USE_IMGUI
-    // Use 85% of available width for album art/video, no hard cap
-    float availableWidth = ImGui::GetContentRegionAvail().x;
-    float albumSize = availableWidth * 0.85f;
-    // if (albumSize > 500) albumSize = 500; // Max size cap removed per user request
+    // 1. Lấy kích thước cố định của cửa sổ con (ArtPanel)
+    // GetWindowSize() trả về kích thước ổn định, không bị ảnh hưởng bởi nội dung bên trong
+    ImVec2 winSize = ImGui::GetWindowSize();
     
+    // 2. Trừ đi phần lề (Padding) mặc định của ImGui để tránh tràn
+    ImVec2 padding = ImGui::GetStyle().WindowPadding;
+    float usableWidth = winSize.x - (padding.x * 2);
+    float usableHeight = winSize.y - (padding.y * 2);
+
+    // 3. Tính toán kích thước hình vuông dựa trên vùng khả dụng
+    float minDimension = (usableWidth < usableHeight) ? usableWidth : usableHeight;
+
     // Check for video texture first
     void* videoTexture = nullptr;
     if (playbackController_ && playbackController_->getEngine()) {
@@ -209,44 +220,65 @@ void MainWindow::renderAlbumArt() {
     }
 
     if (videoTexture) {
-        // Render Video
-        float aspectRatio = 16.0f / 9.0f; // Default fallback
-        
+        // 1. Lấy kích thước gốc của Video
         int vW = 0, vH = 0;
         playbackController_->getEngine()->getVideoSize(vW, vH);
+        
+        float finalW, finalH;
+
         if (vW > 0 && vH > 0) {
-            aspectRatio = (float)vW / (float)vH;
+            // --- THUẬT TOÁN SCALE TO FIT (Vừa khít khung) ---
+            // Tính tỷ lệ giữa khung chứa và video gốc cho cả 2 chiều
+            float scaleX = usableWidth / (float)vW;
+            float scaleY = usableHeight / (float)vH;
+            
+            // Lấy tỷ lệ nhỏ hơn (min) để đảm bảo video nằm trọn trong khung
+            // (Ví dụ: Video vuông nhưng màn hình chữ nhật -> bị giới hạn bởi chiều cao -> dùng scaleY)
+            float scale = (scaleX < scaleY) ? scaleX : scaleY;
+
+            // Nhân thêm 0.95 nếu muốn hở viền một chút (giống album art)
+            // Hoặc để 1.0f nếu muốn video to tối đa
+            scale *= 1.0f; 
+
+            finalW = (float)vW * scale;
+            finalH = (float)vH * scale;
+        } else {
+            // Fallback khi chưa load được size video (giả sử 16:9)
+            // Để tránh giật hình, ta tính theo usableWidth
+            float defaultAspect = 16.0f / 9.0f;
+            finalW = usableWidth * 0.95f;
+            finalH = finalW / defaultAspect;
+            
+            // Nếu fallback bị cao quá thì kẹp lại
+            if (finalH > usableHeight * 0.95f) {
+                finalH = usableHeight * 0.95f;
+                finalW = finalH * defaultAspect;
+            }
         }
         
-        float videoHeight = albumSize / aspectRatio;
+        // 2. Căn giữa (Center)
+        float vStartX = (usableWidth - finalW) / 2.0f;
+        float vStartY = (usableHeight - finalH) / 2.0f;
         
-        // Constrain height to avoid scrolling if video is too tall
-        float maxHeight = ImGui::GetContentRegionAvail().y - 50.0f; // Leave space for info
-        if (videoHeight > maxHeight && maxHeight > 50) {
-            videoHeight = maxHeight;
-            albumSize = videoHeight * aspectRatio; // Adjust width to maintain aspect ratio
-        }
-        
-        // Center video
-        float startX = (availableWidth - albumSize) / 2;
-        if (startX > 0) ImGui::SetCursorPosX(ImGui::GetCursorPosX() + startX);
-        
-        ImGui::Image((ImTextureID)videoTexture, ImVec2(albumSize, videoHeight));
+        ImGui::SetCursorPos(ImVec2(padding.x + vStartX, padding.y + vStartY));
+        ImGui::Image((ImTextureID)videoTexture, ImVec2(finalW, finalH));
+
     } else if (playbackState_ && playbackState_->getCurrentTrack()) {
         auto track = playbackState_->getCurrentTrack();
         const auto& meta = track->getMetadata();
         
-        // Check if track changed
+        
+        // --- LOGIC LOAD ẢNH (Đã tối ưu để giảm lag) ---
         if (currentTrackPath_ != track->getPath()) {
             currentTrackPath_ = track->getPath();
             
-            // Cleanup old texture
+            // Xóa texture cũ
             if (albumArtTexture_) {
                 glDeleteTextures(1, &albumArtTexture_);
                 albumArtTexture_ = 0;
             }
             
-            // Load new album art
+            // Load mới
             if (meta.hasAlbumArt && !meta.albumArtData.empty()) {
                 int width, height, channels;
                 unsigned char* imageData = stbi_load_from_memory(
@@ -265,30 +297,48 @@ void MainWindow::renderAlbumArt() {
             }
         }
         
-        // Display album art
-        float startX = (availableWidth - albumSize) / 2;
-        if (startX > 0) ImGui::SetCursorPosX(ImGui::GetCursorPosX() + startX);
+        // --- RENDER ALBUM ART ---
+        // Tính toán vị trí căn giữa
+        float albumSize = minDimension;
+        float startX = (usableWidth - albumSize) / 2.0f;
+        float startY = (usableHeight - albumSize) / 2.0f;
+        
+        // Đặt con trỏ vẽ (Cộng thêm padding để tính từ mép cửa sổ vào)
+        ImGui::SetCursorPos(ImVec2(padding.x + startX, padding.y + startY));
 
         if (albumArtTexture_) {
             ImGui::Image((ImTextureID)(intptr_t)albumArtTexture_, ImVec2(albumSize, albumSize));
         } else {
             // Placeholder
+            float startX = 5.0f;
+            float startY = 5.0f;
+
+            ImGui::SetCursorPos(ImVec2(padding.x + startX, padding.y + startY));
+
             ImGui::PushStyleColor(ImGuiCol_ChildBg, COLOR_BG_TEAL);
-            ImGui::BeginChild("AlbumArtPlaceholder", ImVec2(albumSize, albumSize), true);
-            ImGui::SetCursorPos(ImVec2(albumSize/2 - 30, albumSize/2 - 10));
-            ImGui::Text("[No Art]");
+            ImGui::BeginChild("AlbumArtPlaceholder", ImVec2(usableWidth, usableHeight), true);
+        
+            const char* text = "No Art";
+            ImVec2 textSize = ImGui::CalcTextSize(text);
+            ImGui::SetCursorPos(ImVec2((usableWidth - textSize.x) / 2, (usableHeight - textSize.y) / 2));
+            ImGui::Text("%s", text);
+            
             ImGui::EndChild();
             ImGui::PopStyleColor();
         }
     } else {
-        // No track - placeholder
-        float startX = (availableWidth - albumSize) / 2;
-        if (startX > 0) ImGui::SetCursorPosX(ImGui::GetCursorPosX() + startX);
+        // --- NO PLAYING ---
+
+        ImGui::SetCursorPos(ImVec2(padding.x, padding.y));
 
         ImGui::PushStyleColor(ImGuiCol_ChildBg, COLOR_BG_TEAL);
-        ImGui::BeginChild("AlbumArtPlaceholder", ImVec2(albumSize, albumSize), true);
-        ImGui::SetCursorPos(ImVec2(albumSize/2 - 30, albumSize/2 - 10));
-        ImGui::Text("[No Art]");
+        ImGui::BeginChild("AlbumArtPlaceholder", ImVec2(usableWidth, usableHeight), true);
+        
+        const char* text = "No Playing";
+        ImVec2 textSize = ImGui::CalcTextSize(text);
+        ImGui::SetCursorPos(ImVec2((usableWidth - textSize.x) / 2, (usableHeight - textSize.y) / 2));
+        ImGui::Text("%s", text);
+        
         ImGui::EndChild();
         ImGui::PopStyleColor();
     }
@@ -299,7 +349,7 @@ void MainWindow::renderTrackList() {
 #ifdef USE_IMGUI
     ImGui::PushStyleColor(ImGuiCol_ChildBg, COLOR_BG_TEAL);
     ImGui::PushStyleColor(ImGuiCol_Header, COLOR_BG_TEAL);
-    ImGui::PushStyleColor(ImGuiCol_HeaderHovered, COLOR_ACCENT);
+    ImGui::PushStyleColor(ImGuiCol_HeaderHovered, COLOR_ACCENT_HOVER);
     ImGui::PushStyleColor(ImGuiCol_HeaderActive, COLOR_ACCENT);
     
     std::string currentPlayingPath = "";
@@ -339,35 +389,7 @@ void MainWindow::renderTrackList() {
                     }
                 }
                 
-                ImGui::SameLine();
                 
-                // Loop button (Moved to Library Header)
-                if (playbackController_ && playbackController_->getCurrentPlaylist()) {
-                    auto currentPlaylist = playbackController_->getCurrentPlaylist();
-                    RepeatMode mode = currentPlaylist->getRepeatMode();
-                    bool isAll = (mode == RepeatMode::ALL);
-                    
-                    // Visual feedback
-                    if (isAll) {
-                        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.2f, 0.7f, 0.3f, 1.0f));  // Green when ALL
-                    } else if (mode == RepeatMode::ONE) {
-                        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.8f, 0.6f, 0.1f, 1.0f));  // Orange when ONE (indication)
-                    }
-                    
-                    const char* label = isAll ? "Loop: ALL" : (mode == RepeatMode::ONE ? "Loop: ONE" : "Loop: OFF");
-                    
-                    if (ImGui::Button(label)) { 
-                         // Toggle ALL <-> NONE (Override ONE if set)
-                         if (isAll)
-                             playbackController_->setRepeatMode(RepeatMode::NONE);
-                         else
-                             playbackController_->setRepeatMode(RepeatMode::ALL);
-                    }
-                    
-                    if (isAll || mode == RepeatMode::ONE) {
-                        ImGui::PopStyleColor();
-                    }
-                }
                 
                 ImGui::Text("Library: %zu tracks", files.size());
                 ImGui::Separator();
@@ -384,9 +406,16 @@ void MainWindow::renderTrackList() {
                     ImGui::PushID(static_cast<int>(i));
                     
                     // Two-line display with full-width selectable
-                    float itemHeight = 45.0f;
                     std::string title = file->getDisplayName();
                     std::string subtitle = meta.artist;
+
+                    // Tính kích thước text bằng ImGui
+                    float spacing = ImGui::GetStyle().ItemSpacing.y;
+                    ImVec2 titleSize = ImGui::CalcTextSize(title.c_str());
+                    ImVec2 subtitleSize = ImGui::CalcTextSize(subtitle.c_str());
+
+                    // Tổng chiều cao
+                    float itemHeight = titleSize.y + spacing + subtitleSize.y;
                     if (!meta.album.empty()) {
                         if (!subtitle.empty()) subtitle += " - ";
                         subtitle += meta.album;
@@ -441,8 +470,18 @@ void MainWindow::renderTrackList() {
             
         case Screen::PLAYLIST:
             if (playlistView_ && playlistView_->getManager()) {
-                auto playlists = playlistView_->getManager()->getAllPlaylists();
+                auto allPlaylists = playlistView_->getManager()->getAllPlaylists();
+                std::vector<std::shared_ptr<Playlist>> playlists;
+                for (const auto& p : allPlaylists) {
+                     if (p->getName() != "Now Playing") {
+                         playlists.push_back(p);
+                     }
+                }
+                
                 static int selectedPlaylistIdx = 0;
+                if (selectedPlaylistIdx >= static_cast<int>(playlists.size())) {
+                    selectedPlaylistIdx = 0;
+                }
                 
                 // Playlist selector
                 ImGui::Text("Playlists:");

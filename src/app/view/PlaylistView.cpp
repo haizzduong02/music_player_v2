@@ -38,6 +38,8 @@ void PlaylistView::render() {
     ImGui::Separator();
     
     for (size_t i = 0; i < playlists.size(); ++i) {
+        if (playlists[i]->getName() == "Now Playing") continue;
+        
         bool isSelected = (playlists[i]->getName() == selectedPlaylistName_);
         
         if (ImGui::Selectable(playlists[i]->getName().c_str(), isSelected)) {
