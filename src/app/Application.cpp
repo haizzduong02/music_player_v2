@@ -1,5 +1,6 @@
 #include "../../inc/app/Application.h"
 #include "../../inc/utils/Logger.h"
+#include "../../inc/utils/Config.h"
 #include "../../inc/service/TagLibMetadataReader.h"
 #include "../../inc/service/LocalFileSystem.h"
 #include "../../inc/service/JsonPersistence.h"
@@ -53,7 +54,10 @@ bool Application::init() {
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
         Uint32 window_flags = SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI;
         
-        window_ = SDL_CreateWindow("Music Player", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1280, 720, window_flags);
+        window_ = SDL_CreateWindow("Music Player", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 
+            Config::getInstance().getConfig().windowWidth, 
+            Config::getInstance().getConfig().windowHeight, 
+            window_flags);
         if (window_ == nullptr) {
             Logger::getInstance().error("Error: SDL_CreateWindow(): " + std::string(SDL_GetError()));
             return false;
@@ -159,6 +163,12 @@ bool Application::init() {
         // Step 3: Initialize Services, Models, Controllers...
         Logger::getInstance().info("Initializing services...");
         persistence_ = std::make_unique<JsonPersistence>();
+        
+        // Initialize Config singleton
+        Config::getInstance().init(persistence_.get());
+        if (!Config::getInstance().load()) {
+            Logger::getInstance().warn("Failed to load configuration, using defaults");
+        }
         // ... (rest of init remains checking Application.cpp content - wait, replace_file_content replaces blocks. I need to be careful with "Services, Models..." lines if they are not in TargetContent)
         metadataReader_ = std::make_unique<TagLibMetadataReader>();
         fileSystem_ = std::make_unique<LocalFileSystem>();
@@ -360,6 +370,7 @@ void Application::shutdown() {
     Logger::getInstance().info("Shutting down application...");
     
     // Save data
+    Config::getInstance().save();
     if (library_) library_->save();
     
     // Release specific controllers and engine BEFORE destroying GL context

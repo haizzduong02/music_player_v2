@@ -6,6 +6,9 @@
 #include "../model/Library.h"
 #include <string>
 #include <cmath>
+#include <set>
+#include <vector>
+#include <memory>
 
 class PlaybackController;
 class FileBrowserView;
@@ -48,6 +51,10 @@ private:
     std::string searchQuery_;
     std::vector<std::shared_ptr<MediaFile>> displayedFiles_;
     int selectedIndex_;
+
+    // Edit Mode State
+    bool isEditMode_ = false;
+    std::set<std::string> selectedTracksForRemoval_;
     
     // Popup state for Add File/Directory
     bool showAddFilePopup_ = false;

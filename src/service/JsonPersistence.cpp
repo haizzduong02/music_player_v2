@@ -1,9 +1,11 @@
 #include "../../inc/service/JsonPersistence.h"
 #include "../../inc/utils/Logger.h"
+#include "../../inc/utils/Config.h" // For AppConfig definition
 #include <fstream>
 #include <filesystem>
 
 namespace fs = std::filesystem;
+// using json = nlohmann::json; // Removed for stubbing
 
 bool JsonPersistence::saveToFile(const std::string& filepath, const std::string& data) {
     try {
@@ -82,17 +84,19 @@ bool JsonPersistence::deleteFile(const std::string& filepath) {
 }
 
 std::string JsonPersistence::serialize(const void* data) {
-    // TODO: Implement with nlohmann/json or similar JSON library
-    // For now, return empty string
-    Logger::getInstance().warn("JsonPersistence::serialize() not fully implemented");
+    if (!data) return "{}";
+    
+    // Stubbed implementation - return empty JSON object
+    Logger::getInstance().warn("JsonPersistence::serialize() stubbed - JSON library missing");
     return "{}";
 }
 
 bool JsonPersistence::deserialize(const std::string& serialized, void* data) {
-    // TODO: Implement with nlohmann/json or similar JSON library
-    // For now, return false
-    Logger::getInstance().warn("JsonPersistence::deserialize() not fully implemented");
-    return false;
+    if (serialized.empty() || !data) return false;
+    
+    // Stubbed implementation
+    Logger::getInstance().warn("JsonPersistence::deserialize() stubbed - JSON library missing");
+    return false; 
 }
 
 bool JsonPersistence::ensureDirectoryExists(const std::string& dirPath) {
@@ -110,13 +114,9 @@ bool JsonPersistence::ensureDirectoryExists(const std::string& dirPath) {
 }
 
 bool JsonPersistence::isValidJson(const std::string& jsonStr) {
-    // Basic JSON validation - just check for braces/brackets
-    if (jsonStr.empty()) {
-        return false;
-    }
-    
+    if (jsonStr.empty()) return false;
+    // Simple basic check for stub
     char first = jsonStr.front();
     char last = jsonStr.back();
-    
     return (first == '{' && last == '}') || (first == '[' && last == ']');
 }

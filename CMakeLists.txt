@@ -81,6 +81,11 @@ set(APP_SOURCES
     src/app/Application.cpp
 )
 
+# Source files - Utils
+set(UTIL_SOURCES
+    src/utils/Config.cpp
+)
+
 # Main executable
 add_executable(music_player
     src/main.cpp
@@ -90,6 +95,7 @@ add_executable(music_player
     ${SERVICE_SOURCES}
     ${HAL_SOURCES}
     ${APP_SOURCES}
+    ${UTIL_SOURCES}
 )
 
 # Find and link TagLib

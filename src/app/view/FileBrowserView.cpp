@@ -13,6 +13,11 @@ FileBrowserView::FileBrowserView(IFileSystem* fileSystem, LibraryController* lib
     refreshCurrentDirectory();
 }
 
+void FileBrowserView::show() {
+    selectedFiles_.clear();
+    BaseView::show();
+}
+
 void FileBrowserView::setPlaylistController(PlaylistController* controller) {
     playlistController_ = controller;
 }
@@ -26,16 +31,38 @@ void FileBrowserView::setTargetPlaylist(const std::string& playlistName) {
 }
 
 void FileBrowserView::render() {
-    if (!isVisible()) {
-        return;
-    }
+    if (!isVisible()) return;
+
+    // If in popup mode, we don't render as a window (handled by parent)
+    if (mode_ == BrowserMode::LIBRARY_ADD_AND_RETURN) return;
     
     // Set larger window size
     ImGui::SetNextWindowSize(ImVec2(900, 600), ImGuiCond_FirstUseEver);
     ImGui::SetNextWindowSizeConstraints(ImVec2(700, 500), ImVec2(1400, 900));
     
-    ImGui::Begin("File Browser", &visible_);
+    if (ImGui::Begin("File Browser", &visible_)) {
+        renderContent();
+    }
+    ImGui::End();
+}
+
+void FileBrowserView::renderPopup() {
+    // Popup logic
+    ImGui::SetNextWindowSize(ImVec2(900, 600), ImGuiCond_Appearing);
     
+    bool open = true;
+    if (ImGui::BeginPopupModal("File Browser", &open)) {
+        renderContent();
+        
+        ImGui::EndPopup();
+    }
+    
+    if (!open) {
+        visible_ = false;
+    }
+}
+
+void FileBrowserView::renderContent() {
     // Current path and navigation
     ImGui::Text("Path: %s", currentPath_.c_str());
     
@@ -55,15 +82,21 @@ void FileBrowserView::render() {
         navigateTo("/home");
     }
     
+    // USB Devices - Placeholder for new functionality
+    // renderUSBDevices(); 
+    
     ImGui::Separator();
     
     // Get available content size
     ImVec2 availableSize = ImGui::GetContentRegionAvail();
-    float panelHeight = availableSize.y - 35; // Leave space for buttons
-    float leftPanelWidth = availableSize.x * 0.35f;
+    float footerHeight = 40.0f; // Space for action buttons
+    float contentHeight = availableSize.y - footerHeight;
+    
+    // Left panel width
+    float leftPanelWidth = availableSize.x * 0.35f; // Original calculation
     
     // LEFT PANEL: Folders only
-    if (ImGui::BeginChild("FolderPanel", ImVec2(leftPanelWidth, panelHeight), true)) {
+    if (ImGui::BeginChild("FolderPanel", ImVec2(leftPanelWidth, contentHeight), true)) {
         ImGui::Text("Folders");
         ImGui::Separator();
         
@@ -77,43 +110,35 @@ void FileBrowserView::render() {
                 }
             }
         }
+        // renderDirectoryTree(); // Placeholder to get context for new functionality
     }
     ImGui::EndChild();
     
     ImGui::SameLine();
     
     // RIGHT PANEL: Media files only (filtered)
-    if (ImGui::BeginChild("FilePanel", ImVec2(0, panelHeight), true)) {
+    if (ImGui::BeginChild("FilePanel", ImVec2(0, contentHeight), true)) {
         ImGui::Text("Media Files");
         ImGui::Separator();
         
         // Table: [Select] [Name] [Extension]
-        if (ImGui::BeginTable("FilesTable", 3, ImGuiTableFlags_BordersInnerH | ImGuiTableFlags_Resizable | ImGuiTableFlags_RowBg)) {
+        if (ImGui::BeginTable("FilesTable", 4, ImGuiTableFlags_BordersInnerH | ImGuiTableFlags_Resizable | ImGuiTableFlags_RowBg)) {
             ImGui::TableSetupColumn("##Select", ImGuiTableColumnFlags_WidthFixed, 30.0f);
             ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_NoHide);
             ImGui::TableSetupColumn("Type", ImGuiTableColumnFlags_WidthFixed, 60.0f);
+            ImGui::TableSetupColumn("Path", ImGuiTableColumnFlags_NoHide); 
             ImGui::TableHeadersRow();
             
             int fileIndex = 0;
-            for (size_t i = 0; i < currentFiles_.size(); ++i) {
-                const auto& fileInfo = currentFiles_[i];
-                if (fileInfo.isDirectory) continue;
+            for (size_t i = 0; i < currentMediaFiles_.size(); ++i) {
+                const auto& fileInfo = currentMediaFiles_[i];
+                // No need to check isDirectory as currentMediaFiles_ only has files
                 
-                // Check if supported format
                 std::string filename = fileInfo.name;
-                std::string ext = "";
-                size_t dotPos = filename.find_last_of('.');
-                if (dotPos == std::string::npos) continue;
-                ext = filename.substr(dotPos); // keep dot for check
-                
-                if (!MediaFileFactory::isSupportedFormat(ext)) continue;
+                std::string ext = fileInfo.extension;
                 
                 // Pure extension for display (remove dot)
                 std::string displayExt = (ext.length() > 0) ? ext.substr(1) : "";
-                // Name without extension (optional, user requested fields: Name, Extension)
-                // Let's keep full name in Name col or strip it? usually Name includes ext.
-                // User asked for "file ... fields: name, extension". 
-                // I will show name (full) and extension in separate col.
                 
                 ImGui::TableNextRow();
                 ImGui::TableNextColumn();
@@ -137,6 +162,15 @@ void FileBrowserView::render() {
                 ImGui::TableNextColumn();
                 // 3. Extension
                 ImGui::Text("%s", displayExt.c_str());
+
+                ImGui::TableNextColumn();
+                // 4. Path (Display relative path if possible, or full path)
+                // If path starts with currentPath_, strip it to show relative
+                std::string displayPath = fileInfo.path;
+                // Simple check to make it relative to current view if desired, 
+                // but user asked for "URL", so full path or at least clear path is good.
+                // Let's force it to be slightly distinct color maybe?
+                ImGui::TextColored(ImVec4(0.7f, 0.7f, 0.7f, 1.0f), "%s", displayPath.c_str());
                 
                 fileIndex++;
             }
@@ -149,7 +183,7 @@ void FileBrowserView::render() {
             ImGui::EndTable();
         }
         
-        if (currentFiles_.empty()) {
+        if (currentMediaFiles_.empty()) {
             ImGui::TextDisabled("Empty folder");
         }
     }
@@ -204,23 +238,16 @@ void FileBrowserView::render() {
     if (ImGui::Button("Add All in Folder")) {
         if (mode_ == BrowserMode::PLAYLIST_SELECTION && playlistController_ && !targetPlaylistName_.empty()) {
              // Iterate logic to add all supported files to playlist
-             for (const auto& file : currentFiles_) {
-                 if (!file.isDirectory) {
-                     // Check support again just in case
-                     std::string ext = file.name;
-                     size_t dotPos = ext.find_last_of('.');
-                     if (dotPos != std::string::npos && MediaFileFactory::isSupportedFormat(ext.substr(dotPos))) {
-                         playlistController_->addToPlaylistAndLibrary(targetPlaylistName_, file.path);
-                     }
-                 }
+             // Iterate logic to add all supported files to playlist
+             for (const auto& file : currentMediaFiles_) {
+                 // No need to check directory or extension again, list is already filtered
+                 playlistController_->addToPlaylistAndLibrary(targetPlaylistName_, file.path);
              }
              Logger::getInstance().info("Added all files in folder to playlist");
         } else {
             libController_->addMediaFilesFromDirectory(currentPath_, false);
         }
     }
-    
-    ImGui::End();
 }
 
 void FileBrowserView::handleInput() {
@@ -250,6 +277,41 @@ void FileBrowserView::navigateTo(const std::string& path) {
 }
 
 void FileBrowserView::refreshCurrentDirectory() {
-    currentFiles_ = fileSystem_->browse(currentPath_);
-    selectedFiles_.clear();
+    // 1. Get directories for navigation (Left Panel)
+    auto allFiles = fileSystem_->browse(currentPath_);
+    currentFiles_.clear();
+    for (const auto& file : allFiles) {
+        if (file.isDirectory) {
+            currentFiles_.push_back(file);
+        }
+    }
+    
+    // 2. Get recursive media files (Right Panel)
+    currentMediaFiles_.clear();
+    
+    // Get all supported extensions
+    std::vector<std::string> extensions = MediaFileFactory::getAllSupportedFormats();
+    
+    // Scan recursively
+    std::vector<std::string> mediaPaths = fileSystem_->getMediaFiles(currentPath_, extensions);
+    
+    // Convert to FileInfo
+    for (const auto& path : mediaPaths) {
+        FileInfo info;
+        info.path = path;
+        
+        // Extract filename and extension manually since we don't have fs::path here easily 
+        // without including filesystem, but let's assume standard path format
+        size_t lastSlash = path.find_last_of("/\\");
+        info.name = (lastSlash != std::string::npos) ? path.substr(lastSlash + 1) : path;
+        
+        size_t lastDot = info.name.find_last_of('.');
+        info.extension = (lastDot != std::string::npos) ? info.name.substr(lastDot) : "";
+        info.isDirectory = false;
+        info.size = 0; // We don't query size for performance, or we could if needed
+        
+        currentMediaFiles_.push_back(info);
+    }
+    
+    // selectedFiles_.clear(); // Removed to persist selection across navigation
 }

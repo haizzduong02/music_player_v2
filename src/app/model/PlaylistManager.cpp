@@ -136,6 +136,11 @@ bool PlaylistManager::renamePlaylist(const std::string& oldName, const std::stri
     return true;
 }
 
+bool PlaylistManager::exists(const std::string& name) const {
+    std::lock_guard<std::mutex> lock(dataMutex_);
+    return playlists_.find(name) != playlists_.end();
+}
+
 void PlaylistManager::initializeNowPlayingPlaylist() {
     auto nowPlaying = std::make_shared<Playlist>(NOW_PLAYING_NAME, persistence_);
     playlists_[NOW_PLAYING_NAME] = nowPlaying;

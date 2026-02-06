@@ -48,11 +48,43 @@ void LibraryView::render() {
             fileBrowserView_->show();
         }
     }
+    
     ImGui::SameLine();
-    if (ImGui::Button("Clear Library")) {
-         if (library_) {
-             library_->clear();
-         }
+    
+    // Edit Mode Toggle
+    if (isEditMode_) {
+        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.8f, 0.4f, 0.0f, 1.0f)); 
+        if (ImGui::Button("Done")) {
+            isEditMode_ = false;
+            selectedTracksForRemoval_.clear();
+        }
+        ImGui::PopStyleColor();
+        
+        ImGui::SameLine();
+        if (ImGui::Button("Remove Selected")) {
+            for (const auto& path : selectedTracksForRemoval_) {
+                if (controller_) controller_->removeMedia(path);
+            }
+            selectedTracksForRemoval_.clear();
+        }
+        
+        ImGui::SameLine();
+        if (ImGui::Button("Select All")) {
+             for (const auto& f : files) {
+                 selectedTracksForRemoval_.insert(f->getPath());
+             }
+        }
+        
+        ImGui::SameLine();
+        if (ImGui::Button("Clear All")) { // The "Delete All" requested
+             if (library_) library_->clear();
+             selectedTracksForRemoval_.clear();
+        }
+    } else {
+        if (ImGui::Button("Edit")) {
+            isEditMode_ = true;
+            selectedTracksForRemoval_.clear();
+        }
     }
     
     ImGui::Text("Library: %zu tracks", files.size());
@@ -99,12 +131,40 @@ void LibraryView::render() {
         ImVec2 startPosScreen = ImGui::GetCursorScreenPos();
         
         float buttonsAreaWidth = (buttonSize * 2) + btnSpacing + 15.0f; 
-        float textAreaWidth = contentAvailX - buttonsAreaWidth - paddingX;
+        // Adjust for checkbox in Edit Mode
+        float checkboxWidth = 30.0f;
+        float contentStartX = paddingX;
+        
+        if (isEditMode_) {
+             contentStartX += checkboxWidth;
+        }
 
-        // 1. Render Selectable
+        float textAreaWidth = contentAvailX - buttonsAreaWidth - contentStartX;
+
+        // 1. Render Selectable Background
+        // Use full width for selection, but in edit mode, clicking it might toggle checkbox? 
+        // Or keep standard behavior but add checkbox overlay.
         bool clicked = ImGui::Selectable("##track", isPlaying, ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowOverlap, ImVec2(0, trackItemHeight));
         
         ImVec2 endPosLocal = ImGui::GetCursorPos();
+        
+        // 1.5 Render Checkbox (Edit Mode)
+        if (isEditMode_) {
+            bool isSelected = (selectedTracksForRemoval_.find(file->getPath()) != selectedTracksForRemoval_.end());
+            ImGui::SetCursorPos(ImVec2(startPosLocal.x + 5.0f, startPosLocal.y + (trackItemHeight - 20) / 2));
+            ImGui::PushID((std::string("chk") + std::to_string(i)).c_str());
+            if (ImGui::Checkbox("##check", &isSelected)) {
+                 if (isSelected) selectedTracksForRemoval_.insert(file->getPath());
+                 else selectedTracksForRemoval_.erase(file->getPath());
+            }
+            ImGui::PopID();
+            
+            // If the row was clicked in edit mode, toggle selection too (better UX)
+            if (clicked) {
+                 if (isSelected) selectedTracksForRemoval_.erase(file->getPath());
+                 else selectedTracksForRemoval_.insert(file->getPath());
+            }
+        }
         
         // 3. Render Buttons (Right Aligned)
         float btn2X = startPosLocal.x + contentAvailX - buttonSize - 10.0f;
@@ -123,9 +183,39 @@ void LibraryView::render() {
         if (ImGui::BeginPopup(addPopupId.c_str())) {
              ImGui::Text("Add to Playlist");
              ImGui::Separator();
+             
+             // Create New Playlist and Add
+             ImGui::Text("Create New:");
+             static char newPlaylistName[64] = "";
+             ImGui::PushItemWidth(150.0f);
+             ImGui::InputText("##newPlaylist", newPlaylistName, sizeof(newPlaylistName));
+             ImGui::PopItemWidth();
+             ImGui::SameLine();
+             if (ImGui::Button("Add") && strlen(newPlaylistName) > 0) {
+                 if (playlistManager_) {
+                     std::string name(newPlaylistName);
+                     if (!playlistManager_->exists(name)) {
+                         auto newPl = playlistManager_->createPlaylist(name);
+                         if (newPl) {
+                             newPl->addTrack(file);
+                             newPl->save();
+                             Logger::getInstance().info("Created playlist and added track: " + name);
+                         }
+                         newPlaylistName[0] = '\0'; // Clear buffer
+                         ImGui::CloseCurrentPopup();
+                     } else {
+                         // Maybe show error? For now just log
+                         Logger::getInstance().warn("Playlist already exists: " + name);
+                     }
+                 }
+             }
+             
+             ImGui::Separator();
+             ImGui::Text("Existing:");
              if (playlistManager_) {
                  auto playlists = playlistManager_->getAllPlaylists();
                  bool found = false;
+                 // Sort logic if needed, or just iterate
                  for (const auto& playlist : playlists) {
                      if (playlist->getName() == "Now Playing") continue;
                      found = true;
@@ -142,10 +232,10 @@ void LibraryView::render() {
              ImGui::EndPopup();
         }
         
-        // Button 2 (:)
+        // Button 2 (i)
         ImGui::SetCursorPos(ImVec2(btn2X, btnY));
         std::string metaPopupId = "MetadataPopup##" + std::to_string(i);
-        if (ImGui::Button((":" + std::string("##meta") + std::to_string(i)).c_str(), ImVec2(buttonSize, buttonSize))) {
+        if (ImGui::Button(("i" + std::string("##meta") + std::to_string(i)).c_str(), ImVec2(buttonSize, buttonSize))) {
             ImGui::OpenPopup(metaPopupId.c_str());
         }
         
@@ -165,10 +255,10 @@ void LibraryView::render() {
         ImGui::PopStyleVar();
         
         // 4. Render Text (Using DrawList)
-        ImGui::PushClipRect(startPosScreen, ImVec2(startPosScreen.x + textAreaWidth, startPosScreen.y + trackItemHeight), true);
+        ImGui::PushClipRect(startPosScreen, ImVec2(startPosScreen.x + textAreaWidth + contentStartX, startPosScreen.y + trackItemHeight), true);
         
-        ImVec2 titlePos = ImVec2(startPosScreen.x + paddingX, startPosScreen.y + paddingY);
-        ImVec2 subtitlePos = ImVec2(startPosScreen.x + paddingX, startPosScreen.y + paddingY + 24.0f);
+        ImVec2 titlePos = ImVec2(startPosScreen.x + contentStartX, startPosScreen.y + paddingY);
+        ImVec2 subtitlePos = ImVec2(startPosScreen.x + contentStartX, startPosScreen.y + paddingY + 24.0f);
         
         ImU32 titleColor = ImGui::GetColorU32(ImGuiCol_Text); // Always use Text color (White) for high contrast
         ImU32 subtitleColor = ImGui::GetColorU32(ImGuiCol_TextDisabled); // Using TextDisabled for dim color
@@ -240,8 +330,8 @@ void LibraryView::render() {
         ImGui::SetCursorPos(endPosLocal);
         ImGui::Dummy(ImVec2(0,0));
         
-        // Single click to play
-        if (clicked && playbackController_) {
+        // Single click to play (only if not in edit mode)
+        if (clicked && playbackController_ && !isEditMode_) {
              // Use playContext to set queue without setting a specific playlist object
              // This enables "Library Mode" where Previous uses History and Next uses Queue w/ Global Loop
              playbackController_->setCurrentPlaylist(nullptr);

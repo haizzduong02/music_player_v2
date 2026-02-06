@@ -4,6 +4,7 @@
 #include "../interfaces/IPersistence.h"
 #include <string>
 #include <map>
+#include <vector>
 
 /**
  * @file Config.h

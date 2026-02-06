@@ -29,7 +29,9 @@ public:
     ~FileBrowserView() override = default;
     
     void render() override;
+    void renderPopup(); // Render as a popup/modal
     void handleInput() override;
+    void show() override; // Override to clear selection on open
     
     void setCurrentDirectory(const std::string& path);
     const std::string& getCurrentDirectory() const { return currentPath_; }
@@ -57,7 +59,8 @@ private:
     
     // UI state
     std::string currentPath_;
-    std::vector<FileInfo> currentFiles_;
+    std::vector<FileInfo> currentFiles_; // Folders for navigation
+    std::vector<FileInfo> currentMediaFiles_; // Recursive media files
     // int selectedIndex_; // Removed single selection index
     std::set<std::string> selectedFiles_;  // For multi-select using set
     
@@ -66,6 +69,11 @@ private:
     std::string targetPlaylistName_;
     std::function<void(const std::vector<std::string>&)> onFilesAddedCallback_;
     
+    /**
+     * @brief Render actual content (shared between Window and Popup)
+     */
+    void renderContent();
+
     /**
      * @brief Render directory tree (left panel)
      */

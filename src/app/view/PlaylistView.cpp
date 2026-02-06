@@ -198,7 +198,7 @@ void PlaylistView::render() {
             }
             
             // Context menu
-            if (ImGui::BeginPopupContextItem()) {
+            if (ImGui::BeginPopupContextItem("track_ctx")) {
                 if (ImGui::MenuItem("Remove")) {
                     controller_->removeFromPlaylist(selectedPlaylist_->getName(), i);
                 }
@@ -253,8 +253,9 @@ void PlaylistView::update(void* subject) {
 
 void PlaylistView::renderPopups() {
     // Check if we were browsing and the browser is now closed
+    // Check if we were browsing and the browser is now closed
     if (isBrowsingForPlaylist_ && fileBrowserView_ && !fileBrowserView_->isVisible()) {
-         shouldReopenAddPopup_ = true;
+         // Browser closed, just reset flag. Do NOT reopen Add Popup as it is already open (nested).
          isBrowsingForPlaylist_ = false;
     }
 
@@ -313,9 +314,8 @@ void PlaylistView::renderAddSongsPopup() {
                     });
                     fileBrowserView_->show();
                     
-                    // Hide this popup so browser can be seen/used
-                    showAddSongsPopup_ = false;
-                    ImGui::CloseCurrentPopup();
+                    // Do NOT close this popup, instead open nested popup for File Browser
+                    ImGui::OpenPopup("File Browser");
                     
                     isBrowsingForPlaylist_ = true;
                 }
@@ -408,6 +408,11 @@ void PlaylistView::renderAddSongsPopup() {
         if (ImGui::Button("Cancel", ImVec2(120, 0))) {
             ImGui::CloseCurrentPopup();
             showAddSongsPopup_ = false;
+        }
+
+        // Render File Browser Nested Popup if active
+        if (isBrowsingForPlaylist_ && fileBrowserView_) {
+            fileBrowserView_->renderPopup();
         }
         
         ImGui::EndPopup();
