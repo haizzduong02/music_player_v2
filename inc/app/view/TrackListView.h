@@ -47,7 +47,7 @@ protected:
             ImGui::PopStyleColor();
             
             ImGui::SameLine();
-            if (ImGui::Button("Remove Selected")) {
+            if (ImGui::Button("Remove")) {
                 removeSelectedTracks();
             }
             
@@ -55,12 +55,7 @@ protected:
             if (ImGui::Button("Select All")) {
                  selectAll(tracks);
             }
-            
-            ImGui::SameLine();
-            if (ImGui::Button("Clear All")) { 
-                 if (listController_) listController_->clearAll();
-                 selectedPaths_.clear();
-            }
+        
         } else {
             if (ImGui::Button("Edit")) {
                 toggleEditMode();

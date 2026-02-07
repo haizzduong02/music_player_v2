@@ -115,11 +115,10 @@ void PlaylistView::render() {
             shouldOpenAddPopup_ = true;
         }
         
-        ImGui::SameLine();
-        auto tracks = selectedPlaylist_->getTracks();
-        
-        renderEditToolbar(tracks);
         ImGui::Separator();
+        
+        auto tracks = selectedPlaylist_->getTracks();
+        renderEditToolbar(tracks);
         
         renderTrackListTable(tracks);
     } else {

@@ -49,10 +49,11 @@ void LibraryView::render() {
         library_->getAll() : 
         library_->search(searchQuery_);
 
-    renderEditToolbar(files);
     
     ImGui::Text("Library: %zu tracks", files.size());
     ImGui::Separator();
+    
+    renderEditToolbar(files);
     
     renderTrackListTable(files);
 }

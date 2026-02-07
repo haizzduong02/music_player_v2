@@ -31,11 +31,9 @@ void HistoryView::render() {
     auto historyTracks = history_->getAll();
     
     ImGui::Text("Playback History (%zu tracks)", historyTracks.size());
-    
-    ImGui::SameLine();
-    renderEditToolbar(historyTracks);
-    
     ImGui::Separator();
+    
+    renderEditToolbar(historyTracks);
     
     renderTrackListTable(historyTracks);
 }
