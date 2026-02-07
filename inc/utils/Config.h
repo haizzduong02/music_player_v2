@@ -5,6 +5,7 @@
 #include <string>
 #include <map>
 #include <vector>
+#include <json.hpp>
 
 /**
  * @file Config.h
@@ -48,6 +49,10 @@ struct AppConfig {
     
     // Additional settings
     std::map<std::string, std::string> customSettings;
+    
+    // JSON serialization
+    friend void to_json(nlohmann::json& j, const AppConfig& c);
+    friend void from_json(const nlohmann::json& j, AppConfig& c);
 };
 
 /**

@@ -1,1 +1,31 @@
-{}
+{
+    "baudRate": 115200,
+    "configPath": "./data/config.json",
+    "customSettings": {},
+    "defaultVolume": 0.5,
+    "hardwareEnabled": true,
+    "historyPath": "./data/history.json",
+    "libraryPath": "./data/library.json",
+    "logPath": "./logs/app.log",
+    "loopEnabled": false,
+    "maxHistorySize": 50,
+    "playlistDir": "./data/playlists/",
+    "serialPort": "/dev/ttyUSB0",
+    "shuffleEnabled": false,
+    "supportedAudioFormats": [
+        ".mp3",
+        ".wav",
+        ".flac",
+        ".ogg",
+        ".m4a"
+    ],
+    "supportedVideoFormats": [
+        ".mp4",
+        ".avi",
+        ".mkv",
+        ".mov"
+    ],
+    "theme": "Dark",
+    "windowHeight": 720,
+    "windowWidth": 1280
+}

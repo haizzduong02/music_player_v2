@@ -2,6 +2,7 @@
 #include <filesystem>
 #include <algorithm>
 #include <cctype>
+#include <json.hpp>
 
 namespace fs = std::filesystem;
 
@@ -95,5 +96,42 @@ void MediaFile::determineMediaType() {
         type_ = MediaType::IMAGE;
     } else {
         type_ = MediaType::UNKNOWN;
+    }
+}
+
+// JSON Serialization
+void to_json(nlohmann::json& j, const MediaFile& m) {
+    j = nlohmann::json{
+        {"path", m.filepath_},
+        {"metadata", {
+            {"title", m.metadata_.title},
+            {"artist", m.metadata_.artist},
+            {"album", m.metadata_.album},
+            {"genre", m.metadata_.genre},
+            {"year", m.metadata_.year},
+            {"track", m.metadata_.track},
+            {"duration", m.metadata_.duration} 
+        }},
+        {"inLibrary", m.inLibrary_}
+    };
+}
+
+void from_json(const nlohmann::json& j, MediaFile& m) {
+    if (j.contains("path")) m.filepath_ = j.at("path").get<std::string>();
+    // Re-parse path to get filename/ext
+    m.parseFilePath();
+    m.determineMediaType();
+    
+    if (j.contains("inLibrary")) m.inLibrary_ = j.at("inLibrary").get<bool>();
+    
+    if (j.contains("metadata")) {
+        const auto& meta = j.at("metadata");
+        if (meta.contains("title")) m.metadata_.title = meta.at("title").get<std::string>();
+        if (meta.contains("artist")) m.metadata_.artist = meta.at("artist").get<std::string>();
+        if (meta.contains("album")) m.metadata_.album = meta.at("album").get<std::string>();
+        if (meta.contains("genre")) m.metadata_.genre = meta.at("genre").get<std::string>();
+        if (meta.contains("year")) m.metadata_.year = meta.at("year").get<int>();
+        if (meta.contains("track")) m.metadata_.track = meta.at("track").get<int>();
+        if (meta.contains("duration")) m.metadata_.duration = meta.at("duration").get<int>();
     }
 }

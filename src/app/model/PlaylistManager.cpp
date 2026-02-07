@@ -1,5 +1,7 @@
 #include "../../../inc/app/model/PlaylistManager.h"
 #include "../../../inc/utils/Logger.h"
+#include "../../../inc/service/TagLibMetadataReader.h"
+#include <json.hpp>
 
 PlaylistManager::PlaylistManager(IPersistence* persistence)
     : persistence_(persistence) {
@@ -73,12 +75,26 @@ bool PlaylistManager::saveAll() {
     }
     
     std::lock_guard<std::mutex> lock(dataMutex_);
+    return saveAllInternal();
+}
+
+bool PlaylistManager::saveAllInternal() {
+    if (!persistence_) return false;
     
     bool allSuccess = true;
+    std::vector<std::string> names;
+    
     for (auto& pair : playlists_) {
+        names.push_back(pair.first);
         if (!pair.second->save()) {
             allSuccess = false;
         }
+    }
+    
+    // Save playlist index
+    nlohmann::json j = names;
+    if (!persistence_->saveToFile("playlists.json", j.dump(4))) {
+        allSuccess = false;
     }
     
     return allSuccess;
@@ -93,9 +109,76 @@ bool PlaylistManager::loadAll() {
     std::lock_guard<std::mutex> lock(dataMutex_);
     
     try {
-        // TODO: Implement persistence load for all playlists
-        // Load playlist names from index file
-        // For each name, load playlist
+        // Load playlist names
+        if (persistence_->fileExists("playlists.json")) {
+            std::string content;
+            if (persistence_->loadFromFile("playlists.json", content)) {
+                nlohmann::json j = nlohmann::json::parse(content);
+                
+                for (const auto& item : j) {
+                    std::string name = item.get<std::string>();
+                    if (playlists_.find(name) == playlists_.end()) {
+                        auto playlist = std::make_shared<Playlist>(name, persistence_);
+                        playlists_[name] = playlist;
+                        playlist->load();
+                    } else {
+                         playlists_[name]->load();
+                    }
+                }
+            }
+        }
+        
+        // Also load "Now Playing" if it was saved
+        if (playlists_.find(NOW_PLAYING_NAME) != playlists_.end()) {
+             playlists_[NOW_PLAYING_NAME]->load();
+        } else {
+             initializeNowPlayingPlaylist();
+             playlists_[NOW_PLAYING_NAME]->load(); 
+        }
+
+        // Ensure Favorites exists and load it
+        if (playlists_.find(FAVORITES_PLAYLIST_NAME) == playlists_.end()) {
+            // Create manually to update map
+            auto playlist = std::make_shared<Playlist>(FAVORITES_PLAYLIST_NAME, persistence_);
+            playlists_[FAVORITES_PLAYLIST_NAME] = playlist;
+            Logger::getInstance().info("Created playlist: " + std::string(FAVORITES_PLAYLIST_NAME));
+        }
+        playlists_[FAVORITES_PLAYLIST_NAME]->load();
+
+        // Fix missing metadata (self-healing)
+        bool metadataUpdated = false;
+        TagLibMetadataReader metadataReader;
+        
+        for (auto& [name, playlist] : playlists_) {
+            if (!playlist) continue;
+            
+            auto tracks = playlist->getTracks();
+            for (auto& track : tracks) {
+                if (!track) continue;
+                
+                // If duration is 0, metadata is likely missing/uninitialized
+                if (track->getMetadata().duration == 0) {
+                    try {
+                        // Attempt to read metadata from file
+                        MediaMetadata meta = metadataReader.readMetadata(track->getPath());
+                        
+                        // If we got valid data, update the track
+                        if (meta.duration > 0 || !meta.title.empty()) {
+                            track->setMetadata(meta);
+                            metadataUpdated = true;
+                            Logger::getInstance().info("Restored metadata for: " + track->getPath());
+                        }
+                    } catch (const std::exception& e) {
+                        Logger::getInstance().warn("Error restoring metadata: " + std::string(e.what()));
+                    }
+                }
+            }
+        }
+        
+        if (metadataUpdated) {
+            saveAllInternal();
+        }
+
         Subject::notify();
         return true;
     } catch (const std::exception& e) {

@@ -7,6 +7,7 @@
 #include <vector>
 #include <memory>
 #include <string>
+#include <json.hpp>
 
 /**
  * @file Playlist.h
@@ -77,7 +78,30 @@ public:
      */
     std::shared_ptr<MediaFile> getTrack(size_t index) const;
     
-    const std::vector<std::shared_ptr<MediaFile>>& getTracks() const { return tracks_; }
+    /**
+     * @brief Save playlist to disk
+     * @return true if saved successfully
+     */
+    bool save();
+    
+    /**
+     * @brief Load playlist from disk
+     * @return true if loaded successfully
+     */
+    bool load();
+    
+    // JSON serialization
+    friend void to_json(nlohmann::json& j, const Playlist& p);
+    friend void from_json(const nlohmann::json& j, Playlist& p);
+
+    /**
+     * @brief Get tracks in the playlist
+     * @return Vector of tracks
+     */
+    const std::vector<std::shared_ptr<MediaFile>>& getTracks() const {
+        std::lock_guard<std::mutex> lock(dataMutex_);
+        return tracks_;
+    }
     
     const std::string& getName() const { return name_; }
     
@@ -107,17 +131,7 @@ public:
     // Legacy support (optional, or just remove)
     bool isLoopEnabled() const { return repeatMode_ != RepeatMode::NONE; }
     
-    /**
-     * @brief Save playlist to disk
-     * @return true if saved successfully
-     */
-    bool save();
-    
-    /**
-     * @brief Load playlist from disk
-     * @return true if loaded successfully
-     */
-    bool load();
+
     
     /**
      * @brief Check if track exists in playlist

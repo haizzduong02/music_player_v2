@@ -3,6 +3,7 @@
 
 #include "../../interfaces/IMetadataReader.h"
 #include <string>
+#include <json.hpp>
 #include <memory>
 
 /**
@@ -72,6 +73,10 @@ public:
      * @return File size
      */
     size_t getFileSize() const;
+    
+    // JSON serialization support
+    friend void to_json(nlohmann::json& j, const MediaFile& m);
+    friend void from_json(const nlohmann::json& j, MediaFile& m);
     
 private:
     std::string filepath_;

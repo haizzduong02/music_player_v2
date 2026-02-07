@@ -120,18 +120,24 @@ void Playlist::rename(const std::string& newName) {
     Subject::notify();
 }
 
+#include <json.hpp>
+
+// ... (other includes)
+
 bool Playlist::save() {
     if (!persistence_) {
-        Logger::getInstance().warn("No persistence layer configured for Playlist");
+        // Logger::getInstance().warn("No persistence layer configured for Playlist");
         return false;
     }
     
     std::lock_guard<std::mutex> lock(dataMutex_);
     
     try {
-        // TODO: Implement persistence save
-        // persistence_->save("playlist_" + name_, tracks_);
-        return true;
+        nlohmann::json j = *this;
+        // Filename: playlist_Name.json
+        // Sanitize name? ideally. For now assume simple names.
+        std::string filename = "playlist_" + name_ + ".json";
+        return persistence_->saveToFile(filename, j.dump(4));
     } catch (const std::exception& e) {
         Logger::getInstance().error("Failed to save playlist '" + name_ + "': " + std::string(e.what()));
         return false;
@@ -139,23 +145,70 @@ bool Playlist::save() {
 }
 
 bool Playlist::load() {
-    if (!persistence_) {
-        Logger::getInstance().warn("No persistence layer configured for Playlist");
-        return false;
-    }
+    if (!persistence_) return false;
     
     std::lock_guard<std::mutex> lock(dataMutex_);
     
     try {
-        // TODO: Implement persistence load
-        // tracks_ = persistence_->load<MediaFile>("playlist_" + name_);
-        Subject::notify();
+        std::string filename = "playlist_" + name_ + ".json";
+        if (!persistence_->fileExists(filename)) return false;
+        
+        std::string content;
+        if (!persistence_->loadFromFile(filename, content)) return false;
+        nlohmann::json j = nlohmann::json::parse(content);
+        
+        // Deserialize manually or via from_json helper logic
+        // We can't use *this = j because we are inside the object and have mutex etc.
+        // Also tracks need to be converted from json objects to MediaFiles
+        
+        if (j.contains("tracks")) {
+            tracks_.clear();
+            for (const auto& item : j["tracks"]) {
+                auto track = std::make_shared<MediaFile>(""); 
+                // Using dummy path, from_json will fill it
+                item.get_to(*track);
+                tracks_.push_back(track);
+            }
+        }
+        
         return true;
     } catch (const std::exception& e) {
         Logger::getInstance().error("Failed to load playlist '" + name_ + "': " + std::string(e.what()));
         return false;
     }
 }
+
+void to_json(nlohmann::json& j, const Playlist& p) {
+    // Only save tracks, name is implied by filename usually, but valid to save it too
+    std::vector<nlohmann::json> tracksJson;
+    for (const auto& track : p.tracks_) {
+        if (track) {
+            nlohmann::json t;
+            to_json(t, *track);
+            tracksJson.push_back(t);
+        }
+    }
+    
+    j = nlohmann::json{
+        {"name", p.name_},
+        {"tracks", tracksJson}
+    };
+}
+
+void from_json(const nlohmann::json& j, Playlist& p) {
+    if (j.contains("name")) p.name_ = j.at("name").get<std::string>();
+    // Tracks handled in load() mostly, but if used for full deserialization:
+    if (j.contains("tracks")) {
+        p.tracks_.clear();
+        for (const auto& item : j["tracks"]) {
+            auto track = std::make_shared<MediaFile>("");
+            item.get_to(*track);
+            p.tracks_.push_back(track);
+        }
+    }
+}
+
+
 
 bool Playlist::contains(const std::string& filepath) const {
     std::lock_guard<std::mutex> lock(dataMutex_);

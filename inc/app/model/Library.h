@@ -8,6 +8,7 @@
 #include <memory>
 #include <string>
 #include <unordered_set>
+#include <json.hpp>
 
 /**
  * @file Library.h
@@ -54,6 +55,18 @@ public:
     bool contains(const std::string& filepath) const;
     
     /**
+     * @brief Save library to disk
+     * @return true if successful
+     */
+    bool save();
+    
+    /**
+     * @brief Load library from disk
+     * @return true if successful
+     */
+    bool load();
+    
+    /**
      * @brief Search library by various criteria
      * @param query Search query
      * @param searchFields Fields to search in (e.g., "title", "artist")
@@ -75,18 +88,7 @@ public:
     
     void clear();
     
-    /**
-     * @brief Save library to disk
-     * @return true if saved successfully
-     */
-    bool save();
-    
-    /**
-     * @brief Load library from disk
-     * @return true if loaded successfully
-     */
-    bool load();
-    
+
 private:
     std::vector<std::shared_ptr<MediaFile>> mediaFiles_;
     std::unordered_set<std::string> pathIndex_;  // For fast lookup

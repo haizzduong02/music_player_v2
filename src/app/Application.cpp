@@ -372,6 +372,7 @@ void Application::shutdown() {
     // Save data
     Config::getInstance().save();
     if (library_) library_->save();
+    if (playlistManager_) playlistManager_->saveAll();
     
     // Release specific controllers and engine BEFORE destroying GL context
     if (playbackController_) {

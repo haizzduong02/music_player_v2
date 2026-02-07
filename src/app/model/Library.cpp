@@ -1,6 +1,77 @@
 #include "../../../inc/app/model/Library.h"
 #include "../../../inc/utils/Logger.h"
 #include <algorithm>
+#include <json.hpp>
+
+// ...
+
+bool Library::save() {
+    if (!persistence_) return false;
+    
+    std::lock_guard<std::mutex> lock(dataMutex_);
+    
+    try {
+        std::vector<nlohmann::json> filesJson;
+        for (const auto& file : mediaFiles_) {
+            if (file) {
+                nlohmann::json j;
+                to_json(j, *file); // Uses MediaFile friend
+                filesJson.push_back(j);
+            }
+        }
+        
+        nlohmann::json libraryJson = filesJson;
+        return persistence_->saveToFile("library.json", libraryJson.dump(4));
+    } catch (const std::exception& e) {
+        Logger::getInstance().error("Failed to save library: " + std::string(e.what()));
+        return false;
+    }
+}
+
+bool Library::load() {
+    if (!persistence_) return false;
+    
+    std::lock_guard<std::mutex> lock(dataMutex_);
+    
+    try {
+        if (!persistence_->fileExists("library.json")) return false;
+        
+        std::string content;
+        if (!persistence_->loadFromFile("library.json", content)) return false;
+        nlohmann::json libraryJson = nlohmann::json::parse(content);
+        
+        if (!libraryJson.is_array()) return false;
+        
+        mediaFiles_.clear();
+        pathIndex_.clear();
+        
+        for (const auto& item : libraryJson) {
+            auto file = std::make_shared<MediaFile>("");
+            item.get_to(*file); // Uses MediaFile friend
+            
+            // Re-validate if file exists? Maybe, but for now just load it.
+            if (file->exists()) {
+                mediaFiles_.push_back(file);
+                pathIndex_.insert(file->getPath());
+            } else {
+                // Determine what to do with missing files? For now, skip or keep?
+                // Keeping them is safer for removable drives, but checking exists() is good hygiene.
+                // Let's keep them if they were in the library, or maybe skip?
+                // MediaFile::from_json sets inLibrary to whatever was saved. 
+                // Let's assume valid.
+                mediaFiles_.push_back(file);
+                pathIndex_.insert(file->getPath());
+            }
+        }
+        
+        Logger::getInstance().info("Loaded " + std::to_string(mediaFiles_.size()) + " files into library");
+        Subject::notify();
+        return true;
+    } catch (const std::exception& e) {
+        Logger::getInstance().error("Failed to load library: " + std::string(e.what()));
+        return false;
+    }
+}
 
 Library::Library(IPersistence* persistence)
     : persistence_(persistence) {
@@ -120,43 +191,7 @@ void Library::clear() {
     Subject::notify();
 }
 
-bool Library::save() {
-    if (!persistence_) {
-        Logger::getInstance().warn("No persistence layer configured for Library");
-        return false;
-    }
-    
-    std::lock_guard<std::mutex> lock(dataMutex_);
-    
-    try {
-        // TODO: Implement persistence save
-        // persistence_->save("library", mediaFiles_);
-        return true;
-    } catch (const std::exception& e) {
-        Logger::getInstance().error("Failed to save library: " + std::string(e.what()));
-        return false;
-    }
-}
 
-bool Library::load() {
-    if (!persistence_) {
-        Logger::getInstance().warn("No persistence layer configured for Library");
-        return false;
-    }
-    
-    std::lock_guard<std::mutex> lock(dataMutex_);
-    
-    try {
-        // TODO: Implement persistence load
-        // mediaFiles_ = persistence_->load<MediaFile>("library");
-        rebuildPathIndex();
-        Subject::notify();
-        return true;
-    } catch (const std::exception& e) {
-        Logger::getInstance().error("Failed to load library: " + std::string(e.what()));
-        return false;
-    }
-}
 
 void Library::rebuildPathIndex() {
     pathIndex_.clear();

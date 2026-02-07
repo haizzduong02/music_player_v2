@@ -112,11 +112,17 @@ private:
     mutable std::mutex dataMutex_;  ///< Thread-safety for playlist manager operations
     
     static constexpr const char* NOW_PLAYING_NAME = "Now Playing";
+    static constexpr const char* FAVORITES_PLAYLIST_NAME = "Favorites";
     
     /**
      * @brief Initialize the default "Now Playing" playlist
      */
     void initializeNowPlayingPlaylist();
+
+    /**
+     * @brief Internal helper to save all without locking (prevents deadlock)
+     */
+    bool saveAllInternal();
 };
 
 #endif // PLAYLIST_MANAGER_H

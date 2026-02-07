@@ -72,7 +72,16 @@ void HistoryView::render() {
         float textAreaWidth = contentAvailX - paddingX;
 
         // 1. Render Selectable (Span Alloc)
-        ImGui::Selectable("##hist", isPlaying, ImGuiSelectableFlags_SpanAllColumns, ImVec2(0, trackItemHeight));
+        if (ImGui::Selectable("##hist", isPlaying, ImGuiSelectableFlags_SpanAllColumns, ImVec2(0, trackItemHeight))) {
+        }
+        
+        // Context menu - MUST FOLLOW Selectable immediately
+        if (ImGui::BeginPopupContextItem("hist_track_ctx")) {
+            if (ImGui::MenuItem("Remove from History")) {
+                controller_->removeFromHistory(i);
+            }
+            ImGui::EndPopup();
+        }
         
         ImVec2 endPosLocal = ImGui::GetCursorPos();
         
@@ -148,13 +157,7 @@ void HistoryView::render() {
              }
         }
         
-        // Context menu
-        if (ImGui::BeginPopupContextItem()) {
-            if (ImGui::MenuItem("Remove from History")) {
-                controller_->removeFromHistory(i);
-            }
-            ImGui::EndPopup();
-        }
+        // Context menu removed from here (moved up)
         
         ImGui::PopID();
     }
