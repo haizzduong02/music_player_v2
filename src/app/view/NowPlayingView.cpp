@@ -111,9 +111,36 @@ void NowPlayingView::render() {
             return s + "...";
         };
 
-        // Line 1: Title
+        // Line 1: Title + Heart Button
         ImGui::AlignTextToFramePadding();
         ImGui::Text("%s", truncate(track->getDisplayName(), maxTitleWidth).c_str());
+        
+        ImGui::SameLine();
+        if (playlistManager_) {
+            auto favPlaylist = playlistManager_->getPlaylist(PlaylistManager::FAVORITES_PLAYLIST_NAME);
+            if (favPlaylist) {
+                bool isFavorite = favPlaylist->contains(track->getPath());
+                
+                if (isFavorite) {
+                    ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 0.4f, 0.4f, 1.0f)); // Light Red/Pink
+                }
+                
+                if (ImGui::Button(isFavorite ? "♥" : "♡")) {
+                    if (isFavorite) {
+                        favPlaylist->removeTrackByPath(track->getPath());
+                        Logger::getInstance().info("Removed from Favorites: " + track->getDisplayName());
+                    } else {
+                        favPlaylist->addTrack(track);
+                        Logger::getInstance().info("Added to Favorites: " + track->getDisplayName());
+                    }
+                    favPlaylist->save();
+                }
+                
+                if (isFavorite) {
+                    ImGui::PopStyleColor();
+                }
+            }
+        }
         
         // Line 2: Artist
         // Manually move cursor down to ensure it's on a new line distinct from the buttons

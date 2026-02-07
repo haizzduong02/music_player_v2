@@ -106,18 +106,21 @@ public:
      */
     bool renamePlaylist(const std::string& oldName, const std::string& newName);
     
+public:
+    static constexpr const char* FAVORITES_PLAYLIST_NAME = "Favorites";
+    
 private:
     std::unordered_map<std::string, std::shared_ptr<Playlist>> playlists_;
     IPersistence* persistence_;
     mutable std::mutex dataMutex_;  ///< Thread-safety for playlist manager operations
     
     static constexpr const char* NOW_PLAYING_NAME = "Now Playing";
-    static constexpr const char* FAVORITES_PLAYLIST_NAME = "Favorites";
     
     /**
      * @brief Initialize the default "Now Playing" playlist
      */
     void initializeNowPlayingPlaylist();
+    void initializeFavoritesPlaylist();
 
     /**
      * @brief Internal helper to save all without locking (prevents deadlock)

@@ -266,6 +266,7 @@ bool Application::init() {
         
         // Load data
         library_->load();
+        playlistManager_->loadAll();
         
         initialized_ = true;
         Logger::getInstance().info("Application initialized successfully");

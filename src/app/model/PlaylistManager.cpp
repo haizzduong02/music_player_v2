@@ -6,6 +6,7 @@
 PlaylistManager::PlaylistManager(IPersistence* persistence)
     : persistence_(persistence) {
     initializeNowPlayingPlaylist();
+    initializeFavoritesPlaylist();
 }
 
 std::shared_ptr<Playlist> PlaylistManager::createPlaylist(const std::string& name) {
@@ -27,9 +28,9 @@ std::shared_ptr<Playlist> PlaylistManager::createPlaylist(const std::string& nam
 bool PlaylistManager::deletePlaylist(const std::string& name) {
     std::lock_guard<std::mutex> lock(dataMutex_);
     
-    // Prevent deleting "Now Playing"
-    if (name == NOW_PLAYING_NAME) {
-        Logger::getInstance().warn("Cannot delete 'Now Playing' playlist");
+    // Prevent deleting "Now Playing" or "Favorites"
+    if (name == NOW_PLAYING_NAME || name == FAVORITES_PLAYLIST_NAME) {
+        Logger::getInstance().warn("Cannot delete system playlist: " + name);
         return false;
     }
     
@@ -190,9 +191,9 @@ bool PlaylistManager::loadAll() {
 bool PlaylistManager::renamePlaylist(const std::string& oldName, const std::string& newName) {
     std::lock_guard<std::mutex> lock(dataMutex_);
     
-    // Prevent renaming "Now Playing"
-    if (oldName == NOW_PLAYING_NAME) {
-        Logger::getInstance().warn("Cannot rename 'Now Playing' playlist");
+    // Prevent renaming "Now Playing" or "Favorites"
+    if (oldName == NOW_PLAYING_NAME || oldName == FAVORITES_PLAYLIST_NAME) {
+        Logger::getInstance().warn("Cannot rename system playlist: " + oldName);
         return false;
     }
     
@@ -225,7 +226,17 @@ bool PlaylistManager::exists(const std::string& name) const {
 }
 
 void PlaylistManager::initializeNowPlayingPlaylist() {
-    auto nowPlaying = std::make_shared<Playlist>(NOW_PLAYING_NAME, persistence_);
-    playlists_[NOW_PLAYING_NAME] = nowPlaying;
-    Logger::getInstance().info("Initialized 'Now Playing' playlist");
+    if (playlists_.find(NOW_PLAYING_NAME) == playlists_.end()) {
+        auto nowPlaying = std::make_shared<Playlist>(NOW_PLAYING_NAME, persistence_);
+        playlists_[NOW_PLAYING_NAME] = nowPlaying;
+        Logger::getInstance().info("Initialized 'Now Playing' playlist");
+    }
+}
+
+void PlaylistManager::initializeFavoritesPlaylist() {
+    if (playlists_.find(FAVORITES_PLAYLIST_NAME) == playlists_.end()) {
+        auto favorites = std::make_shared<Playlist>(FAVORITES_PLAYLIST_NAME, persistence_);
+        playlists_[FAVORITES_PLAYLIST_NAME] = favorites;
+        Logger::getInstance().info("Initialized 'Favorites' playlist");
+    }
 }
