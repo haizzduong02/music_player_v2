@@ -82,7 +82,8 @@ public:
     IView* createHistoryView(
         HistoryController* controller,
         History* history,
-        PlaybackController* playbackController) override;
+        PlaybackController* playbackController,
+        PlaylistManager* playlistManager) override;
     
     /**
      * @brief Create file browser view

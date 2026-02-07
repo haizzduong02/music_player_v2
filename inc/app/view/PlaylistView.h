@@ -35,15 +35,12 @@ public:
     
     void setFileBrowserView(FileBrowserView* browserView) { fileBrowserView_ = browserView; }
     
-    PlaylistManager* getManager() const { return manager_; }
+    PlaylistManager* getManager() const { return playlistManager_; }
     
 protected:
-    void removeSelectedTracks() override;
     
 private:
-    PlaylistController* controller_;
-    PlaylistManager* manager_;
-    PlaybackController* playbackController_;
+    PlaylistController* playlistController_;
     FileBrowserView* fileBrowserView_ = nullptr;
     
     // UI state

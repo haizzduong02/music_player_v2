@@ -5,10 +5,12 @@
 LibraryController::LibraryController(
     Library* library,
     IFileSystem* fileSystem,
-    IMetadataReader* metadataReader)
+    IMetadataReader* metadataReader,
+    PlaybackController* playbackController)
     : library_(library),
       fileSystem_(fileSystem),
-      metadataReader_(metadataReader) {
+      metadataReader_(metadataReader),
+      playbackController_(playbackController) {
 }
 
 int LibraryController::addMediaFilesFromDirectory(const std::string& directoryPath, bool recursive) {
@@ -106,4 +108,25 @@ int LibraryController::verifyLibrary() {
     
     Logger::getInstance().info("Removed " + std::to_string(removedCount) + " missing files");
     return removedCount;
+}
+void LibraryController::playTrack(const std::vector<std::shared_ptr<MediaFile>>& context, size_t index) {
+    if (playbackController_) {
+        playbackController_->setCurrentPlaylist(nullptr);
+        playbackController_->playContext(context, index);
+    }
+}
+
+void LibraryController::removeTracks(const std::set<std::string>& paths) {
+    if (!library_) return;
+    for (const auto& path : paths) {
+        library_->removeMedia(path);
+    }
+}
+
+void LibraryController::removeTrackByPath(const std::string& path) {
+    if (library_) library_->removeMedia(path);
+}
+
+void LibraryController::clearAll() {
+    if (library_) library_->clear();
 }

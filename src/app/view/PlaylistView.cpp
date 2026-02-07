@@ -2,31 +2,37 @@
 #include "../../../inc/app/view/FileBrowserView.h"
 #include "../../../inc/utils/Logger.h"
 #include "../../../inc/app/controller/PlaybackController.h"
+#include "../../../inc/app/controller/PlaylistTrackListController.h"
 
 #ifdef USE_IMGUI
 #include <imgui.h>
 #endif
 
 PlaylistView::PlaylistView(PlaylistController* controller, PlaylistManager* manager, PlaybackController* playbackController)
-    : controller_(controller), manager_(manager), playbackController_(playbackController), selectedTrackIndex_(-1), showCreateDialog_(false), showRenameDialog_(false) {
+    : playlistController_(controller), selectedTrackIndex_(-1), showCreateDialog_(false), showRenameDialog_(false) {
     
-    // Attach as observer to manager
-    if (manager_) {
-        manager_->attach(this);
+    // Initialize TrackListView base members
+    playbackController_ = playbackController;
+    playlistManager_ = manager;
+    // listController_ will be set dynamically when a playlist is selected
+    
+    // Attach as observer to playlistManager_
+    if (playlistManager_) {
+        playlistManager_->attach(this);
     }
 }
 
 PlaylistView::~PlaylistView() {
-    // Detach from manager
-    if (manager_) {
-        manager_->detach(this);
+    // Detach from playlistManager_
+    if (playlistManager_) {
+        playlistManager_->detach(this);
     }
 }
 
 void PlaylistView::render() {
     // Embedded render: no Begin/End
     
-    auto playlists = manager_->getAllPlaylists();
+    auto playlists = playlistManager_->getAllPlaylists();
     
     // Top panel: Playlist list (Fixed height)
     ImGui::BeginChild("PlaylistList", ImVec2(0, 150), true);
@@ -47,8 +53,15 @@ void PlaylistView::render() {
             selectedPlaylistName_ = playlists[i]->getName();
             selectedPlaylist_ = playlists[i];
             selectedTrackIndex_ = -1;
-            selectedPaths_.clear(); // Clear selection when switching playlists
-            isEditMode_ = false;   // Reset edit mode
+            selectedPaths_.clear(); 
+            isEditMode_ = false;   
+            
+            // Re-create adapter for the selected playlist
+            if (playlistController_ && selectedPlaylist_) {
+                static std::shared_ptr<ITrackListController> adapter; 
+                adapter = std::make_shared<PlaylistTrackListController>(playlistController_, selectedPlaylist_, playbackController_);
+                listController_ = adapter.get();
+            }
         }
         
         // Playlist Delete Button
@@ -61,7 +74,7 @@ void PlaylistView::render() {
         
         ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.4f, 0.1f, 0.1f, 1.0f));
         if (ImGui::Button("X", ImVec2(delBtnWidth, 0))) {
-            if (controller_->deletePlaylist(playlists[i]->getName())) {
+            if (playlistController_->deletePlaylist(playlists[i]->getName())) {
                 if (isSelectedPl) {
                     selectedPlaylist_ = nullptr;
                     selectedPlaylistName_ = "";
@@ -95,7 +108,7 @@ void PlaylistView::render() {
         
         ImGui::SameLine();
         if (ImGui::Button("Shuffle")) {
-            controller_->shufflePlaylist(selectedPlaylist_->getName());
+            playlistController_->shufflePlaylist(selectedPlaylist_->getName());
         }
         ImGui::SameLine();
         if (ImGui::Button("Add Files")) {
@@ -103,190 +116,12 @@ void PlaylistView::render() {
         }
         
         ImGui::SameLine();
-        // Edit Mode Toggle
-        if (isEditMode_) {
-            ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.8f, 0.4f, 0.0f, 1.0f));
-            if (ImGui::Button("Done")) {
-                toggleEditMode();
-            }
-            ImGui::PopStyleColor();
-            
-            ImGui::SameLine();
-            if (ImGui::Button("Remove Selected")) {
-                removeSelectedTracks();
-            }
-            
-            ImGui::SameLine();
-            if (ImGui::Button("Select All")) {
-                selectAll(selectedPlaylist_->getTracks());
-            }
-        } else {
-            if (ImGui::Button("Edit")) {
-                toggleEditMode();
-            }
-        }
-        
-        ImGui::Separator();
-        
         auto tracks = selectedPlaylist_->getTracks();
         
-        std::string currentPlayingPath = "";
-        if (playbackController_ && playbackController_->getPlaybackState() && playbackController_->getPlaybackState()->getCurrentTrack()) {
-            currentPlayingPath = playbackController_->getPlaybackState()->getCurrentTrack()->getPath();
-        }
+        renderEditToolbar(tracks);
+        ImGui::Separator();
         
-        for (size_t i = 0; i < tracks.size(); ++i) {
-            const auto& track = tracks[i];
-            const auto& meta = track->getMetadata();
-            bool isPlaying = (track->getPath() == currentPlayingPath);
-            
-            ImGui::PushID(static_cast<int>(i));
-            
-            std::string title = track->getDisplayName();
-            std::string subtitle = meta.artist;
-            if (!meta.album.empty()) {
-                if (!subtitle.empty()) subtitle += " - ";
-                subtitle += meta.album;
-            }
-
-            if (isPlaying) {
-                ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(0.00f, 0.60f, 0.60f, 1.0f)); 
-                ImGui::PushStyleColor(ImGuiCol_HeaderHovered, ImVec4(0.00f, 0.60f, 0.60f, 1.0f));
-            }
-            
-            // --- Layout Settings ---
-            float trackItemHeight = 60.0f; 
-            float paddingX = 10.0f;
-            float paddingY = 8.0f; 
-            
-            float contentAvailX = ImGui::GetContentRegionAvail().x;
-            ImVec2 startPosScreen = ImGui::GetCursorScreenPos();
-            
-            float textAreaWidth = contentAvailX - paddingX;
-
-            // Adjust for checkbox in Edit Mode
-            float checkboxWidth = 30.0f;
-            float contentStartX = paddingX;
-            if (isEditMode_) contentStartX += checkboxWidth;
-            
-            // 1. Render Selectable
-            bool clicked = ImGui::Selectable("##pltrack", isPlaying, ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowOverlap, ImVec2(0, trackItemHeight));
-            
-            // Render Checkbox 
-            if (isEditMode_) {
-                bool selected = isSelected(track->getPath());
-                ImGui::SetCursorPos(ImVec2(startPosScreen.x + 5.0f - ImGui::GetWindowPos().x, startPosScreen.y + (trackItemHeight - 20) / 2 - ImGui::GetWindowPos().y));
-                // Note: GetCursorPos is local, but startPosScreen is screen. 
-                // Let's use relative positioning.
-                ImVec2 localPos = ImVec2(startPosScreen.x - ImGui::GetWindowPos().x + ImGui::GetScrollX() + 5.0f, 
-                                         startPosScreen.y - ImGui::GetWindowPos().y + ImGui::GetScrollY() + (trackItemHeight - 20) / 2);
-                ImGui::SetCursorPos(localPos);
-
-                ImGui::PushID((std::string("chk") + std::to_string(i)).c_str());
-                if (ImGui::Checkbox("##check", &selected)) {
-                     toggleSelection(track->getPath());
-                }
-                ImGui::PopID();
-                
-                if (clicked) toggleSelection(track->getPath());
-            }
-            
-            ImVec2 endPosLocal = ImGui::GetCursorPos();
-            
-            // 2. Render Text (Using DrawList)
-            ImGui::PushClipRect(startPosScreen, ImVec2(startPosScreen.x + textAreaWidth, startPosScreen.y + trackItemHeight), true);
-            
-            ImVec2 titlePos = ImVec2(startPosScreen.x + paddingX, startPosScreen.y + paddingY);
-            ImVec2 subtitlePos = ImVec2(startPosScreen.x + paddingX, startPosScreen.y + paddingY + 24.0f);
-            
-            ImU32 titleColor = ImGui::GetColorU32(ImGuiCol_Text);
-            ImU32 subtitleColor = ImGui::GetColorU32(ImGuiCol_TextDisabled);
-            
-            auto fonts = ImGui::GetIO().Fonts;
-            ImFont* titleFont = (fonts->Fonts.Size > 2) ? fonts->Fonts[2] : ((fonts->Fonts.Size > 1) ? fonts->Fonts[1] : fonts->Fonts[0]);
-            
-            // --- Marquee Logic ---
-            ImGui::PushFont(titleFont);
-            ImVec2 titleSize = ImGui::CalcTextSize(title.c_str());
-            ImGui::PopFont();
-            
-            float scrollOffsetX = 0.0f;
-            float availTitleWidth = textAreaWidth;
-            
-            // Use Index i for ID
-            ImGuiID itemId = ImGui::GetID((void*)(intptr_t)i);
-            float* pHoverTime = ImGui::GetStateStorage()->GetFloatRef(itemId, -1.0f);
-            
-            // Check hover on selectable (Item 1)
-            // But we already rendered Dummy and SetCursorPos...
-            // ImGui::IsItemHovered() here checks the Dummy at line 137? No, Check previous Item (Selectable at 122).
-            // Wait, we used Selectable at line 122, then GetCursorPos...
-            // We should use clicked state from line 122, but for Hover, we can check IsItemHovered() if we are still in same frame context?
-            // Actually `clicked` is bool. Selectable is the Item.
-            // Let's rely on `ImGui::IsItemHovered()` (Selectable is likely the last item or we can check rect).
-            // The Selectable was drawn, then Dummy? No, Selectable is line 122.
-            // We are at line 130 approx.
-            // Let's ensure we are checking the row.
-            // Actually, we can just check if mouse is in the rect.
-            
-            bool isHovered = ImGui::IsMouseHoveringRect(startPosScreen, ImVec2(startPosScreen.x + contentAvailX, startPosScreen.y + trackItemHeight));
-            
-            if (isHovered && titleSize.x > availTitleWidth) {
-                if (*pHoverTime < 0.0f) *pHoverTime = static_cast<float>(ImGui::GetTime());
-                
-                float driftTime = static_cast<float>(ImGui::GetTime()) - *pHoverTime;
-                float initialDelay = 0.5f;
-                
-                if (driftTime > initialDelay) {
-                    float scrollTime = driftTime - initialDelay;
-                    float scrollSpeed = 30.0f;
-                    float maxScroll = titleSize.x - availTitleWidth + 20.0f;
-                    
-                    float totalDuration = (maxScroll / scrollSpeed) + 2.0f;
-                    float currentCycle = fmodf(scrollTime, totalDuration);
-                    
-                    if (currentCycle < (maxScroll / scrollSpeed)) {
-                        scrollOffsetX = currentCycle * scrollSpeed;
-                    } else {
-                        scrollOffsetX = maxScroll;
-                    }
-                }
-            } else {
-                *pHoverTime = -1.0f;
-            }
-            
-            ImGui::PushFont(titleFont);
-            ImVec2 drawnTitlePos = ImVec2(titlePos.x - scrollOffsetX, titlePos.y);
-            ImGui::GetWindowDrawList()->AddText(drawnTitlePos, titleColor, title.c_str());
-            ImGui::PopFont();
-            
-            ImGui::GetWindowDrawList()->AddText(subtitlePos, subtitleColor, subtitle.c_str());
-            
-            ImGui::PopClipRect();
-            
-            if (isPlaying) { ImGui::PopStyleColor(2); }
-            
-            ImGui::SetCursorPos(endPosLocal);
-            ImGui::Dummy(ImVec2(0,0));
-            
-            if (clicked) {
-                if (playbackController_) {
-                    playbackController_->setCurrentPlaylist(selectedPlaylist_.get());
-                    playbackController_->play(tracks[i]);
-                    Logger::getInstance().info("Playing from playlist: " + title);
-                }
-            }
-            
-            // Context menu
-            if (ImGui::BeginPopupContextItem("track_ctx")) {
-                if (ImGui::MenuItem("Remove")) {
-                    controller_->removeFromPlaylist(selectedPlaylist_->getName(), i);
-                }
-                ImGui::EndPopup();
-            }
-            
-            ImGui::PopID();
-        }
+        renderTrackListTable(tracks);
     } else {
         ImGui::Text("Select a playlist");
     }
@@ -306,7 +141,7 @@ void PlaylistView::render() {
         ImGui::InputText("Name", nameBuffer, sizeof(nameBuffer));
         
         if (ImGui::Button("Create")) {
-            controller_->createPlaylist(nameBuffer);
+            playlistController_->createPlaylist(nameBuffer);
             nameBuffer[0] = '\0';
             ImGui::CloseCurrentPopup();
         }
@@ -328,18 +163,9 @@ void PlaylistView::handleInput() {
 
 void PlaylistView::update(void* subject) {
     (void)subject;
-    // Playlist manager changed - will re-render
+    // playlistManager_ changed - will re-render
 }
 
-void PlaylistView::removeSelectedTracks() {
-    if (!selectedPlaylist_) return;
-    
-    // We must remove by path as indices shift
-    for (const auto& path : selectedPaths_) {
-        controller_->removeFromPlaylistByPath(selectedPlaylist_->getName(), path);
-    }
-    selectedPaths_.clear();
-}
 
 void PlaylistView::renderPopups() {
     // Check if we were browsing and the browser is now closed
@@ -421,7 +247,7 @@ void PlaylistView::renderAddSongsPopup() {
         
         if (ImGui::BeginChild("TrackList", ImVec2(0, listHeight), true)) {
             // Retrieve all tracks
-            auto* lib = controller_->getLibrary();
+            auto* lib = playlistController_->getLibrary();
             if (lib) {
                 auto allTracks = lib->getAll();
                 
@@ -482,7 +308,7 @@ void PlaylistView::renderAddSongsPopup() {
         if (ImGui::Button("Add Selected", ImVec2(120, 0))) {
             if (selectedPlaylist_) {
                 for (const auto& path : selectedTracksForAdd_) {
-                    controller_->addToPlaylist(selectedPlaylist_->getName(), path);
+                    playlistController_->addToPlaylist(selectedPlaylist_->getName(), path);
                 }
                 // Save is handled within addToPlaylist usually or manual calling might be needed
                 // Assuming controller works as expected. 

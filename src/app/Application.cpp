@@ -184,16 +184,6 @@ bool Application::init() {
         Logger::getInstance().info("Models initialized");
         
         Logger::getInstance().info("Initializing controllers...");
-        libraryController_ = std::make_unique<LibraryController>(
-            library_.get(),
-            fileSystem_.get(),
-            metadataReader_.get()
-        );
-        playlistController_ = std::make_unique<PlaylistController>(
-            playlistManager_.get(),
-            library_.get(),
-            metadataReader_.get()
-        );
         playbackController_ = std::make_unique<PlaybackController>(
             playbackEngine_.get(),
             playbackState_.get(),
@@ -201,8 +191,20 @@ bool Application::init() {
             hardwareInterface_.get(),
             nullptr
         );
+        libraryController_ = std::make_unique<LibraryController>(
+            library_.get(),
+            fileSystem_.get(),
+            metadataReader_.get(),
+            playbackController_.get()
+        );
+        playlistController_ = std::make_unique<PlaylistController>(
+            playlistManager_.get(),
+            library_.get(),
+            metadataReader_.get()
+        );
         historyController_ = std::make_unique<HistoryController>(
-            history_.get()
+            history_.get(),
+            playbackController_.get()
         );
         usbController_ = std::make_unique<USBController>(
             fileSystem_.get()
@@ -239,7 +241,8 @@ bool Application::init() {
         mainWindow_->setHistoryView(dynamic_cast<HistoryView*>(viewFactory_->createHistoryView(
             historyController_.get(), 
             history_.get(),
-            playbackController_.get()
+            playbackController_.get(),
+            playlistManager_.get()
         )));
         mainWindow_->setFileBrowserView(dynamic_cast<FileBrowserView*>(viewFactory_->createFileBrowserView(fileSystem_.get(), libraryController_.get())));
         

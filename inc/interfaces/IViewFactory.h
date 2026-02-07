@@ -81,7 +81,8 @@ public:
     virtual IView* createHistoryView(
         HistoryController* controller,
         History* history,
-        PlaybackController* playbackController) = 0;
+        PlaybackController* playbackController,
+        PlaylistManager* playlistManager) = 0;
     
     /**
      * @brief Create file browser view

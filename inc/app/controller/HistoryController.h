@@ -2,7 +2,9 @@
 #define HISTORY_CONTROLLER_H
 
 #include "../model/History.h"
+#include "../controller/PlaybackController.h"
 #include <memory>
+#include "../interfaces/ITrackListController.h"
 
 /**
  * @file HistoryController.h
@@ -17,13 +19,13 @@
  * 
  * Orchestrates history operations.
  */
-class HistoryController {
+class HistoryController : public ITrackListController {
 public:
     /**
      * @brief Constructor with dependency injection
      * @param history History model
      */
-    explicit HistoryController(History* history);
+    explicit HistoryController(History* history, PlaybackController* playbackController);
     
     /**
      * @brief Add track to history
@@ -62,9 +64,16 @@ public:
      * @return Vector of all tracks in history
      */
     const std::vector<std::shared_ptr<MediaFile>>& getAllHistory();
+
+    // ITrackListController implementation
+    void playTrack(const std::vector<std::shared_ptr<MediaFile>>& context, size_t index) override;
+    void removeTracks(const std::set<std::string>& paths) override;
+    void removeTrackByPath(const std::string& path) override;
+    void clearAll() override;
     
 private:
     History* history_;
+    PlaybackController* playbackController_;
 };
 
 #endif // HISTORY_CONTROLLER_H

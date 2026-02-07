@@ -1,7 +1,8 @@
 #include "../../../inc/app/controller/HistoryController.h"
 #include "../../../inc/utils/Logger.h"
 
-HistoryController::HistoryController(History* history) : history_(history) {
+HistoryController::HistoryController(History* history, PlaybackController* playbackController) 
+    : history_(history), playbackController_(playbackController) {
 }
 
 void HistoryController::addToHistory(std::shared_ptr<MediaFile> track) {
@@ -27,3 +28,24 @@ void HistoryController::clearHistory() {
 }
 
 
+void HistoryController::playTrack(const std::vector<std::shared_ptr<MediaFile>>& context, size_t index) {
+    if (playbackController_ && index < context.size()) {
+        playbackController_->setCurrentPlaylist(nullptr);
+        playbackController_->play(context[index]);
+    }
+}
+
+void HistoryController::removeTracks(const std::set<std::string>& paths) {
+    if (!history_) return;
+    for (const auto& path : paths) {
+        history_->removeTrackByPath(path);
+    }
+}
+
+void HistoryController::removeTrackByPath(const std::string& path) {
+    if (history_) history_->removeTrackByPath(path);
+}
+
+void HistoryController::clearAll() {
+    if (history_) history_->clear();
+}

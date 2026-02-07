@@ -5,6 +5,7 @@
 #include "../controller/HistoryController.h"
 #include "../controller/PlaybackController.h"
 #include "../model/History.h"
+#include "../model/PlaylistManager.h"
 #include <memory>
 
 /**
@@ -28,7 +29,7 @@ public:
      * @param controller History controller
      * @param history History model to observe
      */
-    HistoryView(HistoryController* controller, History* history, PlaybackController* playbackController);
+    HistoryView(HistoryController* controller, History* history, PlaybackController* playbackController, PlaylistManager* playlistManager);
     
     /**
      * @brief Destructor - detaches from history
@@ -42,12 +43,10 @@ public:
     History* getHistory() const { return history_; }
     
 protected:
-    void removeSelectedTracks() override;
     
 private:
-    HistoryController* controller_;
+    HistoryController* historyController_;
     History* history_;
-    PlaybackController* playbackController_;
     
     // UI state
     int selectedIndex_;

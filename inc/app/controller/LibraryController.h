@@ -1,11 +1,11 @@
 #ifndef LIBRARY_CONTROLLER_H
 #define LIBRARY_CONTROLLER_H
 
+#include "../interfaces/ITrackListController.h"
 #include "../model/Library.h"
+#include "../controller/PlaybackController.h"
 #include "../../interfaces/IFileSystem.h"
 #include "../../interfaces/IMetadataReader.h"
-#include <string>
-#include <vector>
 
 /**
  * @file LibraryController.h
@@ -22,7 +22,7 @@
  * Orchestrates library operations using injected dependencies (DIP).
  * Does not manage UI - that's the View's responsibility.
  */
-class LibraryController {
+class LibraryController : public ITrackListController {
 public:
     /**
      * @brief Constructor with dependency injection
@@ -33,7 +33,8 @@ public:
     LibraryController(
         Library* library,
         IFileSystem* fileSystem,
-        IMetadataReader* metadataReader);
+        IMetadataReader* metadataReader,
+        PlaybackController* playbackController);
     
     /**
      * @brief Add media files from a directory
@@ -95,11 +96,18 @@ public:
      * @return true if updated successfully
      */
     bool updateMetadata(const std::string& filepath, const MediaMetadata& metadata);
+
+    // ITrackListController implementation
+    void playTrack(const std::vector<std::shared_ptr<MediaFile>>& context, size_t index) override;
+    void removeTracks(const std::set<std::string>& paths) override;
+    void removeTrackByPath(const std::string& path) override;
+    void clearAll() override;
     
 private:
     Library* library_;
     IFileSystem* fileSystem_;
     IMetadataReader* metadataReader_;
+    PlaybackController* playbackController_;
 };
 
 #endif // LIBRARY_CONTROLLER_H

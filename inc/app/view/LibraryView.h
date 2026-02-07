@@ -39,13 +39,10 @@ public:
     Library* getLibrary() const { return library_; }
     
 protected:
-    void removeSelectedTracks() override;
     
 private:
-    LibraryController* controller_;
+    LibraryController* libraryController_;
     Library* library_;
-    PlaybackController* playbackController_;
-    class PlaylistManager* playlistManager_;
     FileBrowserView* fileBrowserView_ = nullptr;
     
     // UI state
