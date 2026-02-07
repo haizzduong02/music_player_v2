@@ -154,6 +154,28 @@ void FileBrowserView::renderContent() {
             if (addedCount > 0) Logger::info("Added " + std::to_string(addedCount) + " files.");
             if (mode_ == BrowserMode::LIBRARY_ADD_AND_RETURN && addedCount > 0) visible_ = false;
         }
+
+        ImGui::SameLine();
+        if (ImGui::Button("Add Random 20")) {
+             fileSelector_.selectRandom(20);
+             // Logic duplicated for now for simplicity, ideally should be refactored to method
+            std::vector<std::string> selectedPaths = fileSelector_.getSelectedPaths();
+            int addedCount = 0;
+            std::vector<std::string> addedPaths; 
+            
+            for (const auto& path : selectedPaths) {
+                 if (mode_ == BrowserMode::PLAYLIST_SELECTION && playlistController_ && !targetPlaylistName_.empty()) {
+                     playlistController_->addToPlaylistAndLibrary(targetPlaylistName_, path);
+                 } else {
+                     libController_->addMediaFile(path);
+                     addedPaths.push_back(path);
+                 }
+                 addedCount++;
+            }
+            if (mode_ == BrowserMode::LIBRARY_ADD_AND_RETURN && onFilesAddedCallback_) onFilesAddedCallback_(addedPaths);
+            if (addedCount > 0) Logger::info("Added " + std::to_string(addedCount) + " random files.");
+            if (mode_ == BrowserMode::LIBRARY_ADD_AND_RETURN && addedCount > 0) visible_ = false;
+        }
         
         ImGui::SameLine();
         ImGui::Text("|"); // Simple separator substitute

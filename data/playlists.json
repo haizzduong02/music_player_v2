@@ -1,6 +1,6 @@
 [
     {
-        "name": "abc",
+        "name": "Now Playing",
         "tracks": []
     },
     {
@@ -111,9 +111,5 @@
                 "path": "./media/005-2022629-Flybird Audio-Yoga Meditation with Rain.mp3"
             }
         ]
-    },
-    {
-        "name": "Now Playing",
-        "tracks": []
     }
 ]

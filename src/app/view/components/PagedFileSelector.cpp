@@ -4,6 +4,8 @@
 #include <algorithm>
 #include <cstdio>
 #include <cmath>
+#include <random>
+#include <numeric>
 
 PagedFileSelector::PagedFileSelector() {
     snprintf(pageInputBuffer_, sizeof(pageInputBuffer_), "1");
@@ -169,5 +171,22 @@ void PagedFileSelector::clearSelection() {
 
 bool PagedFileSelector::hasSelection() const {
     return !selectedPaths_.empty();
+}
+
+void PagedFileSelector::selectRandom(int count) {
+    clearSelection();
+    if (items_.empty() || count <= 0) return;
+
+    std::vector<int> indices(items_.size());
+    std::iota(indices.begin(), indices.end(), 0);
+    
+    std::random_device rd;
+    std::mt19937 g(rd());
+    std::shuffle(indices.begin(), indices.end(), g);
+    
+    int toSelect = std::min((int)items_.size(), count);
+    for (int i = 0; i < toSelect; ++i) {
+        selectedPaths_.insert(items_[indices[i]].path);
+    }
 }
 

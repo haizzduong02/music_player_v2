@@ -61,6 +61,12 @@ public:
     void addSelection(const std::string& path) { selectedPaths_.insert(path); }
 
     /**
+     * @brief Select random items (clearing existing selection)
+     * @param count Number of items to select
+     */
+    void selectRandom(int count);
+
+    /**
      * @brief Check if there is any selection
      */
     bool hasSelection() const;

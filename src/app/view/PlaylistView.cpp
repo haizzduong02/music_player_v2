@@ -310,9 +310,28 @@ void PlaylistView::renderAddSongsPopup() {
         if (ImGui::Button("Add Selected", ImVec2(120, 0))) {
             if (selectedPlaylist_) {
                 auto selectedPaths = trackSelector_.getSelectedPaths();
+                int count = 0;
                 for (const auto& path : selectedPaths) {
                     playlistController_->addToPlaylist(selectedPlaylist_->getName(), path);
+                    count++;
                 }
+                if (count > 0) Logger::info("Added " + std::to_string(count) + " tracks.");
+            }
+            ImGui::CloseCurrentPopup();
+            showAddSongsPopup_ = false;
+        }
+        
+        ImGui::SameLine();
+        if (ImGui::Button("Add Random 20", ImVec2(120, 0))) {
+            if (selectedPlaylist_) {
+                trackSelector_.selectRandom(20);
+                auto selectedPaths = trackSelector_.getSelectedPaths();
+                int count = 0;
+                for (const auto& path : selectedPaths) {
+                    playlistController_->addToPlaylist(selectedPlaylist_->getName(), path);
+                    count++;
+                }
+                if (count > 0) Logger::info("Added " + std::to_string(count) + " random tracks.");
             }
             ImGui::CloseCurrentPopup();
             showAddSongsPopup_ = false;
