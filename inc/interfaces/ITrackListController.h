@@ -1,33 +1,34 @@
 #ifndef I_TRACK_LIST_CONTROLLER_H
 #define I_TRACK_LIST_CONTROLLER_H
 
+#include "app/model/MediaFile.h"
+#include <memory>
+#include <set>
 #include <string>
 #include <vector>
-#include <set>
-#include <memory>
-#include "app/model/MediaFile.h"
 
 /**
  * @brief Interface for track list management operations.
  */
-class ITrackListController {
-public:
+class ITrackListController
+{
+  public:
     virtual ~ITrackListController() = default;
 
     /**
      * @brief Play a track from a specific context
      */
-    virtual void playTrack(const std::vector<std::shared_ptr<MediaFile>>& context, size_t index) = 0;
+    virtual void playTrack(const std::vector<std::shared_ptr<MediaFile>> &context, size_t index) = 0;
 
     /**
      * @brief Remove specific tracks by their paths
      */
-    virtual void removeTracks(const std::set<std::string>& paths) = 0;
+    virtual void removeTracks(const std::set<std::string> &paths) = 0;
 
     /**
      * @brief Remove a single track by path
      */
-    virtual void removeTrackByPath(const std::string& path) = 0;
+    virtual void removeTrackByPath(const std::string &path) = 0;
 
     /**
      * @brief Clear all tracks in this list

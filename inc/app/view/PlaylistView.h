@@ -1,10 +1,10 @@
 #ifndef PLAYLIST_VIEW_H
 #define PLAYLIST_VIEW_H
 
-#include "app/view/TrackListView.h"
-#include "app/controller/PlaylistController.h"
 #include "app/controller/PlaybackController.h"
+#include "app/controller/PlaylistController.h"
 #include "app/model/PlaylistManager.h"
+#include "app/view/TrackListView.h"
 #include "app/view/components/PagedFileSelector.h"
 #include <memory>
 
@@ -13,37 +13,43 @@ class FileBrowserView;
 /**
  * @file PlaylistView.h
  * @brief Playlist view using ImGui
- * 
+ *
  * Displays playlists and their contents.
  * Observes PlaylistManager for automatic updates.
  */
 
 /**
  * @brief Playlist view class
- * 
+ *
  * ImGui-based view for playlists.
  * Shows list of playlists and selected playlist content.
  */
-class PlaylistView : public TrackListView {
-public:
-    PlaylistView(PlaylistController* controller, PlaylistManager* manager, PlaybackController* playbackController);
+class PlaylistView : public TrackListView
+{
+  public:
+    PlaylistView(PlaylistController *controller, PlaylistManager *manager, PlaybackController *playbackController);
     ~PlaylistView() override;
-    
+
     void render() override;
     void handleInput() override;
-    void update(void* subject) override;
+    void update(void *subject) override;
     void renderPopups() override;
-    
-    void setFileBrowserView(FileBrowserView* browserView) { fileBrowserView_ = browserView; }
-    
-    PlaylistManager* getManager() const { return playlistManager_; }
-    
-protected:
-    
-private:
-    PlaylistController* playlistController_;
-    FileBrowserView* fileBrowserView_ = nullptr;
-    
+
+    void setFileBrowserView(FileBrowserView *browserView)
+    {
+        fileBrowserView_ = browserView;
+    }
+
+    PlaylistManager *getManager() const
+    {
+        return playlistManager_;
+    }
+
+  protected:
+  private:
+    PlaylistController *playlistController_;
+    FileBrowserView *fileBrowserView_ = nullptr;
+
     // UI state
     std::string selectedPlaylistName_;
     std::shared_ptr<Playlist> selectedPlaylist_;
@@ -52,56 +58,56 @@ private:
     bool showCreateDialog_;
     bool showRenameDialog_;
     std::string renameBuffer_;
-    
+
     // Add Songs Popup State
     bool showAddSongsPopup_ = false;
-    bool shouldReopenAddPopup_ = false; // Flag to reopen popup after browsing
-    bool shouldOpenAddPopup_ = false;   // Flag to open popup from button (fix ID stack)
+    bool shouldReopenAddPopup_ = false;  // Flag to reopen popup after browsing
+    bool shouldOpenAddPopup_ = false;    // Flag to open popup from button (fix ID stack)
     bool isBrowsingForPlaylist_ = false; // Flag to track if we are currently browsing
     // std::set<std::string> selectedTracksForAdd_; // Replaced by trackSelector_
-    
+
     PagedFileSelector trackSelector_;
-    
+
     /**
      * @brief Render Add Songs Popup
      */
     void renderAddSongsPopup();
-    
+
     /**
      * @brief Render playlist list (left panel)
      */
     void renderPlaylistList();
-    
+
     /**
      * @brief Render playlist content (right panel)
      */
     void renderPlaylistContent();
-    
+
     /**
      * @brief Render playlist controls (shuffle, loop, etc.)
      */
     void renderPlaylistControls();
-    
+
     /**
      * @brief Render create playlist dialog
      */
     void renderCreateDialog();
-    
+
     /**
      * @brief Render rename playlist dialog
      */
     void renderRenameDialog();
-    
+
     /**
      * @brief Render context menu
      */
     void renderContextMenu();
-    
+
     /**
      * @brief Select a playlist
      * @param name Playlist name
      */
-    void selectPlaylist(const std::string& name);
+    void selectPlaylist(const std::string &name);
 };
 
 #endif // PLAYLIST_VIEW_H

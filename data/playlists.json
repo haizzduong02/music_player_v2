@@ -1,5 +1,13 @@
 [
     {
+        "name": "abc",
+        "tracks": []
+    },
+    {
+        "name": "Now Playing",
+        "tracks": []
+    },
+    {
         "name": "Favorites",
         "tracks": [
             {
@@ -16,13 +24,5 @@
                 "path": "/home/duong/media/055-1755448-Stock Studio-Deep Meditation.mp3"
             }
         ]
-    },
-    {
-        "name": "Now Playing",
-        "tracks": []
-    },
-    {
-        "name": "abc",
-        "tracks": []
     }
 ]

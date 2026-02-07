@@ -1,19 +1,20 @@
 #ifndef PAGED_FILE_SELECTOR_H
 #define PAGED_FILE_SELECTOR_H
 
-#include <vector>
-#include <string>
-#include <set>
-#include <functional>
 #include "interfaces/IFileSystem.h" // For FileInfo
+#include <functional>
+#include <set>
+#include <string>
+#include <vector>
 
 /**
  * @file PagedFileSelector.h
  * @brief Reusable component for selecting files with pagination
  */
 
-class PagedFileSelector {
-public:
+class PagedFileSelector
+{
+  public:
     PagedFileSelector();
     ~PagedFileSelector() = default;
 
@@ -21,7 +22,7 @@ public:
      * @brief Set the list of items to display
      * @param items List of FileInfo objects
      */
-    void setItems(const std::vector<FileInfo>& items);
+    void setItems(const std::vector<FileInfo> &items);
 
     /**
      * @brief Render the file list table
@@ -58,7 +59,10 @@ public:
     /**
      * @brief Add a path to selection
      */
-    void addSelection(const std::string& path) { selectedPaths_.insert(path); }
+    void addSelection(const std::string &path)
+    {
+        selectedPaths_.insert(path);
+    }
 
     /**
      * @brief Select random items (clearing existing selection)
@@ -81,22 +85,25 @@ public:
      * @param nameLabel Label for the name column (default "Name")
      * @param typeLabel Label for the type/extension column (default "Type")
      */
-    void setCustomLabels(const std::string& nameLabel, const std::string& typeLabel);
+    void setCustomLabels(const std::string &nameLabel, const std::string &typeLabel);
 
     /**
      * @brief Set the fixed height of the list/table
      * @param height Height in pixels. 0.0f means auto/fill.
      */
-    void setListHeight(float height) { height_ = height; }
+    void setListHeight(float height)
+    {
+        height_ = height;
+    }
 
-private:
+  private:
     std::vector<FileInfo> items_;
     std::set<std::string> selectedPaths_;
-    
+
     // UI Config
     std::string labelName_ = "Name";
     std::string labelType_ = "Type";
-    
+
     int currentPage_ = 0;
     int itemsPerPage_ = 15;
     int totalPages_ = 1;

@@ -2,151 +2,181 @@
 #include "app/model/MediaFileFactory.h"
 #include "utils/Logger.h"
 
-PlaylistController::PlaylistController(PlaylistManager* playlistManager, Library* library, IMetadataReader* metadataReader)
-    : playlistManager_(playlistManager), library_(library), metadataReader_(metadataReader) {
+PlaylistController::PlaylistController(PlaylistManager *playlistManager, Library *library,
+                                       IMetadataReader *metadataReader)
+    : playlistManager_(playlistManager), library_(library), metadataReader_(metadataReader)
+{
 }
 
-bool PlaylistController::createPlaylist(const std::string& name) {
+bool PlaylistController::createPlaylist(const std::string &name)
+{
     auto playlist = playlistManager_->createPlaylist(name);
-    if (playlist) {
+    if (playlist)
+    {
         // playlistManager_->saveAll(); // Removed: Save only on exit
         return true;
     }
     return false;
 }
 
-bool PlaylistController::deletePlaylist(const std::string& name) {
+bool PlaylistController::deletePlaylist(const std::string &name)
+{
     bool success = playlistManager_->deletePlaylist(name);
-    if (success) {
+    if (success)
+    {
         // playlistManager_->saveAll(); // Removed: Save only on exit
     }
     return success;
 }
 
-bool PlaylistController::renamePlaylist(const std::string& oldName, const std::string& newName) {
+bool PlaylistController::renamePlaylist(const std::string &oldName, const std::string &newName)
+{
     bool success = playlistManager_->renamePlaylist(oldName, newName);
-    if (success) {
+    if (success)
+    {
         // playlistManager_->saveAll(); // Removed: Save only on exit
     }
     return success;
 }
 
-bool PlaylistController::addToPlaylist(const std::string& playlistName, const std::string& filepath) {
+bool PlaylistController::addToPlaylist(const std::string &playlistName, const std::string &filepath)
+{
     // Get file from library
     auto file = library_->getByPath(filepath);
-    if (!file) {
+    if (!file)
+    {
         Logger::warn("File not in library: " + filepath);
         return false;
     }
-    
+
     // Get playlist
     auto playlist = playlistManager_->getPlaylist(playlistName);
-    if (!playlist) {
+    if (!playlist)
+    {
         Logger::warn("Playlist not found: " + playlistName);
         return false;
     }
-    
+
     bool success = playlist->addTrack(file);
-    if (success) {
+    if (success)
+    {
         // playlistManager_->saveAll(); // Removed: Save only on exit
     }
     return success;
 }
 
-bool PlaylistController::addToPlaylistAndLibrary(
-    const std::string& playlistName,
-    const std::string& filepath) {
-    
+bool PlaylistController::addToPlaylistAndLibrary(const std::string &playlistName, const std::string &filepath)
+{
+
     // Check if file is in library
     auto file = library_->getByPath(filepath);
-    
+
     // If not, add to library first
-    if (!file) {
+    if (!file)
+    {
         file = MediaFileFactory::createMediaFile(filepath, metadataReader_);
-        if (!file || !library_->addMedia(file)) {
+        if (!file || !library_->addMedia(file))
+        {
             Logger::error("Failed to add file to library: " + filepath);
             return false;
         }
     }
-    
+
     // Now add to playlist
     return addToPlaylist(playlistName, filepath);
 }
 
-bool PlaylistController::removeFromPlaylist(const std::string& playlistName, size_t trackIndex) {
+bool PlaylistController::removeFromPlaylist(const std::string &playlistName, size_t trackIndex)
+{
     auto playlist = playlistManager_->getPlaylist(playlistName);
-    if (!playlist) {
+    if (!playlist)
+    {
         return false;
     }
-    
+
     bool success = playlist->removeTrack(trackIndex);
-    if (success) {
+    if (success)
+    {
         // playlistManager_->saveAll(); // Removed: Save only on exit
     }
     return success;
 }
 
-bool PlaylistController::removeFromPlaylistByPath(const std::string& playlistName, const std::string& filepath) {
+bool PlaylistController::removeFromPlaylistByPath(const std::string &playlistName, const std::string &filepath)
+{
     auto playlist = playlistManager_->getPlaylist(playlistName);
-    if (!playlist) return false;
-    
+    if (!playlist)
+        return false;
+
     return playlist->removeTrackByPath(filepath);
 }
 
-int PlaylistController::removeTrackFromAllPlaylists(const std::string& filepath) {
+int PlaylistController::removeTrackFromAllPlaylists(const std::string &filepath)
+{
     auto allPlaylists = playlistManager_->getAllPlaylists();
     int affectedCount = 0;
-    
-    for (auto& playlist : allPlaylists) {
-        if (playlist->removeTrackByPath(filepath)) {
+
+    for (auto &playlist : allPlaylists)
+    {
+        if (playlist->removeTrackByPath(filepath))
+        {
             affectedCount++;
         }
     }
-    
-    if (affectedCount > 0) {
+
+    if (affectedCount > 0)
+    {
         playlistManager_->saveAll(); // Save changes
         Logger::info("Removed track from " + std::to_string(affectedCount) + " playlists: " + filepath);
     }
-    
+
     return affectedCount;
 }
 
-std::shared_ptr<Playlist> PlaylistController::getPlaylist(const std::string& name) {
+std::shared_ptr<Playlist> PlaylistController::getPlaylist(const std::string &name)
+{
     return playlistManager_->getPlaylist(name);
 }
 
-std::vector<std::string> PlaylistController::getPlaylistNames() {
+std::vector<std::string> PlaylistController::getPlaylistNames()
+{
     auto playlists = playlistManager_->getAllPlaylists();
     std::vector<std::string> names;
     names.reserve(playlists.size());
-    
-    for (const auto& playlist : playlists) {
+
+    for (const auto &playlist : playlists)
+    {
         names.push_back(playlist->getName());
     }
-    
+
     return names;
 }
 
-std::shared_ptr<Playlist> PlaylistController::getNowPlayingPlaylist() {
+std::shared_ptr<Playlist> PlaylistController::getNowPlayingPlaylist()
+{
     return playlistManager_->getNowPlayingPlaylist();
 }
 
-bool PlaylistController::shufflePlaylist(const std::string& name) {
+bool PlaylistController::shufflePlaylist(const std::string &name)
+{
     auto playlist = playlistManager_->getPlaylist(name);
-    if (!playlist) {
+    if (!playlist)
+    {
         return false;
     }
-    
+
     playlist->shuffle();
     return true;
 }
 
-bool PlaylistController::setPlaylistLoop(const std::string& name, bool loop) {
+bool PlaylistController::setPlaylistLoop(const std::string &name, bool loop)
+{
     auto playlist = playlistManager_->getPlaylist(name);
-    if (!playlist) {
+    if (!playlist)
+    {
         return false;
     }
-    
+
     playlist->setRepeatMode(loop ? RepeatMode::ALL : RepeatMode::NONE);
     return true;
 }
