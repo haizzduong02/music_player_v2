@@ -28,9 +28,22 @@ private:
     bool isDraggingSeek_;
     float seekPosition_;
     
+    // Icons
+    unsigned int playTexture_ = 0;
+    unsigned int pauseTexture_ = 0;
+    unsigned int nextTexture_ = 0;
+    unsigned int prevTexture_ = 0;
+    unsigned int heartFilledTexture_ = 0;
+    unsigned int heartOutlineTexture_ = 0;
+    
     // Album art OpenGL texture
     unsigned int albumArtTexture_ = 0;
     std::string currentTrackPath_;  // To detect track changes
+    
+    /**
+     * @brief Load a texture from file
+     */
+    unsigned int loadIconTexture(const std::string& path);
     
     /**
      * @brief Render track metadata

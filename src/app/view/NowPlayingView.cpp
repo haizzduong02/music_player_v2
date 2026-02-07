@@ -16,6 +16,14 @@ NowPlayingView::NowPlayingView(PlaybackController* controller, PlaybackState* st
     if (state_) {
         state_->attach(this);
     }
+
+    // Load icons
+    playTexture_ = loadIconTexture("assets/icons/play.tga");
+    pauseTexture_ = loadIconTexture("assets/icons/pause.tga");
+    nextTexture_ = loadIconTexture("assets/icons/next.tga");
+    prevTexture_ = loadIconTexture("assets/icons/prev.tga");
+    heartFilledTexture_ = loadIconTexture("assets/icons/heart_filled.tga");
+    heartOutlineTexture_ = loadIconTexture("assets/icons/heart_outline.tga");
 }
 
 NowPlayingView::~NowPlayingView() {
@@ -28,6 +36,14 @@ NowPlayingView::~NowPlayingView() {
     if (albumArtTexture_) {
         glDeleteTextures(1, &albumArtTexture_);
     }
+    
+    // Cleanup icons
+    if (playTexture_) glDeleteTextures(1, &playTexture_);
+    if (pauseTexture_) glDeleteTextures(1, &pauseTexture_);
+    if (nextTexture_) glDeleteTextures(1, &nextTexture_);
+    if (prevTexture_) glDeleteTextures(1, &prevTexture_);
+    if (heartFilledTexture_) glDeleteTextures(1, &heartFilledTexture_);
+    if (heartOutlineTexture_) glDeleteTextures(1, &heartOutlineTexture_);
 }
 
 // Color scheme (Redefined for NowPlayingView)
@@ -115,32 +131,7 @@ void NowPlayingView::render() {
         ImGui::AlignTextToFramePadding();
         ImGui::Text("%s", truncate(track->getDisplayName(), maxTitleWidth).c_str());
         
-        ImGui::SameLine();
-        if (playlistManager_) {
-            auto favPlaylist = playlistManager_->getPlaylist(PlaylistManager::FAVORITES_PLAYLIST_NAME);
-            if (favPlaylist) {
-                bool isFavorite = favPlaylist->contains(track->getPath());
-                
-                if (isFavorite) {
-                    ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 0.4f, 0.4f, 1.0f)); // Light Red/Pink
-                }
-                
-                if (ImGui::Button(isFavorite ? "♥" : "♡")) {
-                    if (isFavorite) {
-                        favPlaylist->removeTrackByPath(track->getPath());
-                        Logger::getInstance().info("Removed from Favorites: " + track->getDisplayName());
-                    } else {
-                        favPlaylist->addTrack(track);
-                        Logger::getInstance().info("Added to Favorites: " + track->getDisplayName());
-                    }
-                    favPlaylist->save();
-                }
-                
-                if (isFavorite) {
-                    ImGui::PopStyleColor();
-                }
-            }
-        }
+        // Heart button removed from here, moved to controls section
         
         // Line 2: Artist
         // Manually move cursor down to ensure it's on a new line distinct from the buttons
@@ -158,10 +149,12 @@ void NowPlayingView::render() {
     ImGui::NextColumn();
     
     // Column 2: Playback Controls (Center)
-    float buttonWidth = 35.0f;
-    float buttonHeight = 35.0f;
+    float buttonWidth = 32.0f;
+    float buttonHeight = 32.0f;
+    float loopBtnWidth = 60.0f; // Narrower since it's 2 lines
+    float loopBtnHeight = 32.0f; // Taller for 2 lines
     float spacing = ImGui::GetStyle().ItemSpacing.x;
-    float totalButtonsWidth = (buttonWidth * 4) + (spacing * 3);
+    float totalButtonsWidth = (buttonWidth * 4) + loopBtnWidth + (spacing * 4);
     
     float colWidth = ImGui::GetColumnWidth();
     if (colWidth > totalButtonsWidth) {
@@ -169,22 +162,57 @@ void NowPlayingView::render() {
         ImGui::SetCursorPosX(ImGui::GetCursorPosX() + startX);
     }
     
-    if (ImGui::Button("<<", ImVec2(buttonWidth, buttonHeight))) {
+    float baseLineY = ImGui::GetCursorPosY();
+    float iconOffset = (loopBtnHeight - buttonHeight) / 2.0f;
+    
+    // Standardize height for all icons in this row
+    ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2.0f, 0.0f));
+    
+    auto set_icon_pos = [&]() {
+        ImGui::SetCursorPosY(baseLineY + iconOffset);
+    };
+
+    // Favorites toggle (move to front)
+    if (state_ && playlistManager_) {
+        set_icon_pos();
+        auto track = state_->getCurrentTrack();
+        if (track) {
+            auto favPlaylist = playlistManager_->getPlaylist(PlaylistManager::FAVORITES_PLAYLIST_NAME);
+            if (favPlaylist) {
+                bool isFavorite = favPlaylist->contains(track->getPath());
+                unsigned int iconTex = isFavorite ? heartFilledTexture_ : heartOutlineTexture_;
+                
+                if (ImGui::ImageButton("##fav_controls", (ImTextureID)(intptr_t)iconTex, ImVec2(buttonWidth, buttonHeight))) {
+                    if (isFavorite) {
+                        favPlaylist->removeTrackByPath(track->getPath());
+                    } else {
+                        favPlaylist->addTrack(track);
+                    }
+                    favPlaylist->save();
+                }
+                ImGui::SameLine();
+            }
+        }
+    }
+
+    set_icon_pos();
+    if (ImGui::ImageButton("##prev", (ImTextureID)(intptr_t)prevTexture_, ImVec2(buttonWidth, buttonHeight))) {
         if (controller_) controller_->previous();
     }
     ImGui::SameLine();
     
     bool isPlaying = false;
-    const char* playIcon = ">";
+    unsigned int playIconTex = playTexture_;
     if (state_) {
          auto status = state_->getStatus();
          if (status == PlaybackStatus::PLAYING) {
              isPlaying = true;
-             playIcon = "||";
+             playIconTex = pauseTexture_;
          }
     }
     
-    if (ImGui::Button(playIcon, ImVec2(buttonWidth, buttonHeight))) {
+    set_icon_pos();
+    if (ImGui::ImageButton("##play", (ImTextureID)(intptr_t)playIconTex, ImVec2(buttonWidth, buttonHeight))) {
          if (controller_) {
              if (isPlaying) controller_->pause();
              else if (state_ && state_->getStatus() == PlaybackStatus::PAUSED) controller_->resume();
@@ -194,39 +222,42 @@ void NowPlayingView::render() {
     
     ImGui::SameLine();
     
-    if (ImGui::Button(">>", ImVec2(buttonWidth, buttonHeight))) {
+    set_icon_pos();
+    if (ImGui::ImageButton("##next", (ImTextureID)(intptr_t)nextTexture_, ImVec2(buttonWidth, buttonHeight))) {
         if (controller_) controller_->next();
     }
     
     ImGui::SameLine();
     
-    // Repeat One
+    // Repeat Toggle (2-line text)
     if (controller_) {
-        // Use unified getter for both Playlist and Global/Library modes
         RepeatMode mode = controller_->getRepeatMode();
         
-        // Visual feedback based on mode
+        char label[32];
+        ImVec4 color = ImVec4(0.4f, 0.4f, 0.4f, 1.0f);
         if (mode == RepeatMode::ALL) {
-            ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.2f, 0.7f, 0.3f, 1.0f));  // Green when ALL
+            snprintf(label, sizeof(label), "LOOP\nALL");
+            color = ImVec4(0.0f, 0.7f, 0.6f, 1.0f); // Teal
         } else if (mode == RepeatMode::ONE) {
-            ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.8f, 0.6f, 0.1f, 1.0f));  // Orange when ONE
+            snprintf(label, sizeof(label), "LOOP\nONE");
+            color = ImVec4(0.8f, 0.5f, 0.0f, 1.0f); // Orange
+        } else {
+            snprintf(label, sizeof(label), "LOOP\nOFF");
         }
-        
-        const char* label = "Loop: OFF";
-        if (mode == RepeatMode::ALL) label = "Loop: ALL";
-        else if (mode == RepeatMode::ONE) label = "Loop: ONE";
-        
-        // Using wider button for text label
-        float loopBtnWidth = 80.0f;
-        
-        if (ImGui::Button(label, ImVec2(loopBtnWidth, buttonHeight))) { 
+
+        ImGui::SetCursorPosY(baseLineY); // Align Loop to the top (or center, but 2 lines fill loopBtnHeight)
+        ImGui::PushStyleColor(ImGuiCol_Button, color);
+        if (ImGui::Button(label, ImVec2(loopBtnWidth, loopBtnHeight))) { 
              controller_->toggleRepeatMode();
         }
+        ImGui::PopStyleColor();
         
-        if (mode == RepeatMode::ALL || mode == RepeatMode::ONE) {
-            ImGui::PopStyleColor();
+        if (ImGui::IsItemHovered()) {
+            ImGui::SetTooltip("Current Mode: %s", (mode == RepeatMode::ALL ? "ALL" : (mode == RepeatMode::ONE ? "ONE" : "OFF")));
         }
     }
+    
+    ImGui::PopStyleVar(); // Pop standardized FramePadding
     
     ImGui::NextColumn();
     
@@ -270,4 +301,28 @@ void NowPlayingView::update(void* subject) {
             ImGui::SetWindowFocus("Now Playing");
         }
     }
+}
+
+unsigned int NowPlayingView::loadIconTexture(const std::string& path) {
+    int width, height, channels;
+    unsigned char* data = stbi_load(path.c_str(), &width, &height, &channels, 4);
+    if (!data) {
+        Logger::getInstance().error("Failed to load icon: " + path);
+        return 0;
+    }
+
+    unsigned int texture;
+    glGenTextures(1, &texture);
+    glBindTexture(GL_TEXTURE_2D, texture);
+    
+    // Use linear filtering for pixel art to keep it clean or point filtering for crispness
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+    
+    stbi_image_free(data);
+    return texture;
 }
