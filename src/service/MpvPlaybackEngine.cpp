@@ -46,6 +46,8 @@ void MpvPlaybackEngine::initMpv() {
     // Explicitly prioritize PulseAudio, then ALSA, then SDL
     mpv_set_option_string(mpv_, "ao", "pulse,alsa,sdl");
     mpv_set_option_string(mpv_, "audio-client-name", "MusicPlayer");
+    // Increase buffer to 2 seconds to prevent underruns in WSL/Pulse
+    mpv_set_option_string(mpv_, "audio-buffer", "2.0");
     
     // Enable video output but don't spawn a window (we render to texture)
     mpv_set_option_string(mpv_, "vo", "libmpv");

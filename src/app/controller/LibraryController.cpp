@@ -13,7 +13,7 @@ LibraryController::LibraryController(
       playbackController_(playbackController) {
 }
 
-int LibraryController::addMediaFilesFromDirectory(const std::string& directoryPath, bool recursive) {
+int LibraryController::addMediaFilesFromDirectory(const std::string& directoryPath, bool /*recursive*/) {
     if (!fileSystem_ || !library_) {
         return 0;
     }
@@ -64,7 +64,7 @@ bool LibraryController::removeMedia(const std::string& filepath) {
 
 std::vector<std::shared_ptr<MediaFile>> LibraryController::searchMedia(
     const std::string& query,
-    const std::vector<std::string>& searchFields) {
+    const std::vector<std::string>& /*searchFields*/) {
     
     if (!library_) {
         return {};

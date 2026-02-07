@@ -8,7 +8,7 @@ PlaybackController::PlaybackController(
     History* history,
     IHardwareInterface* hardware,
     Playlist* currentPlaylist)
-    : state_(state), engine_(engine), history_(history), 
+    : engine_(engine), state_(state), history_(history), 
       hardware_(hardware), currentPlaylist_(currentPlaylist) {
 }
 
@@ -220,7 +220,7 @@ void PlaybackController::playContext(const std::vector<std::shared_ptr<MediaFile
     play(context[startIndex]);
 }
 
-void PlaybackController::update(void* subject) {
+void PlaybackController::update(void* /*subject*/) {
     // Observer pattern - called when PlaybackState changes
     // Could update UI or respond to state changes here
 }
@@ -270,20 +270,15 @@ void PlaybackController::handlePlaybackFinished() {
 }
 
 void PlaybackController::toggleRepeatMode() {
-    RepeatMode* targetMode = &globalRepeatMode_;
-    if (currentPlaylist_) {
-        targetMode = nullptr; // Use setter
-    }
-    
     // Determine current mode
     RepeatMode current = currentPlaylist_ ? currentPlaylist_->getRepeatMode() : globalRepeatMode_;
     RepeatMode nextMode = RepeatMode::NONE;
     
-    // Cycle: NONE -> ALL -> ONE -> NONE
+    // Cycle: NONE -> ONE -> ALL -> NONE
     switch (current) {
-        case RepeatMode::NONE: nextMode = RepeatMode::ALL; break;
-        case RepeatMode::ALL: nextMode = RepeatMode::ONE; break;
-        case RepeatMode::ONE: nextMode = RepeatMode::NONE; break;
+        case RepeatMode::NONE: nextMode = RepeatMode::ONE; break;
+        case RepeatMode::ONE: nextMode = RepeatMode::ALL; break;
+        case RepeatMode::ALL: nextMode = RepeatMode::NONE; break;
     }
     
     if (currentPlaylist_) {

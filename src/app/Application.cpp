@@ -223,6 +223,16 @@ bool Application::init() {
             if (playlistController_) {
                 playlistController_->removeTrackFromAllPlaylists(path);
             }
+
+            // Remove from History
+            if (history_) {
+                history_->removeTrackByPath(path);
+            }
+
+            // Remove from Playback BackStack
+            if (playbackState_) {
+                playbackState_->removeTrackFromBackStack(path);
+            }
         });
         
         Logger::info("Controllers initialized");

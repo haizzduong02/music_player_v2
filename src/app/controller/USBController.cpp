@@ -34,7 +34,7 @@ bool USBController::unmountUSB(const std::string& mountPoint) {
 
 std::vector<std::string> USBController::scanUSBMedia(
     const std::string& mountPoint,
-    const std::vector<std::string>& extensions) {
+    const std::vector<std::string>& /*extensions*/) {
     
     if (!fileSystem_->exists(mountPoint) || !fileSystem_->isDirectory(mountPoint)) {
         Logger::error("Invalid USB path: " + mountPoint);

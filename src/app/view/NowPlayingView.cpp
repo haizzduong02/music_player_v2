@@ -293,7 +293,7 @@ void NowPlayingView::handleInput() {
     // Input handled through ImGui in render()
 }
 
-void NowPlayingView::update(void* subject) {
+void NowPlayingView::update(void* /*subject*/) {
     // Playback state has changed
     if (state_ && state_->getStatus() == PlaybackStatus::PLAYING) {
         if (!visible_) {

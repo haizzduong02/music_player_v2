@@ -1,14 +1,28 @@
 [
     {
-        "name": "abc",
-        "tracks": []
+        "name": "Favorites",
+        "tracks": [
+            {
+                "inLibrary": true,
+                "metadata": {
+                    "album": "",
+                    "artist": "Stock Studio",
+                    "duration": 289,
+                    "genre": "Ambient",
+                    "title": "Deep Meditation",
+                    "track": 2,
+                    "year": 2020
+                },
+                "path": "/home/duong/media/055-1755448-Stock Studio-Deep Meditation.mp3"
+            }
+        ]
     },
     {
         "name": "Now Playing",
         "tracks": []
     },
     {
-        "name": "Favorites",
+        "name": "abc",
         "tracks": []
     }
 ]

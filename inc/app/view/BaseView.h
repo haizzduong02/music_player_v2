@@ -24,7 +24,7 @@ public:
     
     virtual void render() override = 0;  // Pure virtual - must be implemented
     virtual void handleInput() override {}  // Default: empty
-    virtual void update(void* subject) override {}  // Default: empty
+    virtual void update(void* /*subject*/) override {}  // Default: empty
     
     /**
      * @brief Render popups/modals that need to be at root level

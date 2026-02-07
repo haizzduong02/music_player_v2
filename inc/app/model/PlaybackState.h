@@ -101,6 +101,12 @@ public:
      * @brief Clear back stack
      */
     void clearBackStack();
+
+    /**
+     * @brief Remove specific track from back stack
+     * @param path Filepath to remove
+     */
+    void removeTrackFromBackStack(const std::string& path);
     
     /**
      * @brief Set play queue for Next functionality

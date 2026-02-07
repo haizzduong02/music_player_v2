@@ -76,8 +76,36 @@ void PlaybackState::clearBackStack() {
     while (!backStack_.empty()) {
         backStack_.pop();
     }
+    notify();
 }
 
+void PlaybackState::removeTrackFromBackStack(const std::string& path) {
+    std::lock_guard<std::mutex> lock(dataMutex_);
+    
+    std::vector<std::shared_ptr<MediaFile>> temp;
+    bool changed = false;
+    
+    while (!backStack_.empty()) {
+        auto track = backStack_.top();
+        backStack_.pop();
+        
+        if (track && track->getPath() == path) {
+            changed = true;
+            // Drop it
+        } else {
+            temp.push_back(track);
+        }
+    }
+    
+    // Restore (reverse order because we popped from top)
+    for (auto it = temp.rbegin(); it != temp.rend(); ++it) {
+        backStack_.push(*it);
+    }
+    
+    if (changed) {
+        notify();
+    }
+}
 void PlaybackState::setPlayQueue(const std::vector<std::shared_ptr<MediaFile>>& queue) {
     std::lock_guard<std::mutex> lock(dataMutex_);
     playQueue_ = queue;
