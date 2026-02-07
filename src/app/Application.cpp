@@ -209,6 +209,22 @@ bool Application::init() {
         usbController_ = std::make_unique<USBController>(
             fileSystem_.get()
         );
+        // Connect Library Delete to Playlist Sync
+        libraryController_->setOnTrackRemovedCallback([this](const std::string& path) {
+            // Check if currently playing
+            if (playbackController_ && playbackState_) {
+                auto currentTrack = playbackState_->getCurrentTrack();
+                if (currentTrack && currentTrack->getPath() == path) {
+                    Logger::info("Removed track is currently playing, skipping to next...");
+                    playbackController_->next();
+                }
+            }
+
+            if (playlistController_) {
+                playlistController_->removeTrackFromAllPlaylists(path);
+            }
+        });
+        
         Logger::info("Controllers initialized");
         
         Logger::info("Initializing views...");

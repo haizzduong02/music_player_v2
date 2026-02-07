@@ -6,6 +6,7 @@
 #include "app/controller/PlaybackController.h"
 #include "interfaces/IFileSystem.h"
 #include "interfaces/IMetadataReader.h"
+#include <functional>
 
 /**
  * @file LibraryController.h
@@ -59,6 +60,11 @@ public:
     bool removeMedia(const std::string& filepath);
     
     /**
+     * @brief Set callback for when a track is removed
+     */
+    void setOnTrackRemovedCallback(std::function<void(const std::string&)> callback) { onTrackRemovedCallback_ = callback; }
+    
+    /**
      * @brief Search library
      * @param query Search query
      * @param searchFields Fields to search in
@@ -108,6 +114,7 @@ private:
     IFileSystem* fileSystem_;
     IMetadataReader* metadataReader_;
     PlaybackController* playbackController_;
+    std::function<void(const std::string&)> onTrackRemovedCallback_;
 };
 
 #endif // LIBRARY_CONTROLLER_H

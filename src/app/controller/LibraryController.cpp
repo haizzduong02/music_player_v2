@@ -55,7 +55,11 @@ bool LibraryController::removeMedia(const std::string& filepath) {
         return false;
     }
     
-    return library_->removeMedia(filepath);
+    bool result = library_->removeMedia(filepath);
+    if (result && onTrackRemovedCallback_) {
+        onTrackRemovedCallback_(filepath);
+    }
+    return result;
 }
 
 std::vector<std::shared_ptr<MediaFile>> LibraryController::searchMedia(
@@ -119,14 +123,25 @@ void LibraryController::playTrack(const std::vector<std::shared_ptr<MediaFile>>&
 void LibraryController::removeTracks(const std::set<std::string>& paths) {
     if (!library_) return;
     for (const auto& path : paths) {
-        library_->removeMedia(path);
+        removeMedia(path); // Use internal method to trigger callback
     }
 }
 
 void LibraryController::removeTrackByPath(const std::string& path) {
-    if (library_) library_->removeMedia(path);
+    removeMedia(path); // Use internal method to trigger callback
 }
 
 void LibraryController::clearAll() {
-    if (library_) library_->clear();
+    if (!library_) return;
+    
+    // We need to notify about all removals. 
+    // Optimization: Could add a 'clearAll' callback, but for now iterate.
+    auto allFiles = library_->getAll();
+    for (const auto& file : allFiles) {
+        if (file && onTrackRemovedCallback_) {
+            onTrackRemovedCallback_(file->getPath());
+        }
+    }
+    
+    library_->clear();
 }

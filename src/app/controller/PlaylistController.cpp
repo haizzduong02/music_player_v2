@@ -86,20 +86,29 @@ bool PlaylistController::removeFromPlaylist(const std::string& playlistName, siz
     return success;
 }
 
-bool PlaylistController::removeFromPlaylistByPath(
-    const std::string& playlistName,
-    const std::string& filepath) {
-    
+bool PlaylistController::removeFromPlaylistByPath(const std::string& playlistName, const std::string& filepath) {
     auto playlist = playlistManager_->getPlaylist(playlistName);
-    if (!playlist) {
-        return false;
+    if (!playlist) return false;
+    
+    return playlist->removeTrackByPath(filepath);
+}
+
+int PlaylistController::removeTrackFromAllPlaylists(const std::string& filepath) {
+    auto allPlaylists = playlistManager_->getAllPlaylists();
+    int affectedCount = 0;
+    
+    for (auto& playlist : allPlaylists) {
+        if (playlist->removeTrackByPath(filepath)) {
+            affectedCount++;
+        }
     }
     
-    bool success = playlist->removeTrackByPath(filepath);
-    if (success) {
-        // playlistManager_->saveAll(); // Removed: Save only on exit
+    if (affectedCount > 0) {
+        playlistManager_->saveAll(); // Save changes
+        Logger::info("Removed track from " + std::to_string(affectedCount) + " playlists: " + filepath);
     }
-    return success;
+    
+    return affectedCount;
 }
 
 std::shared_ptr<Playlist> PlaylistController::getPlaylist(const std::string& name) {

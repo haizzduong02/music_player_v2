@@ -1,1 +1,197 @@
-[]
+[
+    {
+        "inLibrary": true,
+        "metadata": {
+            "album": "Spa Melodies vol 1",
+            "artist": "B3B0CK",
+            "duration": 240,
+            "genre": "",
+            "title": "Forest",
+            "track": 9,
+            "year": 2021
+        },
+        "path": "/home/duong/media/034-1831593-B3B0CK-Forest.mp3"
+    },
+    {
+        "inLibrary": true,
+        "metadata": {
+            "album": "",
+            "artist": "Rxbyn",
+            "duration": 178,
+            "genre": "rnb",
+            "title": "antisocial",
+            "track": 2,
+            "year": 2022
+        },
+        "path": "/home/duong/media/037-1921815-Rxbyn-antisocial.mp3"
+    },
+    {
+        "inLibrary": true,
+        "metadata": {
+            "album": "",
+            "artist": "The.madpix.project",
+            "duration": 218,
+            "genre": "Electronic",
+            "title": "Under Water",
+            "track": 1,
+            "year": 2021
+        },
+        "path": "/home/duong/media/040-1901140-The.madpix.project-Under Water.mp3"
+    },
+    {
+        "inLibrary": true,
+        "metadata": {
+            "album": "",
+            "artist": "MODUS",
+            "duration": 233,
+            "genre": "chillout",
+            "title": "My Love",
+            "track": 1,
+            "year": 2021
+        },
+        "path": "/home/duong/media/042-1891977-MODUS-My Love.mp3"
+    },
+    {
+        "inLibrary": true,
+        "metadata": {
+            "album": "",
+            "artist": "PUETO PA LO MIO RECORDS",
+            "duration": 192,
+            "genre": "latin",
+            "title": "YO QUIERO BEBER - Pueto pa lo mio records Presenta - Marshall Aquicci ft AllGenius - (Musica urbana, latin, latin urban, bass)",
+            "track": 0,
+            "year": 2025
+        },
+        "path": "/home/duong/media/051-1876747-PUETO PA LO MIO RECORDS-YO QUIERO BEBER - Pueto pa lo mio records Presenta - Marshall Aquicci ft AllGenius - _Musica urbana, latin, latin urban, bass_.mp3"
+    },
+    {
+        "inLibrary": true,
+        "metadata": {
+            "album": "",
+            "artist": "The_Mountain",
+            "duration": 506,
+            "genre": "ambient, electronic",
+            "title": "Meditation",
+            "track": 0,
+            "year": 2023
+        },
+        "path": "/home/duong/media/052-1996341-The_Mountain-Meditation.mp3"
+    },
+    {
+        "inLibrary": true,
+        "metadata": {
+            "album": "",
+            "artist": "Asa Taura",
+            "duration": 311,
+            "genre": "drone, ambient",
+            "title": "Guides Song II",
+            "track": 0,
+            "year": 2023
+        },
+        "path": "/home/duong/media/054-2002299-Asa Taura-Guides Song II.mp3"
+    },
+    {
+        "inLibrary": true,
+        "metadata": {
+            "album": "",
+            "artist": "Stock Studio",
+            "duration": 289,
+            "genre": "Ambient",
+            "title": "Deep Meditation",
+            "track": 2,
+            "year": 2020
+        },
+        "path": "/home/duong/media/055-1755448-Stock Studio-Deep Meditation.mp3"
+    },
+    {
+        "inLibrary": true,
+        "metadata": {
+            "album": "Self-Titled LP",
+            "artist": "Luke Davids",
+            "duration": 178,
+            "genre": "poprock",
+            "title": "Losing Ground",
+            "track": 6,
+            "year": 2012
+        },
+        "path": "/home/duong/media/062-1823855-Luke Davids-Losing Ground.mp3"
+    },
+    {
+        "inLibrary": true,
+        "metadata": {
+            "album": "",
+            "artist": "Yigit Atilla",
+            "duration": 179,
+            "genre": "Pop",
+            "title": "Broken Love",
+            "track": 1,
+            "year": 2022
+        },
+        "path": "/home/duong/media/071-1912687-Yigit Atilla-Broken Love.mp3"
+    },
+    {
+        "inLibrary": true,
+        "metadata": {
+            "album": "MAYHEM",
+            "artist": "Lady Gaga",
+            "duration": 223,
+            "genre": "Dance Pop",
+            "title": "Abracadabra",
+            "track": 2,
+            "year": 2025
+        },
+        "path": "/home/duong/media/YAbracadabra.mp3"
+    },
+    {
+        "inLibrary": true,
+        "metadata": {
+            "album": "Short n' Sweet",
+            "artist": "Sabrina Carpenter",
+            "duration": 164,
+            "genre": "",
+            "title": "Coincidence",
+            "track": 5,
+            "year": 2024
+        },
+        "path": "/home/duong/media/y2mate.com - Sabrina Carpenter  Coincidence Official Lyric Video.mp3"
+    },
+    {
+        "inLibrary": true,
+        "metadata": {
+            "album": "1989 (Taylor's Version)",
+            "artist": "Taylor Swift",
+            "duration": 237,
+            "genre": "Pop",
+            "title": "Blank Space (Taylor’s Version)",
+            "track": 2,
+            "year": 2019
+        },
+        "path": "/home/duong/media/y2mate.com - Taylor Swift  Blank Space Taylors Version Lyric Video_320kbps.mp3"
+    },
+    {
+        "inLibrary": true,
+        "metadata": {
+            "album": "When The Sun Goes Down",
+            "artist": "The.madpix.project",
+            "duration": 234,
+            "genre": "House",
+            "title": "When The Sun Goes Down",
+            "track": 1,
+            "year": 2016
+        },
+        "path": "/home/duong/media_3/005-1373026-The.madpix.project-When The Sun Goes Down.mp3"
+    },
+    {
+        "inLibrary": true,
+        "metadata": {
+            "album": "",
+            "artist": "James Miller",
+            "duration": 252,
+            "genre": "Electronic",
+            "title": "Just Call My Name",
+            "track": 1,
+            "year": 2016
+        },
+        "path": "/home/duong/media_3/010-1376036-James Miller-Just Call My Name.mp3"
+    }
+]

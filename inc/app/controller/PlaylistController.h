@@ -84,6 +84,13 @@ public:
      * @return true if removed successfully
      */
     bool removeFromPlaylistByPath(const std::string& playlistName, const std::string& filepath);
+
+    /**
+     * @brief Remove track from ALL playlists by filepath
+     * @param filepath Track path to remove
+     * @return Number of playlists affected
+     */
+    int removeTrackFromAllPlaylists(const std::string& filepath);
     
     /**
      * @brief Get a playlist
