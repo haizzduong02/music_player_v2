@@ -22,6 +22,7 @@ LibraryView::LibraryView(LibraryController* controller, Library* library, Playba
     // Attach as observer to library
     if (library_) {
         library_->attach(this);
+        refreshDisplay(); // Initial population
     }
 }
 
@@ -45,11 +46,9 @@ void LibraryView::render() {
     
     ImGui::SameLine();
     
-    auto files = searchQuery_.empty() ? 
-        library_->getAll() : 
-        library_->search(searchQuery_);
+    // Use cached files list
+    const auto& files = displayedFiles_;
 
-    
     ImGui::Text("Library: %zu tracks", files.size());
     ImGui::Separator();
     
@@ -64,6 +63,7 @@ void LibraryView::renderSearchBar() {
     ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.04f, 0.45f, 0.45f, 1.0f));
     if (ImGui::InputText("Search", searchBuffer, sizeof(searchBuffer))) {
         searchQuery_ = searchBuffer;
+        refreshDisplay();
     }
     ImGui::PopStyleColor();
 }

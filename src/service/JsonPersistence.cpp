@@ -86,16 +86,14 @@ bool JsonPersistence::deleteFile(const std::string& filepath) {
 std::string JsonPersistence::serialize(const void* data) {
     if (!data) return "{}";
     
-    // Stubbed implementation - return empty JSON object
-    Logger::warn("JsonPersistence::serialize() stubbed - JSON library missing");
+    // Unused by current models (Library/Config manage their own serialization)
     return "{}";
 }
 
 bool JsonPersistence::deserialize(const std::string& serialized, void* data) {
     if (serialized.empty() || !data) return false;
     
-    // Stubbed implementation
-    Logger::warn("JsonPersistence::deserialize() stubbed - JSON library missing");
+    // Unused by current models
     return false; 
 }
 
