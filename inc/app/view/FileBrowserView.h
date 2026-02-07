@@ -111,6 +111,16 @@ private:
     void navigateTo(const std::string& path);
     
     /**
+     * @brief Update pagination state
+     */
+    void updatePagination();
+    
+    /**
+     * @brief Render pagination controls
+     */
+    void renderPaginationControls();
+    
+    /**
      * @brief Refresh current directory
      */
     void refreshCurrentDirectory();
@@ -124,6 +134,12 @@ private:
      * @brief Add selected files to target playlist
      */
     void addSelectedToPlaylist();
+
+    // Pagination state
+    int currentPage_ = 0;
+    int itemsPerPage_ = 15;
+    int totalPages_ = 1;
+    char pageInputBuffer_[16] = "1";
 };
 
 #endif // FILE_BROWSER_VIEW_H

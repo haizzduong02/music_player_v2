@@ -37,8 +37,8 @@ void FileBrowserView::render() {
     if (mode_ == BrowserMode::LIBRARY_ADD_AND_RETURN) return;
     
     // Set larger window size
-    ImGui::SetNextWindowSize(ImVec2(900, 600), ImGuiCond_FirstUseEver);
-    ImGui::SetNextWindowSizeConstraints(ImVec2(700, 500), ImVec2(1400, 900));
+    ImGui::SetNextWindowSize(ImVec2(1000, 700), ImGuiCond_FirstUseEver);
+    ImGui::SetNextWindowSizeConstraints(ImVec2(800, 600), ImVec2(1600, 1000));
     
     if (ImGui::Begin("File Browser", &visible_)) {
         renderContent();
@@ -48,7 +48,7 @@ void FileBrowserView::render() {
 
 void FileBrowserView::renderPopup() {
     // Popup logic
-    ImGui::SetNextWindowSize(ImVec2(900, 600), ImGuiCond_Appearing);
+    ImGui::SetNextWindowSize(ImVec2(1000, 700), ImGuiCond_Appearing);
     
     bool open = true;
     if (ImGui::BeginPopupModal("File Browser", &open)) {
@@ -115,9 +115,10 @@ void FileBrowserView::renderContent() {
     ImGui::EndChild();
     
     ImGui::SameLine();
+    ImGui::BeginGroup();
     
     // RIGHT PANEL: Media files only (filtered)
-    if (ImGui::BeginChild("FilePanel", ImVec2(0, contentHeight), true)) {
+    if (ImGui::BeginChild("FilePanel", ImVec2(0, contentHeight - 40), true)) { // Reserve space for pagination
         ImGui::Text("Media Files");
         ImGui::Separator();
         
@@ -129,8 +130,12 @@ void FileBrowserView::renderContent() {
             ImGui::TableSetupColumn("Path", ImGuiTableColumnFlags_NoHide); 
             ImGui::TableHeadersRow();
             
+            // Pagination logic
+            size_t startIndex = static_cast<size_t>(currentPage_) * itemsPerPage_;
+            size_t endIndex = std::min(startIndex + static_cast<size_t>(itemsPerPage_), currentMediaFiles_.size());
+            
             int fileIndex = 0;
-            for (size_t i = 0; i < currentMediaFiles_.size(); ++i) {
+            for (size_t i = startIndex; i < endIndex; ++i) {
                 const auto& fileInfo = currentMediaFiles_[i];
                 // No need to check isDirectory as currentMediaFiles_ only has files
                 
@@ -188,6 +193,12 @@ void FileBrowserView::renderContent() {
         }
     }
     ImGui::EndChild();
+
+    // Pagination controls
+    renderPaginationControls();
+    ImGui::EndGroup();
+    
+    ImGui::Separator();
     
     // Bottom buttons
     std::string addBtnText = "Add Selected";
@@ -314,4 +325,66 @@ void FileBrowserView::refreshCurrentDirectory() {
     }
     
     // selectedFiles_.clear(); // Removed to persist selection across navigation
+    updatePagination();
+}
+
+void FileBrowserView::updatePagination() {
+    if (itemsPerPage_ <= 0) itemsPerPage_ = 15;
+    totalPages_ = (int)((currentMediaFiles_.size() + itemsPerPage_ - 1) / itemsPerPage_);
+    if (totalPages_ == 0) totalPages_ = 1; 
+    
+    // Safety clamp
+    if (currentPage_ >= totalPages_) currentPage_ = totalPages_ - 1;
+    if (currentPage_ < 0) currentPage_ = 0;
+    
+    snprintf(pageInputBuffer_, sizeof(pageInputBuffer_), "%d", currentPage_ + 1);
+}
+
+void FileBrowserView::renderPaginationControls() {
+    float buttonWidth = 60.0f;
+    float textWidth = 100.0f;
+    float totalWidth = buttonWidth * 3 + textWidth + 80.0f; 
+    
+    ImGui::SetCursorPosX((ImGui::GetContentRegionAvail().x - totalWidth) * 0.5f + ImGui::GetCursorPosX());
+    
+    if (ImGui::Button("Prev", ImVec2(buttonWidth, 0))) {
+        if (currentPage_ > 0) {
+             currentPage_--;
+             snprintf(pageInputBuffer_, sizeof(pageInputBuffer_), "%d", currentPage_ + 1);
+        }
+    }
+    
+    ImGui::SameLine();
+    
+    // Page Input
+    ImGui::PushItemWidth(50.0f);
+    if (ImGui::InputText("##PageInput", pageInputBuffer_, sizeof(pageInputBuffer_), ImGuiInputTextFlags_CharsDecimal | ImGuiInputTextFlags_EnterReturnsTrue)) {
+        int page = std::atoi(pageInputBuffer_);
+        if (page < 1) page = 1;
+        if (page > totalPages_) page = totalPages_;
+        currentPage_ = page - 1;
+        snprintf(pageInputBuffer_, sizeof(pageInputBuffer_), "%d", currentPage_ + 1);
+    }
+    ImGui::PopItemWidth();
+    
+    ImGui::SameLine();
+    ImGui::Text("of %d", totalPages_);
+    
+    ImGui::SameLine();
+    if (ImGui::Button("Go", ImVec2(buttonWidth, 0))) {
+        int page = std::atoi(pageInputBuffer_);
+        if (page < 1) page = 1;
+        if (page > totalPages_) page = totalPages_;
+        currentPage_ = page - 1;
+        snprintf(pageInputBuffer_, sizeof(pageInputBuffer_), "%d", currentPage_ + 1);
+    }
+
+    ImGui::SameLine();
+    
+    if (ImGui::Button("Next", ImVec2(buttonWidth, 0))) {
+        if (currentPage_ < totalPages_ - 1) {
+             currentPage_++;
+             snprintf(pageInputBuffer_, sizeof(pageInputBuffer_), "%d", currentPage_ + 1);
+        }
+    }
 }
