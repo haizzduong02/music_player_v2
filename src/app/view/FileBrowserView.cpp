@@ -99,7 +99,7 @@ void FileBrowserView::renderContent() {
         if (ImGui::Button("Home", ImVec2(navBtnWidth, 0))) navigateTo(homePath);
         
         ImGui::Separator();
-        ImGui::Text("Folders");
+        ImGui::Text("Folders (%d tracks)", currentTrackCount_);
         ImGui::Separator();
         
         for (size_t i = 0; i < currentFiles_.size(); ++i) {
@@ -241,6 +241,8 @@ void FileBrowserView::refreshCurrentDirectory() {
         
         mediaFiles.push_back(info);
     }
+    
+    currentTrackCount_ = (int)mediaFiles.size();
     
     fileSelector_.setItems(mediaFiles);
     // fileSelector_.clearSelection(); // Optional: clear when valid path changes? 

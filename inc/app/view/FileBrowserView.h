@@ -75,6 +75,7 @@ private:
     BrowserMode mode_ = BrowserMode::LIBRARY;
     std::string targetPlaylistName_;
     std::function<void(const std::vector<std::string>&)> onFilesAddedCallback_;
+    int currentTrackCount_ = 0;
     
     /**
      * @brief Render actual content (shared between Window and Popup)
