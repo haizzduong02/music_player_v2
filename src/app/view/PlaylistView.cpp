@@ -194,7 +194,7 @@ void PlaylistView::renderAddSongsPopup() {
     // Center the popup
     ImVec2 center = ImGui::GetMainViewport()->GetCenter();
     ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
-    ImGui::SetNextWindowSize(ImVec2(600, 500), ImGuiCond_Appearing);
+    ImGui::SetNextWindowSize(ImVec2(800, 600), ImGuiCond_Appearing);
 
     if (ImGui::BeginPopupModal("Add Songs to Playlist", &showAddSongsPopup_)) {
         
@@ -239,7 +239,7 @@ void PlaylistView::renderAddSongsPopup() {
         
         // --- 2. Track List Table ---
         ImVec2 available = ImGui::GetContentRegionAvail();
-        float listHeight = available.y - 40; // Leave space for buttons
+        float listHeight = available.y - 60; // Leave space for buttons, optimize usage
         
         // Retrieve all tracks
         auto* lib = playlistController_->getLibrary();
