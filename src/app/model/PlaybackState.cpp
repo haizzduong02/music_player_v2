@@ -11,14 +11,15 @@ PlaybackState::PlaybackState()
       queueIndex_(0) {
 }
 
-void PlaybackState::setCurrentTrack(std::shared_ptr<MediaFile> track) {
+void PlaybackState::setPlayback(std::shared_ptr<MediaFile> track, PlaybackStatus status) {
     std::lock_guard<std::mutex> lock(dataMutex_);
     currentTrack_ = track;
+    status_ = status;
     position_ = 0.0;
     
     if (track) {
         duration_ = track->getMetadata().duration;
-        Logger::getInstance().info("Current track set to: " + track->getPath());
+        Logger::getInstance().info("Playback set to: " + track->getPath());
     } else {
         duration_ = 0.0;
     }

@@ -181,6 +181,10 @@ private:
     RepeatMode globalRepeatMode_ = RepeatMode::NONE; // Fallback for Queue/Library mode
     size_t currentTrackIndex_;
     
+    // Throttle state
+    double lastPlayTime_ = 0.0;
+    std::string lastPlayedPath_;
+    
     /**
      * @brief Add track to history
      * @param track Track to add

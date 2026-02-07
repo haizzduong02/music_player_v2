@@ -17,15 +17,15 @@
         {
             "inLibrary": true,
             "metadata": {
-                "album": "Short n' Sweet",
-                "artist": "Sabrina Carpenter",
-                "duration": 164,
-                "genre": "",
-                "title": "Coincidence",
-                "track": 5,
+                "album": "COWBOY CARTER",
+                "artist": "Beyoncé",
+                "duration": 132,
+                "genre": "Country",
+                "title": "BLACKBIIRD",
+                "track": 2,
                 "year": 2024
             },
-            "path": "./media/y2mate.com - Sabrina Carpenter  Coincidence Official Lyric Video.mp3"
+            "path": "./media/y2mate.com - BLACKBIIRD.mp3"
         },
         {
             "inLibrary": true,
@@ -56,15 +56,15 @@
         {
             "inLibrary": true,
             "metadata": {
-                "album": "COWBOY CARTER",
-                "artist": "Beyoncé",
-                "duration": 132,
-                "genre": "Country",
-                "title": "BLACKBIIRD",
-                "track": 2,
+                "album": "Short n' Sweet",
+                "artist": "Sabrina Carpenter",
+                "duration": 164,
+                "genre": "",
+                "title": "Coincidence",
+                "track": 5,
                 "year": 2024
             },
-            "path": "./media/y2mate.com - BLACKBIIRD.mp3"
+            "path": "./media/y2mate.com - Sabrina Carpenter  Coincidence Official Lyric Video.mp3"
         }
     ]
 }

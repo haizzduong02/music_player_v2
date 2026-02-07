@@ -38,7 +38,7 @@ public:
      * @brief Set current track
      * @param track Current track
      */
-    void setCurrentTrack(std::shared_ptr<MediaFile> track);
+    void setPlayback(std::shared_ptr<MediaFile> track, PlaybackStatus status);
     
     std::shared_ptr<MediaFile> getCurrentTrack() const { return currentTrack_; }
     

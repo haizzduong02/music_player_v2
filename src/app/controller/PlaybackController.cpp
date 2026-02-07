@@ -1,5 +1,6 @@
 #include "../../../inc/app/controller/PlaybackController.h"
 #include "../../../inc/utils/Logger.h"
+#include <chrono>
 
 PlaybackController::PlaybackController(
     IPlaybackEngine* engine,
@@ -16,19 +17,26 @@ bool PlaybackController::play(std::shared_ptr<MediaFile> track, bool pushToStack
         return false;
     }
     
+    // Throttle playback requests for the same track within 500ms
+    auto now = std::chrono::steady_clock::now();
+    double currentTime = std::chrono::duration<double>(now.time_since_epoch()).count();
+    
+    if (track->getPath() == lastPlayedPath_ && (currentTime - lastPlayTime_ < 0.5)) {
+        Logger::getInstance().debug("Throttling playback request for: " + track->getPath());
+        return true; // Already playing or starting
+    }
+    
+    lastPlayTime_ = currentTime;
+    lastPlayedPath_ = track->getPath();
+    
     // Save current to back stack only if requested
     if (pushToStack && state_->getCurrentTrack()) {
         state_->pushToBackStack();
     }
     
-    // Update state first
-    state_->setCurrentTrack(track);
+    // Update state atomically
+    state_->setPlayback(track, PlaybackStatus::PLAYING);
     state_->syncQueueIndex(track); // Sync queue index for correct Next behavior
-    state_->setStatus(PlaybackStatus::PLAYING);
-    
-    // Reset position and set duration from metadata
-    state_->setPosition(0.0);
-    state_->setDuration(static_cast<double>(track->getMetadata().duration));
     
     // Add to history
     if (history_) {

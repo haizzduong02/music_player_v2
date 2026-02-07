@@ -16,7 +16,12 @@ void History::addTrack(std::shared_ptr<MediaFile> track) {
     // Check if track already exists
     int existingIndex = findTrackIndex(track->getPath());
     
-    if (existingIndex >= 0) {
+    if (existingIndex == 0) {
+        // Already at top, no need to move or notify
+        return;
+    }
+    
+    if (existingIndex > 0) {
         // Move existing track to top (most recent)
         history_.erase(history_.begin() + existingIndex);
     }
