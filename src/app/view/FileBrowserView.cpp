@@ -8,8 +8,13 @@
 FileBrowserView::FileBrowserView(IFileSystem* fileSystem, LibraryController* libController)
     : fileSystem_(fileSystem), libController_(libController) {
     
-    // Start at current directory or home
-    currentPath_ = fileSystem_->exists(".") ? "." : "/";
+    // Start at home directory if available, otherwise root
+    const char* homeEnv = std::getenv("HOME");
+    std::string startPath = (homeEnv && fileSystem_->exists(homeEnv)) ? homeEnv : "/";
+    
+    // Check if we can start at "music_media" subfolder? No, user said they moved everything to home directly or wants home as default.
+    // Let's just use home.
+    currentPath_ = startPath;
     refreshCurrentDirectory();
 }
 
