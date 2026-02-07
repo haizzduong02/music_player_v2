@@ -23,6 +23,7 @@ struct AppConfig
     float defaultVolume = 0.5f;
     bool loopEnabled = false;
     bool shuffleEnabled = false;
+    float customVolume = -1.0f;
 
     // UI settings
     std::string theme = "Dark";

@@ -71,6 +71,7 @@ bool Application::init()
         IMGUI_CHECKVERSION();
         ImGui::CreateContext();
         ImGuiIO &io = ImGui::GetIO();
+        io.IniFilename = nullptr; // Disable imgui.ini generation
         (void)io;
         io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard Controls
         // io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;         // Enable Docking (Requires Docking Branch)
@@ -193,6 +194,13 @@ bool Application::init()
         Logger::info("Initializing controllers...");
         playbackController_ = std::make_unique<PlaybackController>(playbackEngine_.get(), playbackState_.get(),
                                                                    history_.get(), hardwareInterface_.get(), nullptr);
+        // Apply saved volume (prefer customVolume if set, otherwise defaultVolume)
+        float initialVolume = Config::getInstance().getConfig().customVolume;
+        if (initialVolume < 0.0f)
+        {
+            initialVolume = Config::getInstance().getConfig().defaultVolume;
+        }
+        playbackController_->setVolume(initialVolume);
         libraryController_ = std::make_unique<LibraryController>(library_.get(), fileSystem_.get(),
                                                                  metadataReader_.get(), playbackController_.get());
         playlistController_ =

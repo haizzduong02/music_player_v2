@@ -71,6 +71,7 @@ bool Config::save()
 void to_json(nlohmann::json &j, const AppConfig &c)
 {
     j = nlohmann::json{{"defaultVolume", c.defaultVolume},
+                       {"customVolume", c.customVolume},
                        {"loopEnabled", c.loopEnabled},
                        {"shuffleEnabled", c.shuffleEnabled},
                        {"theme", c.theme},
@@ -94,6 +95,8 @@ void from_json(const nlohmann::json &j, AppConfig &c)
 {
     if (j.contains("defaultVolume"))
         c.defaultVolume = j.at("defaultVolume").get<float>();
+    if (j.contains("customVolume"))
+        c.customVolume = j.at("customVolume").get<float>();
     if (j.contains("loopEnabled"))
         c.loopEnabled = j.at("loopEnabled").get<bool>();
     if (j.contains("shuffleEnabled"))

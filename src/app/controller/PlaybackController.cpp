@@ -1,4 +1,5 @@
 #include "app/controller/PlaybackController.h"
+#include "utils/Config.h"
 #include "utils/Logger.h"
 #include <chrono>
 
@@ -232,6 +233,9 @@ void PlaybackController::setVolume(float volume)
     {
         engine_->setVolume(volume);
     }
+
+    // Persist volume change
+    Config::getInstance().getConfig().customVolume = volume;
 }
 
 void PlaybackController::setCurrentPlaylist(Playlist *playlist)
