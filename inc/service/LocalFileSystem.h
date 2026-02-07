@@ -35,11 +35,13 @@ public:
     
     std::vector<std::string> scanDirectory(
         const std::string& path,
-        const std::vector<std::string>& extensions) override;
+        const std::vector<std::string>& extensions,
+        int maxDepth = -1) override;
     
     std::vector<std::string> getMediaFiles(
         const std::string& path,
-        const std::vector<std::string>& extensions) override;
+        const std::vector<std::string>& extensions,
+        int maxDepth = -1) override;
     
     std::vector<std::string> detectUSBDevices() override;
     
@@ -57,11 +59,15 @@ private:
      * @param path Path to scan
      * @param extensions Extensions to filter
      * @param results Output vector
+     * @param maxDepth Max recursion depth
+     * @param currentDepth Current recursion depth
      */
     void scanDirectoryRecursive(
         const std::string& path,
         const std::vector<std::string>& extensions,
-        std::vector<std::string>& results);
+        std::vector<std::string>& results,
+        int maxDepth,
+        int currentDepth);
     
     /**
      * @brief Check if file has supported extension

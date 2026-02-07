@@ -42,18 +42,20 @@ std::vector<FileInfo> LocalFileSystem::browse(const std::string& path) {
 
 std::vector<std::string> LocalFileSystem::scanDirectory(
     const std::string& path,
-    const std::vector<std::string>& extensions) {
+    const std::vector<std::string>& extensions,
+    int maxDepth) {
     
     std::vector<std::string> results;
-    scanDirectoryRecursive(path, extensions, results);
+    scanDirectoryRecursive(path, extensions, results, maxDepth, 0);
     return results;
 }
 
 std::vector<std::string> LocalFileSystem::getMediaFiles(
     const std::string& path,
-    const std::vector<std::string>& extensions) {
+    const std::vector<std::string>& extensions,
+    int maxDepth) {
     
-    return scanDirectory(path, extensions);
+    return scanDirectory(path, extensions, maxDepth);
 }
 
 std::vector<std::string> LocalFileSystem::detectUSBDevices() {
@@ -86,16 +88,26 @@ bool LocalFileSystem::isDirectory(const std::string& path) {
 void LocalFileSystem::scanDirectoryRecursive(
     const std::string& path,
     const std::vector<std::string>& extensions,
-    std::vector<std::string>& results) {
+    std::vector<std::string>& results,
+    int maxDepth,
+    int currentDepth) {
     
     try {
         if (!fs::exists(path) || !fs::is_directory(path)) {
             return;
         }
+
+        // Check depth limit if maxDepth is set (>= 0)
+        if (maxDepth >= 0 && currentDepth > maxDepth) {
+            return;
+        }
         
         for (const auto& entry : fs::directory_iterator(path)) {
             if (entry.is_directory()) {
-                scanDirectoryRecursive(entry.path().string(), extensions, results);
+                // Determine if we should recurse
+                if (maxDepth < 0 || currentDepth < maxDepth) {
+                    scanDirectoryRecursive(entry.path().string(), extensions, results, maxDepth, currentDepth + 1);
+                }
             } else if (entry.is_regular_file()) {
                 if (hasExtension(entry.path().string(), extensions)) {
                     results.push_back(entry.path().string());

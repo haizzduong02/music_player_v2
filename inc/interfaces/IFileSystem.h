@@ -43,21 +43,25 @@ public:
      * @brief Recursively scan directory for media files
      * @param path Directory path to scan
      * @param extensions Supported file extensions (e.g., {".mp3", ".mp4"})
+     * @param maxDepth Maximum recursion depth (-1 for infinite)
      * @return Vector of media file paths
      */
     virtual std::vector<std::string> scanDirectory(
         const std::string& path,
-        const std::vector<std::string>& extensions) = 0;
+        const std::vector<std::string>& extensions,
+        int maxDepth = -1) = 0;
     
     /**
-     * @brief Get all media files in a directory (non-recursive)
+     * @brief Get all media files in a directory
      * @param path Directory path
      * @param extensions Supported file extensions
+     * @param maxDepth Maximum recursion depth (0 for current dir only, -1 for infinite)
      * @return Vector of media file paths
      */
     virtual std::vector<std::string> getMediaFiles(
         const std::string& path,
-        const std::vector<std::string>& extensions) = 0;
+        const std::vector<std::string>& extensions,
+        int maxDepth = -1) = 0;
     
     /**
      * @brief Detect connected USB devices
