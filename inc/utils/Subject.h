@@ -1,7 +1,7 @@
 #ifndef SUBJECT_H
 #define SUBJECT_H
 
-#include "../interfaces/ISubject.h"
+#include "interfaces/ISubject.h"
 #include <vector>
 #include <algorithm>
 #include <mutex>

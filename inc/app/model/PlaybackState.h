@@ -1,9 +1,9 @@
 #ifndef PLAYBACK_STATE_H
 #define PLAYBACK_STATE_H
 
-#include "MediaFile.h"
-#include "../../utils/Subject.h"
-#include "../../interfaces/IPlaybackEngine.h"
+#include "app/model/MediaFile.h"
+#include "utils/Subject.h"
+#include "interfaces/IPlaybackEngine.h"
 #include <memory>
 #include <stack>
 

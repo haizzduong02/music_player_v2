@@ -1,10 +1,10 @@
 #ifndef HISTORY_CONTROLLER_H
 #define HISTORY_CONTROLLER_H
 
-#include "../model/History.h"
-#include "../controller/PlaybackController.h"
+#include "app/model/History.h"
+#include "app/controller/PlaybackController.h"
 #include <memory>
-#include "../interfaces/ITrackListController.h"
+#include "interfaces/ITrackListController.h"
 
 /**
  * @file HistoryController.h

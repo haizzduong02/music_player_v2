@@ -1,8 +1,8 @@
-#include "../../../inc/app/view/PlaylistView.h"
-#include "../../../inc/app/view/FileBrowserView.h"
-#include "../../../inc/utils/Logger.h"
-#include "../../../inc/app/controller/PlaybackController.h"
-#include "../../../inc/app/controller/PlaylistTrackListController.h"
+#include "app/view/PlaylistView.h"
+#include "app/view/FileBrowserView.h"
+#include "utils/Logger.h"
+#include "app/controller/PlaybackController.h"
+#include "app/controller/PlaylistTrackListController.h"
 
 #ifdef USE_IMGUI
 #include <imgui.h>
@@ -178,7 +178,7 @@ void PlaylistView::renderAddSongsPopup() {
     if (shouldOpenAddPopup_) {
          showAddSongsPopup_ = true;
          searchQuery_ = "";
-         selectedTracksForAdd_.clear();
+         trackSelector_.clearSelection();
          ImGui::OpenPopup("Add Songs to Playlist");
          shouldOpenAddPopup_ = false;
     }
@@ -218,8 +218,8 @@ void PlaylistView::renderAddSongsPopup() {
                     // Set callback to tick added files
                     fileBrowserView_->setOnFilesAddedCallback([this](const std::vector<std::string>& files) {
                         for (const auto& f : files) {
-                            Logger::getInstance().info("Callback: Auto-selecting " + f);
-                            selectedTracksForAdd_.insert(f);
+                            Logger::info("Callback: Auto-selecting " + f);
+                            trackSelector_.addSelection(f);
                         }
                         // Note: we don't need to set shouldReopenAddPopup_ here anymore, 
                         // logic in renderPopups handles it when browser closes.
@@ -241,75 +241,78 @@ void PlaylistView::renderAddSongsPopup() {
         ImVec2 available = ImGui::GetContentRegionAvail();
         float listHeight = available.y - 40; // Leave space for buttons
         
-        if (ImGui::BeginChild("TrackList", ImVec2(0, listHeight), true)) {
-            // Retrieve all tracks
-            auto* lib = playlistController_->getLibrary();
-            if (lib) {
-                auto allTracks = lib->getAll();
+        // Retrieve all tracks
+        auto* lib = playlistController_->getLibrary();
+        if (lib) {
+            auto allTracks = lib->getAll();
+            
+            // Filter and Convert to FileInfo
+            std::vector<FileInfo> displayTracks;
+            
+            std::string queryLower = searchQuery_;
+            std::transform(queryLower.begin(), queryLower.end(), queryLower.begin(), ::tolower);
+            
+            for (const auto& t : allTracks) {
+                std::string title = t->getDisplayName();
+                std::string artist = t->getMetadata().artist;
                 
-                // Filter
-                std::vector<std::shared_ptr<MediaFile>> displayTracks;
-                if (searchQuery_.empty()) {
-                    displayTracks = allTracks;
-                } else {
-                    std::string queryLower = searchQuery_;
-                    std::transform(queryLower.begin(), queryLower.end(), queryLower.begin(), ::tolower);
-                    for (const auto& t : allTracks) {
-                        std::string title = t->getDisplayName();
-                        std::string artist = t->getMetadata().artist;
-                        std::transform(title.begin(), title.end(), title.begin(), ::tolower);
-                        std::transform(artist.begin(), artist.end(), artist.begin(), ::tolower);
-                        
-                        if (title.find(queryLower) != std::string::npos || artist.find(queryLower) != std::string::npos) {
-                            displayTracks.push_back(t);
-                        }
-                    }
-                }
-                
-                // Render Table
-                if (ImGui::BeginTable("AddTable", 3, ImGuiTableFlags_RowBg | ImGuiTableFlags_ScrollY)) {
-                    ImGui::TableSetupColumn("Select", ImGuiTableColumnFlags_WidthFixed, 40.0f);
-                    ImGui::TableSetupColumn("Title");
-                    ImGui::TableSetupColumn("Artist");
-                    ImGui::TableHeadersRow();
+                // Search logic
+                if (!searchQuery_.empty()) {
+                    std::string titleLower = title;
+                    std::string artistLower = artist;
+                    std::transform(titleLower.begin(), titleLower.end(), titleLower.begin(), ::tolower);
+                    std::transform(artistLower.begin(), artistLower.end(), artistLower.begin(), ::tolower);
                     
-                    for (const auto& track : displayTracks) {
-                        ImGui::TableNextRow();
-                        ImGui::TableNextColumn();
-                        
-                        // Checkbox
-                        bool isSelected = selectedTracksForAdd_.find(track->getPath()) != selectedTracksForAdd_.end();
-                        ImGui::PushID(track->getPath().c_str());
-                        if (ImGui::Checkbox("##chk", &isSelected)) {
-                            if (isSelected) selectedTracksForAdd_.insert(track->getPath());
-                            else selectedTracksForAdd_.erase(track->getPath());
-                        }
-                        ImGui::PopID();
-                        
-                        ImGui::TableNextColumn();
-                        ImGui::Text("%s", track->getDisplayName().c_str());
-                        
-                        ImGui::TableNextColumn();
-                        ImGui::Text("%s", track->getMetadata().artist.c_str());
+                    if (titleLower.find(queryLower) == std::string::npos && artistLower.find(queryLower) == std::string::npos) {
+                        continue;
                     }
-                    ImGui::EndTable();
                 }
+                
+                FileInfo info;
+                info.name = title;
+                info.extension = artist; // Mapping Artist to "Type/Extension" column
+                info.path = t->getPath();
+                info.isDirectory = false;
+                info.size = 0;
+                
+                displayTracks.push_back(info);
             }
+            
+            // Update selector items
+            // Note: This sets items every frame is inefficient if data hasn't changed.
+            // Ideally should check dirty flag or only set when search changes.
+            // For now, let's optimize slightly by checking if sizes match or similar, 
+            // but effectively we might just set it. 
+            // Better: update only when popup opens or search changes.
+            // But since this is immediate mode, we'll just set it for now.
+            // Optimization: Static or member cache? 
+            // Let's rely on basic set for now, PagedFileSelector is light.
+            
+            trackSelector_.setItems(displayTracks);
+            trackSelector_.setCustomLabels("Title", "Artist");
+            
+            // Render
+            
+            // Actions
+            trackSelector_.renderActions();
+            
+            if (ImGui::BeginChild("TrackList", ImVec2(0, listHeight - 40), true)) {
+                trackSelector_.renderList();
+            }
+            ImGui::EndChild();
+            
+            trackSelector_.renderPagination();
         }
-        ImGui::EndChild();
         
         // --- 3. Bottom Buttons ---
         ImGui::Separator();
         
         if (ImGui::Button("Add Selected", ImVec2(120, 0))) {
             if (selectedPlaylist_) {
-                for (const auto& path : selectedTracksForAdd_) {
+                auto selectedPaths = trackSelector_.getSelectedPaths();
+                for (const auto& path : selectedPaths) {
                     playlistController_->addToPlaylist(selectedPlaylist_->getName(), path);
                 }
-                // Save is handled within addToPlaylist usually or manual calling might be needed
-                // Assuming controller works as expected. 
-                // Currently addToPlaylist just adds to model. We might need to ensure persistence. 
-                // PlaylistManager::save(playlist) is usually called by controller or manager.
             }
             ImGui::CloseCurrentPopup();
             showAddSongsPopup_ = false;

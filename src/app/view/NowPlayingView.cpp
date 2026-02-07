@@ -1,5 +1,5 @@
-#include "../../../inc/app/view/NowPlayingView.h"
-#include "../../../inc/utils/Logger.h"
+#include "app/view/NowPlayingView.h"
+#include "utils/Logger.h"
 #include <imgui.h>
 
 #define STB_IMAGE_IMPLEMENTATION
@@ -188,7 +188,7 @@ void NowPlayingView::render() {
                     } else {
                         favPlaylist->addTrack(track);
                     }
-                    favPlaylist->save();
+                    // playlistManager_->saveAll(); // Removed: Save only on exit
                 }
                 ImGui::SameLine();
             }
@@ -307,7 +307,7 @@ unsigned int NowPlayingView::loadIconTexture(const std::string& path) {
     int width, height, channels;
     unsigned char* data = stbi_load(path.c_str(), &width, &height, &channels, 4);
     if (!data) {
-        Logger::getInstance().error("Failed to load icon: " + path);
+        Logger::error("Failed to load icon: " + path);
         return 0;
     }
 

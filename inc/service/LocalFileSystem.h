@@ -1,7 +1,7 @@
 #ifndef LOCAL_FILE_SYSTEM_H
 #define LOCAL_FILE_SYSTEM_H
 
-#include "../interfaces/IFileSystem.h"
+#include "interfaces/IFileSystem.h"
 #include <string>
 #include <vector>
 

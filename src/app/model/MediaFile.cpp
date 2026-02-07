@@ -1,4 +1,4 @@
-#include "../../../inc/app/model/MediaFile.h"
+#include "app/model/MediaFile.h"
 #include <filesystem>
 #include <algorithm>
 #include <cctype>

@@ -1,7 +1,7 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
-#include "../interfaces/IPersistence.h"
+#include "interfaces/IPersistence.h"
 #include <string>
 #include <map>
 #include <vector>

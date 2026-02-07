@@ -1,6 +1,6 @@
-#include "../../../inc/app/controller/LibraryController.h"
-#include "../../../inc/app/model/MediaFileFactory.h"
-#include "../../../inc/utils/Logger.h"
+#include "app/controller/LibraryController.h"
+#include "app/model/MediaFileFactory.h"
+#include "utils/Logger.h"
 
 LibraryController::LibraryController(
     Library* library,
@@ -31,7 +31,7 @@ int LibraryController::addMediaFilesFromDirectory(const std::string& directoryPa
         }
     }
     
-    Logger::getInstance().info("Added " + std::to_string(addedCount) + " files from " + directoryPath);
+    Logger::info("Added " + std::to_string(addedCount) + " files from " + directoryPath);
     return addedCount;
 }
 
@@ -87,7 +87,7 @@ int LibraryController::refreshLibrary() {
         }
     }
     
-    Logger::getInstance().info("Refreshed " + std::to_string(refreshedCount) + " files");
+    Logger::info("Refreshed " + std::to_string(refreshedCount) + " files");
     return refreshedCount;
 }
 
@@ -106,7 +106,7 @@ int LibraryController::verifyLibrary() {
         }
     }
     
-    Logger::getInstance().info("Removed " + std::to_string(removedCount) + " missing files");
+    Logger::info("Removed " + std::to_string(removedCount) + " missing files");
     return removedCount;
 }
 void LibraryController::playTrack(const std::vector<std::shared_ptr<MediaFile>>& context, size_t index) {

@@ -1,11 +1,11 @@
 #ifndef HISTORY_VIEW_H
 #define HISTORY_VIEW_H
 
-#include "TrackListView.h"
-#include "../controller/HistoryController.h"
-#include "../controller/PlaybackController.h"
-#include "../model/History.h"
-#include "../model/PlaylistManager.h"
+#include "app/view/TrackListView.h"
+#include "app/controller/HistoryController.h"
+#include "app/controller/PlaybackController.h"
+#include "app/model/History.h"
+#include "app/model/PlaylistManager.h"
 #include <memory>
 
 /**

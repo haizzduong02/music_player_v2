@@ -1,13 +1,14 @@
 #ifndef FILE_BROWSER_VIEW_H
 #define FILE_BROWSER_VIEW_H
 
-#include "BaseView.h"
-#include "../controller/LibraryController.h"
-#include "../../interfaces/IFileSystem.h"
+#include "app/view/BaseView.h"
+#include "app/controller/LibraryController.h"
+#include "interfaces/IFileSystem.h"
 #include <string>
 #include <vector>
 #include <set>
 #include <functional>
+#include "app/view/components/PagedFileSelector.h"
 
 /**
  * @file FileBrowserView.h
@@ -57,13 +58,19 @@ private:
     LibraryController* libController_;
     class PlaylistController* playlistController_ = nullptr; // Forward declaration
     
+    
+    // UI state
+
+// ...
+
     // UI state
     std::string currentPath_;
     std::vector<FileInfo> currentFiles_; // Folders for navigation
-    std::vector<FileInfo> currentMediaFiles_; // Recursive media files
-    // int selectedIndex_; // Removed single selection index
-    std::set<std::string> selectedFiles_;  // For multi-select using set
+    // std::vector<FileInfo> currentMediaFiles_; // Recursive media files - Moved to PagedFileSelector
+    // std::set<std::string> selectedFiles_;  // For multi-select - Moved to PagedFileSelector
     
+    PagedFileSelector fileSelector_;
+
     // Mode state
     BrowserMode mode_ = BrowserMode::LIBRARY;
     std::string targetPlaylistName_;
@@ -109,20 +116,6 @@ private:
      * @param path Directory to navigate to
      */
     void navigateTo(const std::string& path);
-    
-    /**
-     * @brief Update pagination state
-     */
-    void updatePagination();
-    
-    /**
-     * @brief Render pagination controls
-     */
-    void renderPaginationControls();
-    
-    /**
-     * @brief Refresh current directory
-     */
     void refreshCurrentDirectory();
     
     /**
@@ -130,16 +123,11 @@ private:
      */
     void addSelectedToLibrary();
     
-    /**
-     * @brief Add selected files to target playlist
-     */
-    void addSelectedToPlaylist();
-
-    // Pagination state
-    int currentPage_ = 0;
-    int itemsPerPage_ = 15;
-    int totalPages_ = 1;
-    char pageInputBuffer_[16] = "1";
+    // Pagination state - Moved to PagedFileSelector
+    // int currentPage_ = 0;
+    // int itemsPerPage_ = 15;
+    // int totalPages_ = 1;
+    // char pageInputBuffer_[16] = "1";
 };
 
 #endif // FILE_BROWSER_VIEW_H

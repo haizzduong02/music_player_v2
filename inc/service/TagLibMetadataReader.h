@@ -1,7 +1,7 @@
 #ifndef TAGLIB_METADATA_READER_H
 #define TAGLIB_METADATA_READER_H
 
-#include "../interfaces/IMetadataReader.h"
+#include "interfaces/IMetadataReader.h"
 #include <string>
 #include <map>
 

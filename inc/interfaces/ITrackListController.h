@@ -5,7 +5,7 @@
 #include <vector>
 #include <set>
 #include <memory>
-#include "../app/model/MediaFile.h"
+#include "app/model/MediaFile.h"
 
 /**
  * @brief Interface for track list management operations.

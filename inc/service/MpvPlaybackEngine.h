@@ -1,7 +1,7 @@
 #ifndef MPV_PLAYBACK_ENGINE_H
 #define MPV_PLAYBACK_ENGINE_H
 
-#include "../interfaces/IPlaybackEngine.h"
+#include "interfaces/IPlaybackEngine.h"
 #include <string>
 #include <vector>
 #include <mutex>

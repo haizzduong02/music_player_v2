@@ -1,12 +1,12 @@
-#include "../../inc/app/Application.h"
-#include "../../inc/utils/Logger.h"
-#include "../../inc/utils/Config.h"
-#include "../../inc/service/TagLibMetadataReader.h"
-#include "../../inc/service/LocalFileSystem.h"
-#include "../../inc/service/JsonPersistence.h"
-#include "../../inc/service/MpvPlaybackEngine.h"
-#include "../../inc/app/view/ViewFactory.h"
-#include "../../inc/app/view/MainWindow.h"
+#include "app/Application.h"
+#include "utils/Logger.h"
+#include "utils/Config.h"
+#include "service/TagLibMetadataReader.h"
+#include "service/LocalFileSystem.h"
+#include "service/JsonPersistence.h"
+#include "service/MpvPlaybackEngine.h"
+#include "app/view/ViewFactory.h"
+#include "app/view/MainWindow.h"
 
 // SDL and ImGui includes
 #include <SDL.h>
@@ -26,25 +26,25 @@ Application::Application()
       shouldQuit_(false),
       initialized_(false) {
     
-    Logger::getInstance().info("Application instance created");
+    Logger::info("Application instance created");
 }
 
 Application::~Application() {
     shutdown();
-    Logger::getInstance().info("Application destroyed");
+    Logger::info("Application destroyed");
 }
 
 bool Application::init() {
-    Logger::getInstance().info("Initializing application...");
+    Logger::info("Initializing application...");
     
     try {
         // Step 1: Initialize SDL Video (Audio handled by MPV)
-        Logger::getInstance().info("Initializing SDL...");
+        Logger::info("Initializing SDL...");
         if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_GAMECONTROLLER) != 0) {
-            Logger::getInstance().error("Error: " + std::string(SDL_GetError()));
+            Logger::error("Error: " + std::string(SDL_GetError()));
             return false;
         }
-        Logger::getInstance().info("SDL Initialized");
+        Logger::info("SDL Initialized");
 
         // Setup window
         SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
@@ -59,14 +59,14 @@ bool Application::init() {
             Config::getInstance().getConfig().windowHeight, 
             window_flags);
         if (window_ == nullptr) {
-            Logger::getInstance().error("Error: SDL_CreateWindow(): " + std::string(SDL_GetError()));
+            Logger::error("Error: SDL_CreateWindow(): " + std::string(SDL_GetError()));
             return false;
         }
 
         glContext_ = SDL_GL_CreateContext(window_);
         SDL_GL_MakeCurrent(window_, glContext_);
         SDL_GL_SetSwapInterval(1); // Enable vsync
-        Logger::getInstance().info("Window and GL Context Created");
+        Logger::info("Window and GL Context Created");
 
         // Step 2: Initialize ImGui
         IMGUI_CHECKVERSION();
@@ -106,7 +106,7 @@ bool Application::init() {
             io.Fonts->AddFontFromFileTTF(fontPath2, 22.0f, &boldConfig);
         }
         if (!mainFont) {
-            Logger::getInstance().warn("Could not load Inter font, using default");
+            Logger::warn("Could not load Inter font, using default");
             io.Fonts->AddFontDefault();
             io.Fonts->AddFontDefault(); // Index 1
             io.Fonts->AddFontDefault(); // Index 2
@@ -161,29 +161,29 @@ bool Application::init() {
         ImGui_ImplOpenGL3_Init("#version 130");
 
         // Step 3: Initialize Services, Models, Controllers...
-        Logger::getInstance().info("Initializing services...");
+        Logger::info("Initializing services...");
         persistence_ = std::make_unique<JsonPersistence>();
         
         // Initialize Config singleton
         Config::getInstance().init(persistence_.get());
         if (!Config::getInstance().load()) {
-            Logger::getInstance().warn("Failed to load configuration, using defaults");
+            Logger::warn("Failed to load configuration, using defaults");
         }
         // ... (rest of init remains checking Application.cpp content - wait, replace_file_content replaces blocks. I need to be careful with "Services, Models..." lines if they are not in TargetContent)
         metadataReader_ = std::make_unique<TagLibMetadataReader>();
         fileSystem_ = std::make_unique<LocalFileSystem>();
         playbackEngine_ = std::make_unique<MpvPlaybackEngine>();
         
-        Logger::getInstance().info("Services initialized");
+        Logger::info("Services initialized");
         
-        Logger::getInstance().info("Initializing models...");
+        Logger::info("Initializing models...");
         library_ = std::make_unique<Library>(persistence_.get());
         playlistManager_ = std::make_unique<PlaylistManager>(persistence_.get());
         history_ = std::make_unique<History>(100);
         playbackState_ = std::make_unique<PlaybackState>();
-        Logger::getInstance().info("Models initialized");
+        Logger::info("Models initialized");
         
-        Logger::getInstance().info("Initializing controllers...");
+        Logger::info("Initializing controllers...");
         playbackController_ = std::make_unique<PlaybackController>(
             playbackEngine_.get(),
             playbackState_.get(),
@@ -209,9 +209,9 @@ bool Application::init() {
         usbController_ = std::make_unique<USBController>(
             fileSystem_.get()
         );
-        Logger::getInstance().info("Controllers initialized");
+        Logger::info("Controllers initialized");
         
-        Logger::getInstance().info("Initializing views...");
+        Logger::info("Initializing views...");
         viewFactory_ = std::make_unique<ViewFactory>();
         
         // Use ViewFactory to create MainWindow via interface (or direct if factory returns pointer)
@@ -265,29 +265,29 @@ bool Application::init() {
         mainWindow_->setPlaybackController(playbackController_.get());
         mainWindow_->setPlaybackState(playbackState_.get());
         
-        Logger::getInstance().info("Views initialized");
+        Logger::info("Views initialized");
         
         // Load data
         library_->load();
         playlistManager_->loadAll();
         
         initialized_ = true;
-        Logger::getInstance().info("Application initialized successfully");
+        Logger::info("Application initialized successfully");
         return true;
         
     } catch (const std::exception& e) {
-        Logger::getInstance().error("Application initialization failed: " + std::string(e.what()));
+        Logger::error("Application initialization failed: " + std::string(e.what()));
         return false;
     }
 }
 
 void Application::run() {
     if (!initialized_) {
-        Logger::getInstance().error("Cannot run - application not initialized");
+        Logger::error("Cannot run - application not initialized");
         return;
     }
     
-    Logger::getInstance().info("Application running...");
+    Logger::info("Application running...");
     
     if (mainWindow_) {
         mainWindow_->show();
@@ -362,7 +362,7 @@ void Application::run() {
         // std::this_thread::sleep_for(std::chrono::milliseconds(1));
     }
     
-    Logger::getInstance().info("Application main loop ended");
+    Logger::info("Application main loop ended");
 }
 
 void Application::shutdown() {
@@ -371,7 +371,7 @@ void Application::shutdown() {
         return;
     }
     
-    Logger::getInstance().info("Shutting down application...");
+    Logger::info("Shutting down application...");
     
     // Save data
     Config::getInstance().save();
@@ -428,5 +428,5 @@ void Application::shutdown() {
     
     initialized_ = false; // Mark as shut down
     
-    Logger::getInstance().info("Application shutdown complete");
+    Logger::info("Application shutdown complete");
 }

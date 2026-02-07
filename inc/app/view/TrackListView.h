@@ -1,13 +1,13 @@
 #ifndef TRACK_LIST_VIEW_H
 #define TRACK_LIST_VIEW_H
 
-#include "BaseView.h"
-#include "../model/MediaFile.h"
-#include "../interfaces/ITrackListController.h"
-#include "../controller/PlaybackController.h"
-#include "../model/PlaylistManager.h"
+#include "app/view/BaseView.h"
+#include "app/model/MediaFile.h"
+#include "interfaces/ITrackListController.h"
+#include "app/controller/PlaybackController.h"
+#include "app/model/PlaylistManager.h"
 #include "imgui.h"
-#include "../../utils/Logger.h"
+#include "utils/Logger.h"
 #include <string>
 #include <vector>
 #include <set>
@@ -148,7 +148,7 @@ protected:
                             if (playlist->getName() == "Now Playing") continue;
                             if (ImGui::Selectable(playlist->getName().c_str())) {
                                 playlist->addTrack(file);
-                                playlist->save();
+                                // playlistManager_->saveAll(); // Removed: Save only on exit
                                 ImGui::CloseCurrentPopup();
                             }
                         }
@@ -170,8 +170,7 @@ protected:
                             auto newPl = playlistManager_->createPlaylist(name);
                             if (newPl) {
                                 newPl->addTrack(file);
-                                newPl->save();
-                                playlistManager_->saveAll(); // Ensure the new playlist itself is saved in the manager
+                                // playlistManager_->saveAll(); // Removed: Save only on exit
                                 newPlaylistBuffer[0] = '\0';
                                 ImGui::CloseCurrentPopup();
                             }

@@ -16,45 +16,45 @@ int main(int argc, char* argv[]) {
     setenv("SDL_AUDIODRIVER", "pulseaudio", 1);
     
     // Initialize logger
-    Logger::getInstance().info("=================================");
-    Logger::getInstance().info("Music Player Application Starting");
-    Logger::getInstance().info("=================================");
+    Logger::info("=================================");
+    Logger::info("Music Player Application Starting");
+    Logger::info("=================================");
     
     try {
         // Create application instance
         Application app;
         
         // Initialize all components
-        Logger::getInstance().info("Initializing application...");
+        Logger::info("Initializing application...");
         if (!app.init()) {
-            Logger::getInstance().error("Failed to initialize application");
+            Logger::error("Failed to initialize application");
             std::cerr << "Failed to initialize application. Check logs for details." << std::endl;
             return 1;
         }
         
-        Logger::getInstance().info("Application initialized successfully");
+        Logger::info("Application initialized successfully");
         
         // Run main loop
-        Logger::getInstance().info("Starting main loop...");
+        Logger::info("Starting main loop...");
         app.run();
         
         // Shutdown gracefully
-        Logger::getInstance().info("Shutting down application...");
+        Logger::info("Shutting down application...");
         app.shutdown();
         
-        Logger::getInstance().info("=================================");
-        Logger::getInstance().info("Music Player Application Exited");
-        Logger::getInstance().info("=================================");
+        Logger::info("=================================");
+        Logger::info("Music Player Application Exited");
+        Logger::info("=================================");
         
         return 0;
         
     } catch (const std::exception& e) {
-        Logger::getInstance().error("Fatal error: " + std::string(e.what()));
+        Logger::error("Fatal error: " + std::string(e.what()));
         std::cerr << "Fatal error: " << e.what() << std::endl;
         return 1;
         
     } catch (...) {
-        Logger::getInstance().error("Unknown fatal error occurred");
+        Logger::error("Unknown fatal error occurred");
         std::cerr << "Unknown fatal error occurred" << std::endl;
         return 1;
     }

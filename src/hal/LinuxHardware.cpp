@@ -1,5 +1,5 @@
-#include "../../inc/interfaces/IHardwareInterface.h"
-#include "../../inc/utils/Logger.h"
+#include "interfaces/IHardwareInterface.h"
+#include "utils/Logger.h"
 #include <thread>
 #include <chrono>
 #include <cstring>
@@ -71,7 +71,7 @@ public:
         // Open serial port
         serialFd_ = ::open(port.c_str(), O_RDWR | O_NOCTTY | O_NDELAY);
         if (serialFd_ == -1) {
-            Logger::getInstance().error("Failed to open serial port: " + port);
+            Logger::error("Failed to open serial port: " + port);
             return false;
         }
         
@@ -110,7 +110,7 @@ public:
         tcflush(serialFd_, TCIOFLUSH);
         
         connected_ = true;
-        Logger::getInstance().info("Hardware initialized on port: " + port + " at " + std::to_string(baudRate) + " baud");
+        Logger::info("Hardware initialized on port: " + port + " at " + std::to_string(baudRate) + " baud");
         return true;
     }
     
@@ -120,7 +120,7 @@ public:
             serialFd_ = -1;
         }
         connected_ = false;
-        Logger::getInstance().info("Hardware connection closed");
+        Logger::info("Hardware connection closed");
     }
     
     bool isConnected() const override {
@@ -136,7 +136,7 @@ public:
         ssize_t written = write(serialFd_, cmdWithNewline.c_str(), cmdWithNewline.length());
         
         if (written < 0) {
-            Logger::getInstance().error("Failed to send command: " + command);
+            Logger::error("Failed to send command: " + command);
             return false;
         }
         
@@ -209,7 +209,7 @@ public:
         
         listening_ = true;
         listenerThread_ = std::thread(&LinuxHardware::listenerLoop, this);
-        Logger::getInstance().info("Hardware listener started");
+        Logger::info("Hardware listener started");
     }
     
     void stopListening() override {
@@ -221,7 +221,7 @@ public:
         if (listenerThread_.joinable()) {
             listenerThread_.join();
         }
-        Logger::getInstance().info("Hardware listener stopped");
+        Logger::info("Hardware listener stopped");
     }
     
 private:

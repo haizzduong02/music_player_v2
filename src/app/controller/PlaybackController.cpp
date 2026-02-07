@@ -1,5 +1,5 @@
-#include "../../../inc/app/controller/PlaybackController.h"
-#include "../../../inc/utils/Logger.h"
+#include "app/controller/PlaybackController.h"
+#include "utils/Logger.h"
 #include <chrono>
 
 PlaybackController::PlaybackController(
@@ -22,7 +22,7 @@ bool PlaybackController::play(std::shared_ptr<MediaFile> track, bool pushToStack
     double currentTime = std::chrono::duration<double>(now.time_since_epoch()).count();
     
     if (track->getPath() == lastPlayedPath_ && (currentTime - lastPlayTime_ < 0.5)) {
-        Logger::getInstance().debug("Throttling playback request for: " + track->getPath());
+        Logger::debug("Throttling playback request for: " + track->getPath());
         return true; // Already playing or starting
     }
     
@@ -250,22 +250,22 @@ void PlaybackController::updateTime(double deltaTime) {
 }
 
 void PlaybackController::handlePlaybackFinished() {
-    Logger::getInstance().info("Playback finished");
+    Logger::info("Playback finished");
     
     RepeatMode mode = currentPlaylist_ ? currentPlaylist_->getRepeatMode() : globalRepeatMode_;
     
-    Logger::getInstance().info("Current RepeatMode: " + std::to_string(static_cast<int>(mode)));
+    Logger::info("Current RepeatMode: " + std::to_string(static_cast<int>(mode)));
     
     // Check RepeatMode::ONE
     if (mode == RepeatMode::ONE) {
          if (state_ && state_->getCurrentTrack()) {
-             Logger::getInstance().info("RepeatMode::ONE active, repeating track: " + state_->getCurrentTrack()->getDisplayName());
+             Logger::info("RepeatMode::ONE active, repeating track: " + state_->getCurrentTrack()->getDisplayName());
              play(state_->getCurrentTrack());
              return;
          }
     }
     
-    Logger::getInstance().info("Calling next() (Auto-advance)");
+    Logger::info("Calling next() (Auto-advance)");
     next(); // Simple auto-next
 }
 
@@ -296,7 +296,7 @@ void PlaybackController::toggleRepeatMode() {
     if (nextMode == RepeatMode::ALL) modeStr = "ALL";
     else if (nextMode == RepeatMode::ONE) modeStr = "ONE";
     
-    Logger::getInstance().info("Repeat mode set to: " + modeStr);
+    Logger::info("Repeat mode set to: " + modeStr);
 }
 
 void PlaybackController::setRepeatMode(RepeatMode mode) {

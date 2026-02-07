@@ -1,9 +1,9 @@
 #ifndef PLAYLIST_MANAGER_H
 #define PLAYLIST_MANAGER_H
 
-#include "Playlist.h"
-#include "../../utils/Subject.h"
-#include "../../interfaces/IPersistence.h"
+#include "app/model/Playlist.h"
+#include "utils/Subject.h"
+#include "interfaces/IPersistence.h"
 #include <vector>
 #include <memory>
 #include <string>

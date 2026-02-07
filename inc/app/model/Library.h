@@ -1,9 +1,10 @@
 #ifndef LIBRARY_H
 #define LIBRARY_H
 
-#include "MediaFile.h"
-#include "../../utils/Subject.h"
-#include "../../interfaces/IPersistence.h"
+#include "app/model/MediaFile.h"
+#include "utils/Subject.h"
+#include "interfaces/IPersistence.h"
+#include "interfaces/ITrackCollection.h"
 #include <vector>
 #include <memory>
 #include <string>
@@ -25,7 +26,7 @@
  * Implements Observer pattern to notify views of changes.
  * Follows Single Responsibility Principle - only manages library data.
  */
-class Library : public Subject {
+class Library : public Subject, public ITrackCollection {
 public:
     /**
      * @brief Constructor
@@ -52,7 +53,7 @@ public:
      * @param filepath Path to check
      * @return true if file is in library
      */
-    bool contains(const std::string& filepath) const;
+    bool contains(const std::string& filepath) const override;
     
     /**
      * @brief Save library to disk
@@ -83,10 +84,15 @@ public:
      */
     std::shared_ptr<MediaFile> getByPath(const std::string& filepath) const;
     
-    size_t size() const { return mediaFiles_.size(); }
+    size_t size() const override { return mediaFiles_.size(); }
     const std::vector<std::shared_ptr<MediaFile>>& getAll() const { return mediaFiles_; }
     
-    void clear();
+    void clear() override;
+    
+    // ITrackCollection implementation
+    bool addTrack(std::shared_ptr<MediaFile> track) override { return addMedia(track); }
+    bool removeTrackByPath(const std::string& path) override { return removeMedia(path); }
+    const std::vector<std::shared_ptr<MediaFile>>& getTracks() const override { return getAll(); }
     
 
 private:

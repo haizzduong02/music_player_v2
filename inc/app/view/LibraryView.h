@@ -1,10 +1,10 @@
 #ifndef LIBRARY_VIEW_H
 #define LIBRARY_VIEW_H
 
-#include "TrackListView.h"
-#include "../controller/LibraryController.h"
-#include "../model/Library.h"
-#include "../controller/PlaybackController.h"
+#include "app/view/TrackListView.h"
+#include "app/controller/LibraryController.h"
+#include "app/model/Library.h"
+#include "app/controller/PlaybackController.h"
 #include <vector>
 #include <memory>
 

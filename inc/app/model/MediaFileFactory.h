@@ -1,8 +1,8 @@
 #ifndef MEDIA_FILE_FACTORY_H
 #define MEDIA_FILE_FACTORY_H
 
-#include "MediaFile.h"
-#include "../../interfaces/IMetadataReader.h"
+#include "app/model/MediaFile.h"
+#include "interfaces/IMetadataReader.h"
 #include <memory>
 #include <string>
 

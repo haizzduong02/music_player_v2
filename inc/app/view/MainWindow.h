@@ -1,13 +1,13 @@
 #ifndef MAIN_WINDOW_H
 #define MAIN_WINDOW_H
 
-#include "BaseView.h"
-#include "LibraryView.h"
-#include "PlaylistView.h"
-#include "NowPlayingView.h"
-#include "HistoryView.h"
-#include "FileBrowserView.h"
-#include "../../app/model/PlaybackState.h"
+#include "app/view/BaseView.h"
+#include "app/view/LibraryView.h"
+#include "app/view/PlaylistView.h"
+#include "app/view/NowPlayingView.h"
+#include "app/view/HistoryView.h"
+#include "app/view/FileBrowserView.h"
+#include "app/model/PlaybackState.h"
 #include <vector>
 #include <memory>
 #include <GL/gl.h>

@@ -1,11 +1,11 @@
 #ifndef LIBRARY_CONTROLLER_H
 #define LIBRARY_CONTROLLER_H
 
-#include "../interfaces/ITrackListController.h"
-#include "../model/Library.h"
-#include "../controller/PlaybackController.h"
-#include "../../interfaces/IFileSystem.h"
-#include "../../interfaces/IMetadataReader.h"
+#include "interfaces/ITrackListController.h"
+#include "app/model/Library.h"
+#include "app/controller/PlaybackController.h"
+#include "interfaces/IFileSystem.h"
+#include "interfaces/IMetadataReader.h"
 
 /**
  * @file LibraryController.h

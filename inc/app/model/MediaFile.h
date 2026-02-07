@@ -1,7 +1,7 @@
 #ifndef MEDIA_FILE_H
 #define MEDIA_FILE_H
 
-#include "../../interfaces/IMetadataReader.h"
+#include "interfaces/IMetadataReader.h"
 #include <string>
 #include <json.hpp>
 #include <memory>

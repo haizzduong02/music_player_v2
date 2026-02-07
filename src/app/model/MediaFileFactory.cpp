@@ -1,5 +1,5 @@
-#include "../../../inc/app/model/MediaFileFactory.h"
-#include "../../../inc/utils/Logger.h"
+#include "app/model/MediaFileFactory.h"
+#include "utils/Logger.h"
 #include <algorithm>
 #include <cctype>
 
@@ -16,7 +16,7 @@ std::unique_ptr<MediaFile> MediaFileFactory::createMediaFile(
             MediaMetadata metadata = metadataReader->readMetadata(filepath);
             mediaFile->setMetadata(metadata);
         } catch (const std::exception& e) {
-            Logger::getInstance().warn("Failed to read metadata for: " + filepath + " - " + e.what());
+            Logger::warn("Failed to read metadata for: " + filepath + " - " + e.what());
         }
     }
     

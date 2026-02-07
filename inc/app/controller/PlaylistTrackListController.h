@@ -1,9 +1,9 @@
 #ifndef PLAYLIST_TRACK_LIST_CONTROLLER_H
 #define PLAYLIST_TRACK_LIST_CONTROLLER_H
 
-#include "../interfaces/ITrackListController.h"
-#include "../controller/PlaylistController.h"
-#include "../model/Playlist.h"
+#include "interfaces/ITrackListController.h"
+#include "app/controller/PlaylistController.h"
+#include "app/model/Playlist.h"
 
 /**
  * @brief Adapter for playlist tracks to implement ITrackListController

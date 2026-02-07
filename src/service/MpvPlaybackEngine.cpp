@@ -1,5 +1,5 @@
-#include "../../inc/service/MpvPlaybackEngine.h"
-#include "../../inc/utils/Logger.h"
+#include "service/MpvPlaybackEngine.h"
+#include "utils/Logger.h"
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_opengl.h>
 #include <stdexcept>
@@ -50,14 +50,14 @@ void MpvPlaybackEngine::initMpv() {
     // Enable video output but don't spawn a window (we render to texture)
     mpv_set_option_string(mpv_, "vo", "libmpv");
 
-    Logger::getInstance().info("Calling mpv_initialize...");
+    Logger::info("Calling mpv_initialize...");
     if (mpv_initialize(mpv_) < 0) {
         throw std::runtime_error("Failed to initialize mpv");
     }
-    Logger::getInstance().info("mpv_initialize success");
+    Logger::info("mpv_initialize success");
     
     mpv_set_wakeup_callback(mpv_, on_mpv_wakeup, this);
-    Logger::getInstance().info("MpvPlaybackEngine initialized");
+    Logger::info("MpvPlaybackEngine initialized");
 }
 
 void MpvPlaybackEngine::initGL() {
@@ -70,11 +70,11 @@ void MpvPlaybackEngine::initGL() {
     };
 
     if (mpv_render_context_create(&mpv_gl_, mpv_, params) < 0) {
-        Logger::getInstance().error("Failed to create mpv SW render context");
+        Logger::error("Failed to create mpv SW render context");
         return;
     }
     
-    Logger::getInstance().info("Mpv SW render context initialized");
+    Logger::info("Mpv SW render context initialized");
 }
 
 void MpvPlaybackEngine::cleanup() {
@@ -101,23 +101,23 @@ void MpvPlaybackEngine::cleanup() {
         mpv_gl_ = nullptr;
         
         std::thread([mpv, mpv_gl]() {
-            Logger::getInstance().info("Async cleanup thread started");
+            Logger::info("Async cleanup thread started");
             
             if (mpv_gl) {
-                Logger::getInstance().info("Freeing mpv render context (async)...");
+                Logger::info("Freeing mpv render context (async)...");
                 mpv_render_context_free(mpv_gl);
-                Logger::getInstance().info("mpv render context freed (async)");
+                Logger::info("mpv render context freed (async)");
             }
             
             if (mpv) {
-                Logger::getInstance().info("Terminating mpv core (async)...");
+                Logger::info("Terminating mpv core (async)...");
                 mpv_terminate_destroy(mpv);
-                Logger::getInstance().info("mpv core terminated (async)");
+                Logger::info("mpv core terminated (async)");
             }
         }).detach();
     }
     
-    Logger::getInstance().info("MpvPlaybackEngine::cleanup finished (main thread)");
+    Logger::info("MpvPlaybackEngine::cleanup finished (main thread)");
 }
 
 void MpvPlaybackEngine::updateVideo() {
@@ -134,10 +134,10 @@ void MpvPlaybackEngine::updateVideo() {
                 if (end_file->reason == MPV_END_FILE_REASON_EOF) {
                     // Only auto-advance if file ended naturally
                     eofReached_ = true;
-                    Logger::getInstance().info("MPV_EVENT_END_FILE (EOF) detected");
+                    Logger::info("MPV_EVENT_END_FILE (EOF) detected");
                     notify();
                 } else {
-                    Logger::getInstance().info("MPV_EVENT_END_FILE (Reason: " + std::to_string(end_file->reason) + ") - ignored");
+                    Logger::info("MPV_EVENT_END_FILE (Reason: " + std::to_string(end_file->reason) + ") - ignored");
                 }
                 break;
             }
@@ -161,7 +161,7 @@ void MpvPlaybackEngine::updateVideo() {
             mpv_get_property(mpv_, "video-params/w", MPV_FORMAT_INT64, &w);
             mpv_get_property(mpv_, "video-params/h", MPV_FORMAT_INT64, &h);
             if (w <= 0 || h <= 0) {
-                Logger::getInstance().warn("Video update frame received but dimensions invalid: " + std::to_string(w) + "x" + std::to_string(h));
+                Logger::warn("Video update frame received but dimensions invalid: " + std::to_string(w) + "x" + std::to_string(h));
                 return;
             }
         }
@@ -173,7 +173,7 @@ void MpvPlaybackEngine::updateVideo() {
         // Log occasionally
         static int frameCount = 0;
         if (frameCount++ % 300 == 0) {
-             Logger::getInstance().debug("Rendering video frame: " + std::to_string(width) + "x" + std::to_string(height));
+             Logger::debug("Rendering video frame: " + std::to_string(width) + "x" + std::to_string(height));
         }
 
         // Resize buffer if needed (using member vector would be better for performance, 
@@ -214,7 +214,7 @@ void MpvPlaybackEngine::updateVideo() {
             // Should report swap to mpv
             mpv_render_context_report_swap(mpv_gl_);
         } else {
-             Logger::getInstance().error("mpv_render_context_render failed");
+             Logger::error("mpv_render_context_render failed");
         }
     }
 }
@@ -238,7 +238,7 @@ bool MpvPlaybackEngine::play(const std::string& filepath) {
     // Use async command to avoid blocking on audio drain (e.g. pulse timeout)
     int res = mpv_command_async(mpv_, 0, cmd);
     if (res < 0) {
-        Logger::getInstance().error("mpv failed to load file (async)");
+        Logger::error("mpv failed to load file (async)");
         return false;
     }
     

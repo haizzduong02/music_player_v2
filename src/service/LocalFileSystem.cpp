@@ -1,5 +1,5 @@
-#include "../../inc/service/LocalFileSystem.h"
-#include "../../inc/utils/Logger.h"
+#include "service/LocalFileSystem.h"
+#include "utils/Logger.h"
 #include <filesystem>
 #include <algorithm>
 
@@ -10,7 +10,7 @@ std::vector<FileInfo> LocalFileSystem::browse(const std::string& path) {
     
     try {
         if (!fs::exists(path) || !fs::is_directory(path)) {
-            Logger::getInstance().warn("Invalid directory: " + path);
+            Logger::warn("Invalid directory: " + path);
             return files;
         }
         
@@ -34,7 +34,7 @@ std::vector<FileInfo> LocalFileSystem::browse(const std::string& path) {
         });
         
     } catch (const fs::filesystem_error& e) {
-        Logger::getInstance().error("Failed to browse directory '" + path + "': " + e.what());
+        Logger::error("Failed to browse directory '" + path + "': " + e.what());
     }
     
     return files;
@@ -59,17 +59,17 @@ std::vector<std::string> LocalFileSystem::getMediaFiles(
 }
 
 std::vector<std::string> LocalFileSystem::detectUSBDevices() {
-    Logger::getInstance().warn("USB detection not implemented for this platform");
+    Logger::warn("USB detection not implemented for this platform");
     return std::vector<std::string>();
 }
 
 bool LocalFileSystem::mountUSB(const std::string& device, const std::string& mountPoint) {
-    Logger::getInstance().warn("USB mounting not implemented for this platform");
+    Logger::warn("USB mounting not implemented for this platform");
     return false;
 }
 
 bool LocalFileSystem::unmountUSB(const std::string& mountPoint) {
-    Logger::getInstance().warn("USB unmounting not implemented for this platform");
+    Logger::warn("USB unmounting not implemented for this platform");
     return false;
 }
 
@@ -115,7 +115,7 @@ void LocalFileSystem::scanDirectoryRecursive(
             }
         }
     } catch (const fs::filesystem_error& e) {
-        Logger::getInstance().error("Error scanning directory '" + path + "': " + e.what());
+        Logger::error("Error scanning directory '" + path + "': " + e.what());
     }
 }
 

@@ -1,8 +1,8 @@
 #ifndef S32K144_INTERFACE_H
 #define S32K144_INTERFACE_H
 
-#include "../interfaces/IHardwareInterface.h"
-#include "../utils/Subject.h"
+#include "interfaces/IHardwareInterface.h"
+#include "utils/Subject.h"
 #include <string>
 #include <thread>
 #include <atomic>

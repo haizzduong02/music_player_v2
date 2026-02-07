@@ -1,5 +1,5 @@
-#include "../../../inc/app/model/PlaybackState.h"
-#include "../../../inc/utils/Logger.h"
+#include "app/model/PlaybackState.h"
+#include "utils/Logger.h"
 #include <algorithm>
 
 PlaybackState::PlaybackState()
@@ -19,7 +19,7 @@ void PlaybackState::setPlayback(std::shared_ptr<MediaFile> track, PlaybackStatus
     
     if (track) {
         duration_ = track->getMetadata().duration;
-        Logger::getInstance().info("Playback set to: " + track->getPath());
+        Logger::info("Playback set to: " + track->getPath());
     } else {
         duration_ = 0.0;
     }

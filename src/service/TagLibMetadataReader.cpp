@@ -1,5 +1,5 @@
-#include "../../inc/service/TagLibMetadataReader.h"
-#include "../../inc/utils/Logger.h"
+#include "service/TagLibMetadataReader.h"
+#include "utils/Logger.h"
 #include <taglib/fileref.h>
 #include <taglib/tag.h>
 #include <taglib/tpropertymap.h>
@@ -26,7 +26,7 @@ MediaMetadata TagLibMetadataReader::readMetadata(const std::string& filepath) {
     TagLib::FileRef file(filepath.c_str());
     
     if (file.isNull() || !file.tag()) {
-        Logger::getInstance().warn("Failed to read detailed metadata from: " + filepath);
+        Logger::warn("Failed to read detailed metadata from: " + filepath);
         return metadata;
     }
     
@@ -94,14 +94,14 @@ MediaMetadata TagLibMetadataReader::readMetadata(const std::string& filepath) {
 
 bool TagLibMetadataReader::writeMetadata(const std::string& filepath, const MediaMetadata& metadata) {
     if (!supportsEditing(filepath)) {
-        Logger::getInstance().warn("Format does not support editing: " + filepath);
+        Logger::warn("Format does not support editing: " + filepath);
         return false;
     }
     
     TagLib::FileRef file(filepath.c_str());
     
     if (file.isNull() || !file.tag()) {
-        Logger::getInstance().error("Failed to open file for writing: " + filepath);
+        Logger::error("Failed to open file for writing: " + filepath);
         return false;
     }
     
@@ -119,9 +119,9 @@ bool TagLibMetadataReader::writeMetadata(const std::string& filepath, const Medi
     bool success = file.save();
     
     if (success) {
-        Logger::getInstance().info("Metadata saved for: " + filepath);
+        Logger::info("Metadata saved for: " + filepath);
     } else {
-        Logger::getInstance().error("Failed to save metadata for: " + filepath);
+        Logger::error("Failed to save metadata for: " + filepath);
     }
     
     return success;

@@ -1,8 +1,8 @@
 #ifndef USB_CONTROLLER_H
 #define USB_CONTROLLER_H
 
-#include "../../interfaces/IFileSystem.h"
-#include "../../utils/Subject.h"
+#include "interfaces/IFileSystem.h"
+#include "utils/Subject.h"
 #include <string>
 #include <vector>
 #include <thread>

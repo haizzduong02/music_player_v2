@@ -1,20 +1,20 @@
-#include "../../inc/utils/Config.h"
-#include "../../inc/utils/Logger.h"
+#include "utils/Config.h"
+#include "utils/Logger.h"
 #include <json.hpp>
 bool Config::load() {
     if (!persistence_) {
-        Logger::getInstance().error("Config persistence not initialized");
+        Logger::error("Config persistence not initialized");
         return false;
     }
 
     if (!persistence_->fileExists(config_.configPath)) {
-        Logger::getInstance().info("No config file found at " + config_.configPath + ", using defaults");
+        Logger::info("No config file found at " + config_.configPath + ", using defaults");
         return save(); // Save defaults
     }
 
     std::string data;
     if (!persistence_->loadFromFile(config_.configPath, data)) {
-        Logger::getInstance().error("Failed to load config file");
+        Logger::error("Failed to load config file");
         return false;
     }
 
@@ -22,17 +22,17 @@ bool Config::load() {
         nlohmann::json j = nlohmann::json::parse(data);
         config_ = j.get<AppConfig>();
     } catch (const std::exception& e) {
-        Logger::getInstance().error("Failed to parse config: " + std::string(e.what()));
+        Logger::error("Failed to parse config: " + std::string(e.what()));
         return false;
     }
 
-    Logger::getInstance().info("Configuration loaded successfully");
+    Logger::info("Configuration loaded successfully");
     return true;
 }
 
 bool Config::save() {
     if (!persistence_) {
-        Logger::getInstance().error("Config persistence not initialized");
+        Logger::error("Config persistence not initialized");
         return false;
     }
 
@@ -41,17 +41,17 @@ bool Config::save() {
         std::string data = j.dump(4);
         
         if (!persistence_->saveToFile(config_.configPath, data)) {
-            Logger::getInstance().error("Failed to save config file");
+            Logger::error("Failed to save config file");
             return false;
         }
     } catch (const std::exception& e) {
-        Logger::getInstance().error("Failed to serialize config: " + std::string(e.what()));
+        Logger::error("Failed to serialize config: " + std::string(e.what()));
         return false;
     }
 
 // ... existing methods ...
 
-    Logger::getInstance().info("Configuration saved successfully");
+    Logger::info("Configuration saved successfully");
     return true;
 }
 

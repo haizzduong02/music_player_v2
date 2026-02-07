@@ -1,9 +1,9 @@
 #ifndef PLAYLIST_CONTROLLER_H
 #define PLAYLIST_CONTROLLER_H
 
-#include "../model/PlaylistManager.h"
-#include "../model/Library.h"
-#include "../../interfaces/IMetadataReader.h"
+#include "app/model/PlaylistManager.h"
+#include "app/model/Library.h"
+#include "interfaces/IMetadataReader.h"
 #include <string>
 #include <vector>
 

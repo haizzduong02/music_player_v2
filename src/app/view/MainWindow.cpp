@@ -1,6 +1,6 @@
-#include "../../../inc/app/view/MainWindow.h"
-#include "../../../inc/utils/Logger.h"
-#include "../../../inc/app/controller/PlaybackController.h"
+#include "app/view/MainWindow.h"
+#include "utils/Logger.h"
+#include "app/controller/PlaybackController.h"
 #include <sstream>
 #include <cstring>
 
@@ -24,7 +24,7 @@ static const ImVec4 COLOR_TEXT = ImVec4(1.00f, 1.00f, 1.00f, 1.0f);          // 
 static const ImVec4 COLOR_TEXT_DIM = ImVec4(0.75f, 0.75f, 0.75f, 1.0f);      // Brighter Dim Text      
 
 MainWindow::MainWindow() {
-    Logger::getInstance().info("MainWindow created");
+    Logger::info("MainWindow created");
 }
 
 void MainWindow::render() {
@@ -378,7 +378,7 @@ void MainWindow::renderPlaybackControls() {
 
 void MainWindow::switchScreen(Screen screen) {
     currentScreen_ = screen;
-    Logger::getInstance().info("Switched to screen: " + std::to_string(static_cast<int>(screen)));
+    Logger::info("Switched to screen: " + std::to_string(static_cast<int>(screen)));
 }
 
 void MainWindow::scrollToCurrentTrack() {

@@ -1,7 +1,7 @@
 #ifndef JSON_PERSISTENCE_H
 #define JSON_PERSISTENCE_H
 
-#include "../interfaces/IPersistence.h"
+#include "interfaces/IPersistence.h"
 #include <string>
 
 /**

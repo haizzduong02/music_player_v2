@@ -1,6 +1,6 @@
-#include "../../../inc/app/view/HistoryView.h"
-#include "../../../inc/utils/Logger.h"
-#include "../../../inc/app/controller/PlaybackController.h"
+#include "app/view/HistoryView.h"
+#include "utils/Logger.h"
+#include "app/controller/PlaybackController.h"
 #include <imgui.h>
 #include <string>
 

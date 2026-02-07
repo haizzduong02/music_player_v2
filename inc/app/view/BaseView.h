@@ -1,7 +1,7 @@
 #ifndef BASE_VIEW_H
 #define BASE_VIEW_H
 
-#include "../../interfaces/IView.h"
+#include "interfaces/IView.h"
 
 /**
  * @file BaseView.h

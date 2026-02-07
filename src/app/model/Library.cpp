@@ -1,5 +1,5 @@
-#include "../../../inc/app/model/Library.h"
-#include "../../../inc/utils/Logger.h"
+#include "app/model/Library.h"
+#include "utils/Logger.h"
 #include <algorithm>
 #include <json.hpp>
 
@@ -21,9 +21,15 @@ bool Library::save() {
         }
         
         nlohmann::json libraryJson = filesJson;
-        return persistence_->saveToFile("library.json", libraryJson.dump(4));
+        if (persistence_->saveToFile("data/library.json", libraryJson.dump(4))) {
+            Logger::info("Library saved");
+            return true;
+        } else {
+            Logger::error("Failed to save library to data/library.json (persistence error)");
+            return false;
+        }
     } catch (const std::exception& e) {
-        Logger::getInstance().error("Failed to save library: " + std::string(e.what()));
+        Logger::error("Failed to save library: " + std::string(e.what()));
         return false;
     }
 }
@@ -34,10 +40,10 @@ bool Library::load() {
     std::lock_guard<std::mutex> lock(dataMutex_);
     
     try {
-        if (!persistence_->fileExists("library.json")) return false;
+        if (!persistence_->fileExists("data/library.json")) return false;
         
         std::string content;
-        if (!persistence_->loadFromFile("library.json", content)) return false;
+        if (!persistence_->loadFromFile("data/library.json", content)) return false;
         nlohmann::json libraryJson = nlohmann::json::parse(content);
         
         if (!libraryJson.is_array()) return false;
@@ -64,11 +70,11 @@ bool Library::load() {
             }
         }
         
-        Logger::getInstance().info("Loaded " + std::to_string(mediaFiles_.size()) + " files into library");
+        Logger::info("Loaded " + std::to_string(mediaFiles_.size()) + " files into library");
         Subject::notify();
         return true;
     } catch (const std::exception& e) {
-        Logger::getInstance().error("Failed to load library: " + std::string(e.what()));
+        Logger::error("Failed to load library: " + std::string(e.what()));
         return false;
     }
 }
@@ -87,7 +93,7 @@ bool Library::addMedia(std::shared_ptr<MediaFile> mediaFile) {
     // Check for duplicates using path index
     const std::string& path = mediaFile->getPath();
     if (pathIndex_.find(path) != pathIndex_.end()) {
-        Logger::getInstance().warn("File already in library: " + path);
+        Logger::warn("File already in library: " + path);
         return false;
     }
     
@@ -96,7 +102,7 @@ bool Library::addMedia(std::shared_ptr<MediaFile> mediaFile) {
     pathIndex_.insert(path);
     mediaFile->setInLibrary(true);
     
-    Logger::getInstance().info("Added to library: " + path);
+    Logger::info("Added to library: " + path);
     Subject::notify();
     return true;
 }
@@ -117,7 +123,7 @@ bool Library::removeMedia(const std::string& filepath) {
     mediaFiles_.erase(it);
     pathIndex_.erase(filepath);
     
-    Logger::getInstance().info("Removed from library: " + filepath);
+    Logger::info("Removed from library: " + filepath);
     Subject::notify();
     return true;
 }
@@ -187,7 +193,7 @@ void Library::clear() {
     mediaFiles_.clear();
     pathIndex_.clear();
     
-    Logger::getInstance().info("Library cleared");
+    Logger::info("Library cleared");
     Subject::notify();
 }
 
@@ -198,4 +204,9 @@ void Library::rebuildPathIndex() {
     for (const auto& file : mediaFiles_) {
         pathIndex_.insert(file->getPath());
     }
+}
+
+bool Library::contains(const std::string& filepath) const {
+    std::lock_guard<std::mutex> lock(dataMutex_);
+    return pathIndex_.find(filepath) != pathIndex_.end();
 }

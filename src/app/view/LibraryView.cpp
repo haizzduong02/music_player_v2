@@ -1,8 +1,8 @@
-#include "../../../inc/app/view/LibraryView.h"
-#include "../../../inc/app/view/FileBrowserView.h"
-#include "../../../inc/app/model/PlaylistManager.h"
-#include "../../../inc/utils/Logger.h"
-#include "../../../inc/app/controller/PlaybackController.h"
+#include "app/view/LibraryView.h"
+#include "app/view/FileBrowserView.h"
+#include "app/model/PlaylistManager.h"
+#include "utils/Logger.h"
+#include "app/controller/PlaybackController.h"
 
 #ifdef USE_IMGUI
 #include <imgui.h>

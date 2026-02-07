@@ -1,5 +1,5 @@
-#include "../../../inc/app/controller/HistoryController.h"
-#include "../../../inc/utils/Logger.h"
+#include "app/controller/HistoryController.h"
+#include "utils/Logger.h"
 
 HistoryController::HistoryController(History* history, PlaybackController* playbackController) 
     : history_(history), playbackController_(playbackController) {

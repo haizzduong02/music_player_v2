@@ -1,10 +1,10 @@
-#include "../../../inc/app/view/ViewFactory.h"
-#include "../../../inc/app/view/MainWindow.h"
-#include "../../../inc/app/view/LibraryView.h"
-#include "../../../inc/app/view/PlaylistView.h"
-#include "../../../inc/app/view/NowPlayingView.h"
-#include "../../../inc/app/view/HistoryView.h"
-#include "../../../inc/app/view/FileBrowserView.h"
+#include "app/view/ViewFactory.h"
+#include "app/view/MainWindow.h"
+#include "app/view/LibraryView.h"
+#include "app/view/PlaylistView.h"
+#include "app/view/NowPlayingView.h"
+#include "app/view/HistoryView.h"
+#include "app/view/FileBrowserView.h"
 
 // ViewFactory implementation
 

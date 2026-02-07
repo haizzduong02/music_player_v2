@@ -1,9 +1,9 @@
 #ifndef NOW_PLAYING_VIEW_H
 #define NOW_PLAYING_VIEW_H
 
-#include "BaseView.h"
-#include "../controller/PlaybackController.h"
-#include "../model/PlaylistManager.h"
+#include "app/view/BaseView.h"
+#include "app/controller/PlaybackController.h"
+#include "app/model/PlaylistManager.h"
 
 // ... (existing comments)
 

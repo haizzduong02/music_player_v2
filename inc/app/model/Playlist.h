@@ -1,9 +1,10 @@
 #ifndef PLAYLIST_H
 #define PLAYLIST_H
 
-#include "MediaFile.h"
-#include "../../utils/Subject.h"
-#include "../../interfaces/IPersistence.h"
+#include "app/model/MediaFile.h"
+#include "utils/Subject.h"
+#include "interfaces/IPersistence.h"
+#include "interfaces/ITrackCollection.h"
 #include <vector>
 #include <memory>
 #include <string>
@@ -33,21 +34,20 @@ enum class RepeatMode {
     ONE
 };
 
-class Playlist : public Subject {
+class Playlist : public Subject, public ITrackCollection {
 public:
     /**
      * @brief Constructor
      * @param name Playlist name
-     * @param persistence Persistence layer (DIP)
      */
-    explicit Playlist(const std::string& name, IPersistence* persistence = nullptr);
+    explicit Playlist(const std::string& name);
     
     /**
      * @brief Add a track to the playlist
      * @param track Media file to add
      * @return true if added successfully
      */
-    bool addTrack(std::shared_ptr<MediaFile> track);
+    bool addTrack(std::shared_ptr<MediaFile> track) override;
     
     /**
      * @brief Insert track at specific position
@@ -69,7 +69,7 @@ public:
      * @param filepath Path of track to remove
      * @return true if removed successfully
      */
-    bool removeTrackByPath(const std::string& filepath);
+    bool removeTrackByPath(const std::string& filepath) override;
     
     /**
      * @brief Get a track by index
@@ -77,18 +77,6 @@ public:
      * @return Shared pointer to track, nullptr if invalid index
      */
     std::shared_ptr<MediaFile> getTrack(size_t index) const;
-    
-    /**
-     * @brief Save playlist to disk
-     * @return true if saved successfully
-     */
-    bool save();
-    
-    /**
-     * @brief Load playlist from disk
-     * @return true if loaded successfully
-     */
-    bool load();
     
     // JSON serialization
     friend void to_json(nlohmann::json& j, const Playlist& p);
@@ -98,7 +86,7 @@ public:
      * @brief Get tracks in the playlist
      * @return Vector of tracks
      */
-    const std::vector<std::shared_ptr<MediaFile>>& getTracks() const {
+    const std::vector<std::shared_ptr<MediaFile>>& getTracks() const override {
         std::lock_guard<std::mutex> lock(dataMutex_);
         return tracks_;
     }
@@ -111,14 +99,14 @@ public:
      */
     void rename(const std::string& newName);
     
-    size_t size() const { return tracks_.size(); }
+    size_t size() const override { return tracks_.size(); }
     
     bool isEmpty() const { return tracks_.empty(); }
     
     /**
      * @brief Clear all tracks
      */
-    void clear();
+    void clear() override;
     
     /**
      * @brief Shuffle the playlist
@@ -131,20 +119,21 @@ public:
     // Legacy support (optional, or just remove)
     bool isLoopEnabled() const { return repeatMode_ != RepeatMode::NONE; }
     
-
-    
     /**
      * @brief Check if track exists in playlist
      * @param filepath Track path to check
      * @return true if track exists
      */
-    bool contains(const std::string& filepath) const;
+    bool contains(const std::string& filepath) const override;
+
+    // JSON serialization
+    friend void to_json(nlohmann::json& j, const Playlist& p);
+    friend void from_json(const nlohmann::json& j, Playlist& p);
     
 private:
     std::string name_;
     std::vector<std::shared_ptr<MediaFile>> tracks_;
     RepeatMode repeatMode_;
-    IPersistence* persistence_;
     mutable std::mutex dataMutex_;  ///< Thread-safety for playlist operations
 };
 

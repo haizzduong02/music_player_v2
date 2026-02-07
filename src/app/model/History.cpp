@@ -1,14 +1,14 @@
-#include "../../../inc/app/model/History.h"
-#include "../../../inc/utils/Logger.h"
+#include "app/model/History.h"
+#include "utils/Logger.h"
 #include <algorithm>
 
 History::History(size_t maxSize, IPersistence* persistence)
     : maxSize_(maxSize), persistence_(persistence) {
 }
 
-void History::addTrack(std::shared_ptr<MediaFile> track) {
+bool History::addTrack(std::shared_ptr<MediaFile> track) {
     if (!track) {
-        return;
+        return false;
     }
     
     std::lock_guard<std::mutex> lock(dataMutex_);
@@ -18,7 +18,7 @@ void History::addTrack(std::shared_ptr<MediaFile> track) {
     
     if (existingIndex == 0) {
         // Already at top, no need to move or notify
-        return;
+        return true;
     }
     
     if (existingIndex > 0) {
@@ -32,8 +32,9 @@ void History::addTrack(std::shared_ptr<MediaFile> track) {
     // Trim to max size
     trimToMaxSize();
     
-    Logger::getInstance().debug("Added to history: " + track->getPath());
+    Logger::debug("Added to history: " + track->getPath());
     Subject::notify();
+    return true;
 }
 
 bool History::removeTrack(size_t index) {
@@ -65,7 +66,7 @@ void History::clear() {
     std::lock_guard<std::mutex> lock(dataMutex_);
     history_.clear();
     
-    Logger::getInstance().info("History cleared");
+    Logger::info("History cleared");
     Subject::notify();
 }
 
@@ -98,7 +99,7 @@ void History::setMaxSize(size_t maxSize) {
 
 bool History::save() {
     if (!persistence_) {
-        Logger::getInstance().warn("No persistence layer configured for History");
+        Logger::warn("No persistence layer configured for History");
         return false;
     }
     
@@ -109,14 +110,14 @@ bool History::save() {
         // persistence_->save("history", history_);
         return true;
     } catch (const std::exception& e) {
-        Logger::getInstance().error("Failed to save history: " + std::string(e.what()));
+        Logger::error("Failed to save history: " + std::string(e.what()));
         return false;
     }
 }
 
 bool History::load() {
     if (!persistence_) {
-        Logger::getInstance().warn("No persistence layer configured for History");
+        Logger::warn("No persistence layer configured for History");
         return false;
     }
     
@@ -129,7 +130,7 @@ bool History::load() {
         Subject::notify();
         return true;
     } catch (const std::exception& e) {
-        Logger::getInstance().error("Failed to load history: " + std::string(e.what()));
+        Logger::error("Failed to load history: " + std::string(e.what()));
         return false;
     }
 }
@@ -147,4 +148,9 @@ void History::trimToMaxSize() {
     if (history_.size() > maxSize_) {
         history_.resize(maxSize_);
     }
+}
+
+bool History::contains(const std::string& path) const {
+    std::lock_guard<std::mutex> lock(dataMutex_);
+    return findTrackIndex(path) >= 0;
 }

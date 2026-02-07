@@ -1,6 +1,6 @@
-#include "../../../inc/app/controller/PlaylistController.h"
-#include "../../../inc/app/model/MediaFileFactory.h"
-#include "../../../inc/utils/Logger.h"
+#include "app/controller/PlaylistController.h"
+#include "app/model/MediaFileFactory.h"
+#include "utils/Logger.h"
 
 PlaylistController::PlaylistController(PlaylistManager* playlistManager, Library* library, IMetadataReader* metadataReader)
     : playlistManager_(playlistManager), library_(library), metadataReader_(metadataReader) {
@@ -9,7 +9,7 @@ PlaylistController::PlaylistController(PlaylistManager* playlistManager, Library
 bool PlaylistController::createPlaylist(const std::string& name) {
     auto playlist = playlistManager_->createPlaylist(name);
     if (playlist) {
-        playlistManager_->saveAll(); // Persist playlist index
+        // playlistManager_->saveAll(); // Removed: Save only on exit
         return true;
     }
     return false;
@@ -18,7 +18,7 @@ bool PlaylistController::createPlaylist(const std::string& name) {
 bool PlaylistController::deletePlaylist(const std::string& name) {
     bool success = playlistManager_->deletePlaylist(name);
     if (success) {
-        playlistManager_->saveAll(); // Persist playlist index
+        // playlistManager_->saveAll(); // Removed: Save only on exit
     }
     return success;
 }
@@ -26,7 +26,7 @@ bool PlaylistController::deletePlaylist(const std::string& name) {
 bool PlaylistController::renamePlaylist(const std::string& oldName, const std::string& newName) {
     bool success = playlistManager_->renamePlaylist(oldName, newName);
     if (success) {
-        playlistManager_->saveAll(); // Persist playlist index
+        // playlistManager_->saveAll(); // Removed: Save only on exit
     }
     return success;
 }
@@ -35,20 +35,20 @@ bool PlaylistController::addToPlaylist(const std::string& playlistName, const st
     // Get file from library
     auto file = library_->getByPath(filepath);
     if (!file) {
-        Logger::getInstance().warn("File not in library: " + filepath);
+        Logger::warn("File not in library: " + filepath);
         return false;
     }
     
     // Get playlist
     auto playlist = playlistManager_->getPlaylist(playlistName);
     if (!playlist) {
-        Logger::getInstance().warn("Playlist not found: " + playlistName);
+        Logger::warn("Playlist not found: " + playlistName);
         return false;
     }
     
     bool success = playlist->addTrack(file);
     if (success) {
-        playlist->save(); // Persist track changes
+        // playlistManager_->saveAll(); // Removed: Save only on exit
     }
     return success;
 }
@@ -64,7 +64,7 @@ bool PlaylistController::addToPlaylistAndLibrary(
     if (!file) {
         file = MediaFileFactory::createMediaFile(filepath, metadataReader_);
         if (!file || !library_->addMedia(file)) {
-            Logger::getInstance().error("Failed to add file to library: " + filepath);
+            Logger::error("Failed to add file to library: " + filepath);
             return false;
         }
     }
@@ -81,7 +81,7 @@ bool PlaylistController::removeFromPlaylist(const std::string& playlistName, siz
     
     bool success = playlist->removeTrack(trackIndex);
     if (success) {
-        playlist->save(); // Persist track changes
+        // playlistManager_->saveAll(); // Removed: Save only on exit
     }
     return success;
 }
@@ -97,7 +97,7 @@ bool PlaylistController::removeFromPlaylistByPath(
     
     bool success = playlist->removeTrackByPath(filepath);
     if (success) {
-        playlist->save(); // Persist track changes
+        // playlistManager_->saveAll(); // Removed: Save only on exit
     }
     return success;
 }

@@ -1,12 +1,12 @@
 #ifndef PLAYBACK_CONTROLLER_H
 #define PLAYBACK_CONTROLLER_H
 
-#include "../model/PlaybackState.h"
-#include "../model/History.h"
-#include "../model/Playlist.h"
-#include "../../interfaces/IPlaybackEngine.h"
-#include "../../interfaces/IHardwareInterface.h"
-#include "../../interfaces/IObserver.h"
+#include "app/model/PlaybackState.h"
+#include "app/model/History.h"
+#include "app/model/Playlist.h"
+#include "interfaces/IPlaybackEngine.h"
+#include "interfaces/IHardwareInterface.h"
+#include "interfaces/IObserver.h"
 #include <memory>
 
 /**

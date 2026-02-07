@@ -1,25 +1,25 @@
 #ifndef APPLICATION_H
 #define APPLICATION_H
 
-#include "../interfaces/IPlaybackEngine.h"
-#include "../interfaces/IFileSystem.h"
-#include "../interfaces/IMetadataReader.h"
-#include "../interfaces/IHardwareInterface.h"
-#include "../interfaces/IPersistence.h"
-#include "../interfaces/IViewFactory.h"
+#include "interfaces/IPlaybackEngine.h"
+#include "interfaces/IFileSystem.h"
+#include "interfaces/IMetadataReader.h"
+#include "interfaces/IHardwareInterface.h"
+#include "interfaces/IPersistence.h"
+#include "interfaces/IViewFactory.h"
 
-#include "../app/model/Library.h"
-#include "../app/model/PlaylistManager.h"
-#include "../app/model/History.h"
-#include "../app/model/PlaybackState.h"
+#include "app/model/Library.h"
+#include "app/model/PlaylistManager.h"
+#include "app/model/History.h"
+#include "app/model/PlaybackState.h"
 
-#include "../app/controller/LibraryController.h"
-#include "../app/controller/PlaylistController.h"
-#include "../app/controller/PlaybackController.h"
-#include "../app/controller/HistoryController.h"
-#include "../app/controller/USBController.h"
+#include "app/controller/LibraryController.h"
+#include "app/controller/PlaylistController.h"
+#include "app/controller/PlaybackController.h"
+#include "app/controller/HistoryController.h"
+#include "app/controller/USBController.h"
 
-#include "../app/view/MainWindow.h"
+#include "app/view/MainWindow.h"
 
 #include <memory>
 #include <vector>

@@ -1,13 +1,13 @@
 #ifndef VIEW_FACTORY_H
 #define VIEW_FACTORY_H
 
-#include "../../interfaces/IViewFactory.h"
-#include "MainWindow.h"
-#include "LibraryView.h"
-#include "PlaylistView.h"
-#include "NowPlayingView.h"
-#include "HistoryView.h"
-#include "FileBrowserView.h"
+#include "interfaces/IViewFactory.h"
+#include "app/view/MainWindow.h"
+#include "app/view/LibraryView.h"
+#include "app/view/PlaylistView.h"
+#include "app/view/NowPlayingView.h"
+#include "app/view/HistoryView.h"
+#include "app/view/FileBrowserView.h"
 
 /**
  * @file ViewFactory.h

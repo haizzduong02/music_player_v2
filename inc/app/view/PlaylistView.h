@@ -1,10 +1,11 @@
 #ifndef PLAYLIST_VIEW_H
 #define PLAYLIST_VIEW_H
 
-#include "TrackListView.h"
-#include "../controller/PlaylistController.h"
-#include "../controller/PlaybackController.h"
-#include "../model/PlaylistManager.h"
+#include "app/view/TrackListView.h"
+#include "app/controller/PlaylistController.h"
+#include "app/controller/PlaybackController.h"
+#include "app/model/PlaylistManager.h"
+#include "app/view/components/PagedFileSelector.h"
 #include <memory>
 
 class FileBrowserView;
@@ -57,7 +58,9 @@ private:
     bool shouldReopenAddPopup_ = false; // Flag to reopen popup after browsing
     bool shouldOpenAddPopup_ = false;   // Flag to open popup from button (fix ID stack)
     bool isBrowsingForPlaylist_ = false; // Flag to track if we are currently browsing
-    std::set<std::string> selectedTracksForAdd_;
+    // std::set<std::string> selectedTracksForAdd_; // Replaced by trackSelector_
+    
+    PagedFileSelector trackSelector_;
     
     /**
      * @brief Render Add Songs Popup

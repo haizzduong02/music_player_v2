@@ -1,9 +1,10 @@
 #ifndef HISTORY_H
 #define HISTORY_H
 
-#include "MediaFile.h"
-#include "../../utils/Subject.h"
-#include "../../interfaces/IPersistence.h"
+#include "app/model/MediaFile.h"
+#include "utils/Subject.h"
+#include "interfaces/IPersistence.h"
+#include "interfaces/ITrackCollection.h"
 #include <vector>
 #include <memory>
 #include <deque>
@@ -24,7 +25,7 @@
  * Prevents duplicates by moving existing entries to the top.
  * Notifies observers when history changes.
  */
-class History : public Subject {
+class History : public Subject, public ITrackCollection {
 public:
     /**
      * @brief Constructor
@@ -37,8 +38,9 @@ public:
      * @brief Add a track to history (at the top)
      * If track already exists, move it to top
      * @param track Media file to add
+     * @return true always (history always accepts)
      */
-    void addTrack(std::shared_ptr<MediaFile> track);
+    bool addTrack(std::shared_ptr<MediaFile> track) override;
     
     /**
      * @brief Remove a track from history
@@ -52,9 +54,9 @@ public:
      * @param filepath Path of track to remove
      * @return true if removed successfully
      */
-    bool removeTrackByPath(const std::string& filepath);
+    bool removeTrackByPath(const std::string& filepath) override;
     
-    void clear();
+    void clear() override;
     
     /**
      * @brief Get recent tracks
@@ -65,7 +67,12 @@ public:
     
     std::shared_ptr<MediaFile> getTrack(size_t index) const;
     const std::vector<std::shared_ptr<MediaFile>>& getAll() const { return history_; }
-    size_t size() const { return history_.size(); }
+    
+    // ITrackCollection implementation
+    const std::vector<std::shared_ptr<MediaFile>>& getTracks() const override { return getAll(); }
+    size_t size() const override { return history_.size(); }
+    bool contains(const std::string& path) const override;
+    
     bool isEmpty() const { return history_.empty(); }
     void setMaxSize(size_t maxSize);
     size_t getMaxSize() const { return maxSize_; }
