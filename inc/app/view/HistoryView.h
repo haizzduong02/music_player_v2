@@ -1,11 +1,11 @@
 #ifndef HISTORY_VIEW_H
 #define HISTORY_VIEW_H
 
-#include "BaseView.h"
+#include "TrackListView.h"
 #include "../controller/HistoryController.h"
 #include "../controller/PlaybackController.h"
 #include "../model/History.h"
-#include <cmath>
+#include <memory>
 
 /**
  * @file HistoryView.h
@@ -21,7 +21,7 @@
  * ImGui-based view for playback history.
  * Shows list of recently played tracks.
  */
-class HistoryView : public BaseView {
+class HistoryView : public TrackListView {
 public:
     /**
      * @brief Constructor with dependency injection
@@ -40,6 +40,9 @@ public:
     void update(void* subject) override;
     
     History* getHistory() const { return history_; }
+    
+protected:
+    void removeSelectedTracks() override;
     
 private:
     HistoryController* controller_;

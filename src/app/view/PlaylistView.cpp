@@ -36,13 +36,45 @@ void PlaylistView::render() {
     for (size_t i = 0; i < playlists.size(); ++i) {
         if (playlists[i]->getName() == "Now Playing") continue;
         
-        bool isSelected = (playlists[i]->getName() == selectedPlaylistName_);
+        bool isSelectedPl = (playlists[i]->getName() == selectedPlaylistName_);
         
-        if (ImGui::Selectable(playlists[i]->getName().c_str(), isSelected)) {
+        ImGui::PushID(static_cast<int>(i));
+        
+        float sidebarWidth = ImGui::GetContentRegionAvail().x;
+        float delBtnWidth = 24.0f;
+        
+        if (ImGui::Selectable(playlists[i]->getName().c_str(), isSelectedPl, 0, ImVec2(sidebarWidth - delBtnWidth - 5, 0))) {
             selectedPlaylistName_ = playlists[i]->getName();
             selectedPlaylist_ = playlists[i];
             selectedTrackIndex_ = -1;
+            selectedPaths_.clear(); // Clear selection when switching playlists
+            isEditMode_ = false;   // Reset edit mode
         }
+        
+        // Playlist Delete Button
+        bool isSystem = (playlists[i]->getName() == "Now Playing" || playlists[i]->getName() == "Favorites");
+        ImGui::SameLine(sidebarWidth - delBtnWidth);
+        
+        if (isSystem) {
+             ImGui::BeginDisabled();
+        }
+        
+        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.4f, 0.1f, 0.1f, 1.0f));
+        if (ImGui::Button("X", ImVec2(delBtnWidth, 0))) {
+            if (controller_->deletePlaylist(playlists[i]->getName())) {
+                if (isSelectedPl) {
+                    selectedPlaylist_ = nullptr;
+                    selectedPlaylistName_ = "";
+                }
+            }
+        }
+        ImGui::PopStyleColor();
+        
+        if (isSystem) {
+             ImGui::EndDisabled();
+        }
+        
+        ImGui::PopID();
     }
     
     ImGui::Separator();
@@ -68,6 +100,30 @@ void PlaylistView::render() {
         ImGui::SameLine();
         if (ImGui::Button("Add Files")) {
             shouldOpenAddPopup_ = true;
+        }
+        
+        ImGui::SameLine();
+        // Edit Mode Toggle
+        if (isEditMode_) {
+            ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.8f, 0.4f, 0.0f, 1.0f));
+            if (ImGui::Button("Done")) {
+                toggleEditMode();
+            }
+            ImGui::PopStyleColor();
+            
+            ImGui::SameLine();
+            if (ImGui::Button("Remove Selected")) {
+                removeSelectedTracks();
+            }
+            
+            ImGui::SameLine();
+            if (ImGui::Button("Select All")) {
+                selectAll(selectedPlaylist_->getTracks());
+            }
+        } else {
+            if (ImGui::Button("Edit")) {
+                toggleEditMode();
+            }
         }
         
         ImGui::Separator();
@@ -108,8 +164,32 @@ void PlaylistView::render() {
             
             float textAreaWidth = contentAvailX - paddingX;
 
+            // Adjust for checkbox in Edit Mode
+            float checkboxWidth = 30.0f;
+            float contentStartX = paddingX;
+            if (isEditMode_) contentStartX += checkboxWidth;
+            
             // 1. Render Selectable
-            bool clicked = ImGui::Selectable("##pltrack", isPlaying, ImGuiSelectableFlags_SpanAllColumns, ImVec2(0, trackItemHeight));
+            bool clicked = ImGui::Selectable("##pltrack", isPlaying, ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowOverlap, ImVec2(0, trackItemHeight));
+            
+            // Render Checkbox 
+            if (isEditMode_) {
+                bool selected = isSelected(track->getPath());
+                ImGui::SetCursorPos(ImVec2(startPosScreen.x + 5.0f - ImGui::GetWindowPos().x, startPosScreen.y + (trackItemHeight - 20) / 2 - ImGui::GetWindowPos().y));
+                // Note: GetCursorPos is local, but startPosScreen is screen. 
+                // Let's use relative positioning.
+                ImVec2 localPos = ImVec2(startPosScreen.x - ImGui::GetWindowPos().x + ImGui::GetScrollX() + 5.0f, 
+                                         startPosScreen.y - ImGui::GetWindowPos().y + ImGui::GetScrollY() + (trackItemHeight - 20) / 2);
+                ImGui::SetCursorPos(localPos);
+
+                ImGui::PushID((std::string("chk") + std::to_string(i)).c_str());
+                if (ImGui::Checkbox("##check", &selected)) {
+                     toggleSelection(track->getPath());
+                }
+                ImGui::PopID();
+                
+                if (clicked) toggleSelection(track->getPath());
+            }
             
             ImVec2 endPosLocal = ImGui::GetCursorPos();
             
@@ -251,6 +331,16 @@ void PlaylistView::update(void* subject) {
     // Playlist manager changed - will re-render
 }
 
+void PlaylistView::removeSelectedTracks() {
+    if (!selectedPlaylist_) return;
+    
+    // We must remove by path as indices shift
+    for (const auto& path : selectedPaths_) {
+        controller_->removeFromPlaylistByPath(selectedPlaylist_->getName(), path);
+    }
+    selectedPaths_.clear();
+}
+
 void PlaylistView::renderPopups() {
     // Check if we were browsing and the browser is now closed
     // Check if we were browsing and the browser is now closed
@@ -265,7 +355,7 @@ void PlaylistView::renderPopups() {
 void PlaylistView::renderAddSongsPopup() {
     if (shouldOpenAddPopup_) {
          showAddSongsPopup_ = true;
-         songSearchQuery_ = "";
+         searchQuery_ = "";
          selectedTracksForAdd_.clear();
          ImGui::OpenPopup("Add Songs to Playlist");
          shouldOpenAddPopup_ = false;
@@ -290,12 +380,12 @@ void PlaylistView::renderAddSongsPopup() {
         ImGui::BeginGroup();
         {
             char buffer[256];
-            strncpy(buffer, songSearchQuery_.c_str(), sizeof(buffer));
+            strncpy(buffer, searchQuery_.c_str(), sizeof(buffer));
             buffer[sizeof(buffer) - 1] = 0;
             
             ImGui::SetNextItemWidth(350);
             if (ImGui::InputTextWithHint("##search", "Search Library...", buffer, sizeof(buffer))) {
-                songSearchQuery_ = buffer;
+                searchQuery_ = buffer;
             }
             
             ImGui::SameLine();
@@ -337,10 +427,10 @@ void PlaylistView::renderAddSongsPopup() {
                 
                 // Filter
                 std::vector<std::shared_ptr<MediaFile>> displayTracks;
-                if (songSearchQuery_.empty()) {
+                if (searchQuery_.empty()) {
                     displayTracks = allTracks;
                 } else {
-                    std::string queryLower = songSearchQuery_;
+                    std::string queryLower = searchQuery_;
                     std::transform(queryLower.begin(), queryLower.end(), queryLower.begin(), ::tolower);
                     for (const auto& t : allTracks) {
                         std::string title = t->getDisplayName();

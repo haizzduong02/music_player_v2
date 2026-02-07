@@ -55,35 +55,28 @@ void LibraryView::render() {
     if (isEditMode_) {
         ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.8f, 0.4f, 0.0f, 1.0f)); 
         if (ImGui::Button("Done")) {
-            isEditMode_ = false;
-            selectedTracksForRemoval_.clear();
+            toggleEditMode();
         }
         ImGui::PopStyleColor();
         
         ImGui::SameLine();
         if (ImGui::Button("Remove Selected")) {
-            for (const auto& path : selectedTracksForRemoval_) {
-                if (controller_) controller_->removeMedia(path);
-            }
-            selectedTracksForRemoval_.clear();
+            removeSelectedTracks();
         }
         
         ImGui::SameLine();
         if (ImGui::Button("Select All")) {
-             for (const auto& f : files) {
-                 selectedTracksForRemoval_.insert(f->getPath());
-             }
+             selectAll(files);
         }
         
         ImGui::SameLine();
-        if (ImGui::Button("Clear All")) { // The "Delete All" requested
+        if (ImGui::Button("Clear All")) { 
              if (library_) library_->clear();
-             selectedTracksForRemoval_.clear();
+             selectedPaths_.clear();
         }
     } else {
         if (ImGui::Button("Edit")) {
-            isEditMode_ = true;
-            selectedTracksForRemoval_.clear();
+            toggleEditMode();
         }
     }
     
@@ -150,19 +143,17 @@ void LibraryView::render() {
         
         // 1.5 Render Checkbox (Edit Mode)
         if (isEditMode_) {
-            bool isSelected = (selectedTracksForRemoval_.find(file->getPath()) != selectedTracksForRemoval_.end());
+            bool selected = isSelected(file->getPath());
             ImGui::SetCursorPos(ImVec2(startPosLocal.x + 5.0f, startPosLocal.y + (trackItemHeight - 20) / 2));
             ImGui::PushID((std::string("chk") + std::to_string(i)).c_str());
-            if (ImGui::Checkbox("##check", &isSelected)) {
-                 if (isSelected) selectedTracksForRemoval_.insert(file->getPath());
-                 else selectedTracksForRemoval_.erase(file->getPath());
+            if (ImGui::Checkbox("##check", &selected)) {
+                 toggleSelection(file->getPath());
             }
             ImGui::PopID();
             
             // If the row was clicked in edit mode, toggle selection too (better UX)
             if (clicked) {
-                 if (isSelected) selectedTracksForRemoval_.erase(file->getPath());
-                 else selectedTracksForRemoval_.insert(file->getPath());
+                 toggleSelection(file->getPath());
             }
         }
         
@@ -357,4 +348,20 @@ void LibraryView::handleInput() {
 void LibraryView::update(void* subject) {
     (void)subject;
     selectedIndex_ = -1;  // Clear selection
+    refreshDisplay();
+}
+
+void LibraryView::refreshDisplay() {
+    // This view currently calculates display tracks on the fly in render()
+    // but we can use this to cache or force a refresh if needed.
+    if (library_) {
+        displayedFiles_ = searchQuery_.empty() ? library_->getAll() : library_->search(searchQuery_);
+    }
+}
+
+void LibraryView::removeSelectedTracks() {
+    for (const auto& path : selectedPaths_) {
+        if (controller_) controller_->removeMedia(path);
+    }
+    selectedPaths_.clear();
 }

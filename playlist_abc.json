@@ -4,19 +4,6 @@
         {
             "inLibrary": true,
             "metadata": {
-                "album": "COWBOY CARTER",
-                "artist": "Beyoncé",
-                "duration": 132,
-                "genre": "Country",
-                "title": "BLACKBIIRD",
-                "track": 2,
-                "year": 2024
-            },
-            "path": "./media/y2mate.com - BLACKBIIRD.mp3"
-        },
-        {
-            "inLibrary": true,
-            "metadata": {
                 "album": "THE TORTURED POETS DEPARTMENT: THE ANTHOLOGY",
                 "artist": "Taylor Swift",
                 "duration": 213,
@@ -39,6 +26,19 @@
                 "year": 2024
             },
             "path": "./media/y2mate.com - Sabrina Carpenter  Coincidence Official Lyric Video.mp3"
+        },
+        {
+            "inLibrary": true,
+            "metadata": {
+                "album": "COWBOY CARTER",
+                "artist": "Beyoncé",
+                "duration": 132,
+                "genre": "Country",
+                "title": "BLACKBIIRD",
+                "track": 2,
+                "year": 2024
+            },
+            "path": "./media/y2mate.com - BLACKBIIRD.mp3"
         }
     ]
 }

@@ -26,11 +26,38 @@ void HistoryView::render() {
     auto historyTracks = history_->getAll();
     
     ImGui::Text("Playback History (%zu tracks)", historyTracks.size());
+    
     ImGui::SameLine();
-    if (ImGui::Button("Clear History")) {
+    if (ImGui::Button("Clear All")) {
         controller_->clearHistory();
         selectedIndex_ = -1;
+        selectedPaths_.clear();
     }
+    
+    ImGui::SameLine();
+    // Edit Mode Toggle
+    if (isEditMode_) {
+        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.8f, 0.4f, 0.0f, 1.0f));
+        if (ImGui::Button("Done")) {
+            toggleEditMode();
+        }
+        ImGui::PopStyleColor();
+        
+        ImGui::SameLine();
+        if (ImGui::Button("Remove Selected")) {
+            removeSelectedTracks();
+        }
+        
+        ImGui::SameLine();
+        if (ImGui::Button("Select All")) {
+            selectAll(historyTracks);
+        }
+    } else {
+        if (ImGui::Button("Edit")) {
+            toggleEditMode();
+        }
+    }
+    
     ImGui::Separator();
     
     float scrollHeight = ImGui::GetContentRegionAvail().y;
@@ -69,10 +96,32 @@ void HistoryView::render() {
         
         ImVec2 startPosScreen = ImGui::GetCursorScreenPos();
         
-        float textAreaWidth = contentAvailX - paddingX;
+        // Adjust for checkbox in Edit Mode
+        float checkboxWidth = 30.0f;
+        float contentStartX = paddingX;
+        if (isEditMode_) contentStartX += checkboxWidth;
+        
+        float textAreaWidth = contentAvailX - contentStartX;
 
-        // 1. Render Selectable (Span Alloc)
-        if (ImGui::Selectable("##hist", isPlaying, ImGuiSelectableFlags_SpanAllColumns, ImVec2(0, trackItemHeight))) {
+        // 1. Render Selectable
+        bool clicked = ImGui::Selectable("##hist", isPlaying, ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowOverlap, ImVec2(0, trackItemHeight));
+
+        // Render Checkbox 
+        if (isEditMode_) {
+            bool selected = isSelected(track->getPath());
+            ImGui::SetCursorPos(ImVec2(startPosScreen.x + 5.0f - ImGui::GetWindowPos().x, startPosScreen.y + (trackItemHeight - 20) / 2 - ImGui::GetWindowPos().y));
+            // Apply similar relative positioning logic as PlaylistView
+            ImVec2 localPos = ImVec2(startPosScreen.x - ImGui::GetWindowPos().x + ImGui::GetScrollX() + 5.0f, 
+                                     startPosScreen.y - ImGui::GetWindowPos().y + ImGui::GetScrollY() + (trackItemHeight - 20) / 2);
+            ImGui::SetCursorPos(localPos);
+
+            ImGui::PushID((std::string("chk") + std::to_string(i)).c_str());
+            if (ImGui::Checkbox("##check", &selected)) {
+                 toggleSelection(track->getPath());
+            }
+            ImGui::PopID();
+            
+            if (clicked) toggleSelection(track->getPath());
         }
         
         // Context menu - MUST FOLLOW Selectable immediately
@@ -173,4 +222,11 @@ void HistoryView::update(void* subject) {
     (void)subject;
     // History changed - will re-render
     selectedIndex_ = -1;
+}
+
+void HistoryView::removeSelectedTracks() {
+    for (const auto& path : selectedPaths_) {
+        controller_->removeFromHistoryByPath(path);
+    }
+    selectedPaths_.clear();
 }

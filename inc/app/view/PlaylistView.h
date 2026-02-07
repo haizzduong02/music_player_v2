@@ -1,14 +1,11 @@
 #ifndef PLAYLIST_VIEW_H
 #define PLAYLIST_VIEW_H
 
-#include "BaseView.h"
+#include "TrackListView.h"
 #include "../controller/PlaylistController.h"
 #include "../controller/PlaybackController.h"
 #include "../model/PlaylistManager.h"
-#include "../model/PlaylistManager.h"
-#include <string>
-#include <cmath>
-#include <set>
+#include <memory>
 
 class FileBrowserView;
 
@@ -26,7 +23,7 @@ class FileBrowserView;
  * ImGui-based view for playlists.
  * Shows list of playlists and selected playlist content.
  */
-class PlaylistView : public BaseView {
+class PlaylistView : public TrackListView {
 public:
     PlaylistView(PlaylistController* controller, PlaylistManager* manager, PlaybackController* playbackController);
     ~PlaylistView() override;
@@ -39,6 +36,9 @@ public:
     void setFileBrowserView(FileBrowserView* browserView) { fileBrowserView_ = browserView; }
     
     PlaylistManager* getManager() const { return manager_; }
+    
+protected:
+    void removeSelectedTracks() override;
     
 private:
     PlaylistController* controller_;
@@ -60,7 +60,6 @@ private:
     bool shouldReopenAddPopup_ = false; // Flag to reopen popup after browsing
     bool shouldOpenAddPopup_ = false;   // Flag to open popup from button (fix ID stack)
     bool isBrowsingForPlaylist_ = false; // Flag to track if we are currently browsing
-    std::string songSearchQuery_;
     std::set<std::string> selectedTracksForAdd_;
     
     /**

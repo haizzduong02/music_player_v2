@@ -8,15 +8,27 @@ PlaylistController::PlaylistController(PlaylistManager* playlistManager, Library
 
 bool PlaylistController::createPlaylist(const std::string& name) {
     auto playlist = playlistManager_->createPlaylist(name);
-    return playlist != nullptr;
+    if (playlist) {
+        playlistManager_->saveAll(); // Persist playlist index
+        return true;
+    }
+    return false;
 }
 
 bool PlaylistController::deletePlaylist(const std::string& name) {
-    return playlistManager_->deletePlaylist(name);
+    bool success = playlistManager_->deletePlaylist(name);
+    if (success) {
+        playlistManager_->saveAll(); // Persist playlist index
+    }
+    return success;
 }
 
 bool PlaylistController::renamePlaylist(const std::string& oldName, const std::string& newName) {
-    return playlistManager_->renamePlaylist(oldName, newName);
+    bool success = playlistManager_->renamePlaylist(oldName, newName);
+    if (success) {
+        playlistManager_->saveAll(); // Persist playlist index
+    }
+    return success;
 }
 
 bool PlaylistController::addToPlaylist(const std::string& playlistName, const std::string& filepath) {
@@ -34,7 +46,11 @@ bool PlaylistController::addToPlaylist(const std::string& playlistName, const st
         return false;
     }
     
-    return playlist->addTrack(file);
+    bool success = playlist->addTrack(file);
+    if (success) {
+        playlist->save(); // Persist track changes
+    }
+    return success;
 }
 
 bool PlaylistController::addToPlaylistAndLibrary(
@@ -63,7 +79,11 @@ bool PlaylistController::removeFromPlaylist(const std::string& playlistName, siz
         return false;
     }
     
-    return playlist->removeTrack(trackIndex);
+    bool success = playlist->removeTrack(trackIndex);
+    if (success) {
+        playlist->save(); // Persist track changes
+    }
+    return success;
 }
 
 bool PlaylistController::removeFromPlaylistByPath(
@@ -75,7 +95,11 @@ bool PlaylistController::removeFromPlaylistByPath(
         return false;
     }
     
-    return playlist->removeTrackByPath(filepath);
+    bool success = playlist->removeTrackByPath(filepath);
+    if (success) {
+        playlist->save(); // Persist track changes
+    }
+    return success;
 }
 
 std::shared_ptr<Playlist> PlaylistController::getPlaylist(const std::string& name) {

@@ -1,12 +1,10 @@
 #ifndef LIBRARY_VIEW_H
 #define LIBRARY_VIEW_H
 
-#include "BaseView.h"
+#include "TrackListView.h"
 #include "../controller/LibraryController.h"
 #include "../model/Library.h"
-#include <string>
-#include <cmath>
-#include <set>
+#include "../controller/PlaybackController.h"
 #include <vector>
 #include <memory>
 
@@ -27,7 +25,7 @@ class FileBrowserView;
  * ImGui-based view for the library.
  * Automatically updates when library changes (Observer pattern).
  */
-class LibraryView : public BaseView {
+class LibraryView : public TrackListView {
 public:
     LibraryView(LibraryController* controller, Library* library, PlaybackController* playbackController, class PlaylistManager* playlistManager);
     ~LibraryView() override;
@@ -40,6 +38,9 @@ public:
     
     Library* getLibrary() const { return library_; }
     
+protected:
+    void removeSelectedTracks() override;
+    
 private:
     LibraryController* controller_;
     Library* library_;
@@ -48,13 +49,8 @@ private:
     FileBrowserView* fileBrowserView_ = nullptr;
     
     // UI state
-    std::string searchQuery_;
     std::vector<std::shared_ptr<MediaFile>> displayedFiles_;
     int selectedIndex_;
-
-    // Edit Mode State
-    bool isEditMode_ = false;
-    std::set<std::string> selectedTracksForRemoval_;
     
     // Popup state for Add File/Directory
     bool showAddFilePopup_ = false;
