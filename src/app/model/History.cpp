@@ -120,7 +120,7 @@ bool History::save()
     try
     {
         // TODO: Implement persistence save
-        // persistence_->save("history", history_);
+        return true;
         return true;
     }
     catch (const std::exception &e)
@@ -143,7 +143,7 @@ bool History::load()
     try
     {
         // TODO: Implement persistence load
-        // history_ = persistence_->load<MediaFile>("history");
+        trimToMaxSize();
         trimToMaxSize();
         Subject::notify();
         return true;
