@@ -15,6 +15,10 @@ FileBrowserView::FileBrowserView(IFileSystem* fileSystem, LibraryController* lib
     // Check if we can start at "music_media" subfolder? No, user said they moved everything to home directly or wants home as default.
     // Let's just use home.
     currentPath_ = startPath;
+    
+    // Increase density for File Browser as requested ("increase selector height")
+    fileSelector_.setItemsPerPage(25);
+    
     refreshCurrentDirectory();
 }
 
@@ -53,7 +57,7 @@ void FileBrowserView::render() {
 
 void FileBrowserView::renderPopup() {
     // Popup logic
-    ImGui::SetNextWindowSize(ImVec2(1000, 700), ImGuiCond_Appearing);
+    ImGui::SetNextWindowSize(ImVec2(900, 600), ImGuiCond_Appearing);
     
     bool open = true;
     if (ImGui::BeginPopupModal("File Browser", &open)) {
@@ -116,8 +120,8 @@ void FileBrowserView::renderContent() {
     
     // RIGHT PANEL: Media files + Actions
     // RIGHT PANEL: Media files + Actions
-    // Container for the right panel
-    if (ImGui::BeginChild("FilePanel", ImVec2(0, contentHeight - 40), true)) {
+    // Right Panel container
+    if (ImGui::BeginChild("FilePanel", ImVec2(0, contentHeight), true)) {
         // Calculate heights
         // Header: Add Button + Selector Actions (~30-40px)
         // Footer: Pagination (~30px)
@@ -166,11 +170,8 @@ void FileBrowserView::renderContent() {
     // Reserve space for pagination footer (approx 40px)
     footerHeight = 40.0f; // Update existing variable instead of redeclaring
     float listHeight = ImGui::GetContentRegionAvail().y - footerHeight;
-    
-    if (ImGui::BeginChild("FileList", ImVec2(0, listHeight), true)) {
-        fileSelector_.renderList();
-    }
-    ImGui::EndChild();
+    fileSelector_.setListHeight(listHeight);
+    fileSelector_.renderList();
     
     // Fixed Footer (Pagination)
     fileSelector_.renderPagination();

@@ -77,6 +77,12 @@ public:
      */
     void setCustomLabels(const std::string& nameLabel, const std::string& typeLabel);
 
+    /**
+     * @brief Set the fixed height of the list/table
+     * @param height Height in pixels. 0.0f means auto/fill.
+     */
+    void setListHeight(float height) { height_ = height; }
+
 private:
     std::vector<FileInfo> items_;
     std::set<std::string> selectedPaths_;
@@ -89,6 +95,7 @@ private:
     int itemsPerPage_ = 15;
     int totalPages_ = 1;
     char pageInputBuffer_[16] = "1";
+    float height_ = 0.0f; // 0.0f = auto-fill available space
 
     void updatePagination();
     void renderPaginationControls();

@@ -55,7 +55,8 @@ void PagedFileSelector::renderActions() {
 
 void PagedFileSelector::renderList() {
     // Table
-    if (ImGui::BeginTable("FilesSelectorTable", 4, ImGuiTableFlags_BordersInnerH | ImGuiTableFlags_Resizable | ImGuiTableFlags_RowBg | ImGuiTableFlags_ScrollY)) {
+    ImVec2 outerSize = ImVec2(0.0f, height_); // Use configured height (0=auto)
+    if (ImGui::BeginTable("FilesSelectorTable", 4, ImGuiTableFlags_BordersInnerH | ImGuiTableFlags_Resizable | ImGuiTableFlags_RowBg | ImGuiTableFlags_ScrollY, outerSize)) {
         ImGui::TableSetupColumn("##Select", ImGuiTableColumnFlags_WidthFixed, 30.0f);
         ImGui::TableSetupColumn(labelName_.c_str(), ImGuiTableColumnFlags_NoHide);
         ImGui::TableSetupColumn(labelType_.c_str(), ImGuiTableColumnFlags_WidthFixed, 100.0f); // Wider for Artist/Type
