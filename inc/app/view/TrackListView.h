@@ -55,7 +55,6 @@ protected:
             if (ImGui::Button("Select All")) {
                  selectAll(tracks);
             }
-        
         } else {
             if (ImGui::Button("Edit")) {
                 toggleEditMode();
@@ -139,14 +138,43 @@ protected:
             if (ImGui::BeginPopup(addPopupId.c_str())) {
                 ImGui::Text("Add to Playlist");
                 ImGui::Separator();
+                
                 if (playlistManager_) {
                     auto playlists = playlistManager_->getAllPlaylists();
-                    for (const auto& playlist : playlists) {
-                        if (playlist->getName() == "Now Playing") continue;
-                        if (ImGui::Selectable(playlist->getName().c_str())) {
-                            playlist->addTrack(file);
-                            playlist->save();
-                            ImGui::CloseCurrentPopup();
+                    
+                    // 1. List existing playlists
+                    if (ImGui::BeginChild("PlaylistListSub", ImVec2(200, 150), false)) {
+                        for (const auto& playlist : playlists) {
+                            if (playlist->getName() == "Now Playing") continue;
+                            if (ImGui::Selectable(playlist->getName().c_str())) {
+                                playlist->addTrack(file);
+                                playlist->save();
+                                ImGui::CloseCurrentPopup();
+                            }
+                        }
+                    }
+                    ImGui::EndChild();
+                    
+                    ImGui::Separator();
+                    
+                    // 2. Create new playlist and add
+                    static char newPlaylistBuffer[128] = "";
+                    ImGui::PushItemWidth(160);
+                    ImGui::InputTextWithHint("##new_pl", "New Playlist...", newPlaylistBuffer, sizeof(newPlaylistBuffer));
+                    ImGui::PopItemWidth();
+                    
+                    ImGui::SameLine();
+                    if (ImGui::Button("+##create_add", ImVec2(30, 0))) {
+                        std::string name(newPlaylistBuffer);
+                        if (!name.empty()) {
+                            auto newPl = playlistManager_->createPlaylist(name);
+                            if (newPl) {
+                                newPl->addTrack(file);
+                                newPl->save();
+                                playlistManager_->saveAll(); // Ensure the new playlist itself is saved in the manager
+                                newPlaylistBuffer[0] = '\0';
+                                ImGui::CloseCurrentPopup();
+                            }
                         }
                     }
                 }
