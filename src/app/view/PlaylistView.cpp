@@ -37,6 +37,10 @@ void PlaylistView::render() {
     // Top panel: Playlist list (Fixed height)
     ImGui::BeginChild("PlaylistList", ImVec2(0, 150), true);
     ImGui::Text("Playlists");
+    ImGui::SameLine(ImGui::GetContentRegionAvail().x - 25);
+    if (ImGui::Button("+", ImVec2(25, 0))) {
+        showCreateDialog_ = true;
+    }
     ImGui::Separator();
     
     for (size_t i = 0; i < playlists.size(); ++i) {
@@ -90,14 +94,7 @@ void PlaylistView::render() {
         ImGui::PopID();
     }
     
-    ImGui::Separator();
-    
-    // New playlist button
-    if (ImGui::Button("New Playlist")) {
-        showCreateDialog_ = true;
-    }
-    
-    ImGui::EndChild();
+    ImGui::EndChild(); // End PlaylistList
     
     // Bottom panel: Playlist tracks (Remaining height)
     ImGui::BeginChild("PlaylistTracks", ImVec2(0, 0), true);

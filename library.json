@@ -375,5 +375,18 @@
             "year": 2019
         },
         "path": "./media/y2mate.com - Taylor Swift  Blank Space Taylors Version Lyric Video_320kbps.mp3"
+    },
+    {
+        "inLibrary": true,
+        "metadata": {
+            "album": "",
+            "artist": "Color Out",
+            "duration": 177,
+            "genre": "poppunk, emo",
+            "title": "Host",
+            "track": 0,
+            "year": 2024
+        },
+        "path": "./media/Color_Out_-_Host.mp3"
     }
 ]
