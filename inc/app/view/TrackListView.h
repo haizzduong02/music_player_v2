@@ -189,9 +189,43 @@ protected:
             if (ImGui::BeginPopup("MetadataPopup")) {
                 ImGui::Text("Track Details");
                 ImGui::Separator();
-                ImGui::Text("File: %s", file->getDisplayName().c_str());
+                ImGui::Text("Title: %s", file->getDisplayName().c_str());
                 ImGui::Text("Artist: %s", artist.c_str());
                 ImGui::Text("Album: %s", album.c_str());
+                
+                ImGui::Separator();
+                
+                // Extension
+                std::string ext = file->getExtension();
+                if (!ext.empty() && ext[0] == '.') ext = ext.substr(1);
+                std::transform(ext.begin(), ext.end(), ext.begin(), ::toupper);
+                ImGui::Text("Format: %s", ext.c_str());
+                
+                // Duration
+                int dur = meta.duration;
+                int min = dur / 60;
+                int sec = dur % 60;
+                ImGui::Text("Duration: %d:%02d", min, sec);
+                
+                // File Size
+                size_t sizeBytes = file->getFileSize();
+                if (sizeBytes > 0) {
+                    const char* units[] = {"B", "KB", "MB", "GB"};
+                    int i = 0;
+                    double size = static_cast<double>(sizeBytes);
+                    while (size > 1024 && i < 3) {
+                        size /= 1024;
+                        i++;
+                    }
+                    ImGui::Text("Size: %.2f %s", size, units[i]);
+                }
+                
+                // Audio Properties
+                if (meta.bitrate > 0) ImGui::Text("Bitrate: %d kbps", meta.bitrate);
+                if (meta.sampleRate > 0) ImGui::Text("Sample Rate: %d Hz", meta.sampleRate);
+                if (meta.channels > 0) ImGui::Text("Channels: %d (%s)", meta.channels, (meta.channels == 1 ? "Mono" : "Stereo"));
+                if (!meta.codec.empty()) ImGui::Text("Codec: %s", meta.codec.c_str());
+                
                 ImGui::EndPopup();
             }
             ImGui::PopStyleVar();
