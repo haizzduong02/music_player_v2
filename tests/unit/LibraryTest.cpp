@@ -247,3 +247,34 @@ TEST_F(LibraryTest, LoadIgnoresMissingFiles)
     // Verify it hits the else branch of "if (file->exists())" 
     // This is hard to prove without coverage tool, but logic is there
 }
+
+TEST_F(LibraryTest, AddMediaBatch)
+{
+    Library lib(nullptr);
+    std::vector<std::shared_ptr<MediaFile>> batch;
+    batch.push_back(std::make_shared<MediaFile>("/b1.mp3"));
+    batch.push_back(std::make_shared<MediaFile>("/b2.mp3"));
+    
+    int processed = lib.addMediaBatch(batch);
+    EXPECT_EQ(processed, 2);
+    EXPECT_EQ(lib.size(), 2);
+    
+    // Test duplicates in batch/library
+    batch.clear();
+    batch.push_back(std::make_shared<MediaFile>("/b1.mp3")); // Duplicate
+    batch.push_back(std::make_shared<MediaFile>("/b3.mp3")); // New
+    
+    processed = lib.addMediaBatch(batch);
+    EXPECT_EQ(processed, 1);
+    EXPECT_EQ(lib.size(), 3);
+}
+
+TEST_F(LibraryTest, GetPathIndex)
+{
+    Library lib(nullptr);
+    lib.addMedia(std::make_shared<MediaFile>("/p1.mp3"));
+    
+    auto index = lib.getPathIndex();
+    EXPECT_EQ(index.size(), 1);
+    EXPECT_TRUE(index.count("/p1.mp3"));
+}

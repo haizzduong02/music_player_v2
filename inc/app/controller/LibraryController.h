@@ -48,14 +48,20 @@ class LibraryController : public ITrackListController
      * @param filepath Path to the media file
      * @return true if added successfully
      */
-    bool addMediaFile(const std::string &filepath);
+    virtual bool addMediaFile(const std::string &filepath);
+
+    /**
+     * @brief Add multiple media files asynchronously
+     * @param filepaths Vector of file paths to add
+     */
+    virtual void addMediaFilesAsync(const std::vector<std::string> &filepaths);
 
     /**
      * @brief Remove media from library
      * @param filepath Path of file to remove
      * @return true if removed successfully
      */
-    bool removeMedia(const std::string &filepath);
+    virtual bool removeMedia(const std::string &filepath);
 
     /**
      * @brief Set callback for when a track is removed
@@ -71,21 +77,22 @@ class LibraryController : public ITrackListController
      * @param searchFields Fields to search in
      * @return Vector of matching media files
      */
-    std::vector<std::shared_ptr<MediaFile>>
+    virtual std::vector<std::shared_ptr<MediaFile>>
     searchMedia(const std::string &query, const std::vector<std::string> &searchFields = {"title", "artist", "album"});
 
     /**
      * @brief Refresh library (reload metadata for all files)
      * @return Number of files refreshed
      */
-    int refreshLibrary();
+    virtual int refreshLibrary();
 
     /**
-     * @brief Verify library files (check if files still exist)
-     * Removes missing files from library
-     * @return Number of files removed
+     * @brief Get all track paths in the library
+     * @return Set of file paths
      */
-    int verifyLibrary();
+    virtual std::unordered_set<std::string> getAllTrackPaths() const;
+
+    virtual int verifyLibrary();
 
     /**
      * @brief Get library statistics

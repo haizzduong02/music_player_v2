@@ -38,6 +38,11 @@ LibraryView::~LibraryView()
 
 void LibraryView::render()
 {
+    if (needsRefresh_.exchange(false))
+    {
+        refreshDisplay();
+    }
+
     renderSearchBar();
 
     // Top Controls
@@ -84,8 +89,7 @@ void LibraryView::handleInput()
 void LibraryView::update(void *subject)
 {
     (void)subject;
-    selectedIndex_ = -1; // Clear selection
-    refreshDisplay();
+    needsRefresh_ = true;
 }
 
 void LibraryView::refreshDisplay()

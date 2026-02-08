@@ -95,18 +95,36 @@ void PagedFileSelector::renderList()
             ImGui::TableNextColumn();
 
             bool isSelected = (selectedPaths_.find(fileInfo.path) != selectedPaths_.end());
+            bool isDisabled = (disabledPaths_.find(fileInfo.path) != disabledPaths_.end());
+
+            if (isDisabled)
+            {
+                // Force selected visual for disabled items (already in library)
+                isSelected = true; 
+                ImGui::BeginDisabled(true); 
+            }
+
             ImGui::PushID((int)i);
             if (ImGui::Checkbox("##check", &isSelected))
             {
-                if (isSelected)
-                    selectedPaths_.insert(fileInfo.path);
-                else
-                    selectedPaths_.erase(fileInfo.path);
+                if (!isDisabled) 
+                {
+                    if (isSelected)
+                        selectedPaths_.insert(fileInfo.path);
+                    else
+                        selectedPaths_.erase(fileInfo.path);
+                }
             }
             ImGui::PopID();
 
+            if (isDisabled)
+            {
+                ImGui::EndDisabled();
+            }
+
             ImGui::TableNextColumn();
-            ImGui::Text("%s", fileInfo.name.c_str());
+            if (isDisabled) ImGui::TextDisabled("%s", fileInfo.name.c_str());
+            else ImGui::Text("%s", fileInfo.name.c_str());
 
             ImGui::TableNextColumn();
             std::string ext = (fileInfo.extension.length() > 0 && fileInfo.extension[0] == '.')

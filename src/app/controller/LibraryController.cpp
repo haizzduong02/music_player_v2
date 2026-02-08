@@ -1,6 +1,9 @@
 #include "app/controller/LibraryController.h"
 #include "app/model/MediaFileFactory.h"
+#include "app/model/MediaFileFactory.h"
 #include "utils/Logger.h"
+#include <thread>
+#include <vector>
 
 LibraryController::LibraryController(Library *library, IFileSystem *fileSystem, IMetadataReader *metadataReader,
                                      PlaybackController *playbackController)
@@ -48,6 +51,47 @@ bool LibraryController::addMediaFile(const std::string &filepath)
 
     // Move unique_ptr to shared_ptr
     return library_->addMedia(std::shared_ptr<MediaFile>(std::move(file)));
+}
+
+void LibraryController::addMediaFilesAsync(const std::vector<std::string> &filepaths)
+{
+    if (!library_ || !metadataReader_ || filepaths.empty())
+        return;
+
+    // Create a copy of filepaths to pass to the thread
+    std::vector<std::string> paths = filepaths;
+    
+    // Launch detached thread
+    std::thread([this, paths]() {
+        Logger::info("Starting async library import of " + std::to_string(paths.size()) + " files");
+        
+        std::vector<std::shared_ptr<MediaFile>> batch;
+        batch.reserve(20);
+        int totalAdded = 0;
+
+        for (const auto &path : paths)
+        {
+            auto file = MediaFileFactory::createMediaFile(path, metadataReader_);
+            if (file && file->getType() != MediaType::UNKNOWN)
+            {
+                batch.push_back(std::shared_ptr<MediaFile>(std::move(file)));
+            }
+            
+            if (batch.size() >= 20)
+            {
+                totalAdded += library_->addMediaBatch(batch);
+                batch.clear();
+            }
+        }
+        
+        // Add remaining
+        if (!batch.empty())
+        {
+            totalAdded += library_->addMediaBatch(batch);
+        }
+        
+        Logger::info("Async import finished. Added " + std::to_string(totalAdded) + " files.");
+    }).detach();
 }
 
 bool LibraryController::removeMedia(const std::string &filepath)
@@ -101,6 +145,15 @@ int LibraryController::refreshLibrary()
 
     Logger::info("Refreshed " + std::to_string(refreshedCount) + " files");
     return refreshedCount;
+}
+
+std::unordered_set<std::string> LibraryController::getAllTrackPaths() const
+{
+    if (!library_)
+    {
+        return {};
+    }
+    return library_->getPathIndex();
 }
 
 int LibraryController::verifyLibrary()

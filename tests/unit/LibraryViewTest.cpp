@@ -120,6 +120,7 @@ TEST_F(LibraryViewTest, UpdateRefreshesDisplayedFiles)
 
     // Trigger update via Observer pattern
     view->update(library.get());
+    performRefresh(); // Manually refresh since we are not in render loop
 
     ASSERT_EQ(getDisplayedFiles().size(), 1);
     EXPECT_EQ(getDisplayedFiles()[0]->getPath(), "/active.mp3");
@@ -142,6 +143,7 @@ TEST_F(LibraryViewTest, SearchFiltersFiles)
 
     // Initial update shows all
     view->update(library.get());
+    performRefresh();
     ASSERT_EQ(getDisplayedFiles().size(), 2);
 
     // Set search query directly using helper
@@ -166,6 +168,7 @@ TEST_F(LibraryViewTest, SearchIsCaseInsensitive)
     library->addMedia(f1);
 
     view->update(library.get());
+    performRefresh(); // Process update
 
     // Search with lowercase
     setSearchQuery("metallica");

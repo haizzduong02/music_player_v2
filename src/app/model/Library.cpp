@@ -132,6 +132,37 @@ bool Library::addMedia(std::shared_ptr<MediaFile> mediaFile)
     return true;
 }
 
+int Library::addMediaBatch(const std::vector<std::shared_ptr<MediaFile>> &mediaFiles)
+{
+    if (mediaFiles.empty())
+        return 0;
+
+    std::lock_guard<std::mutex> lock(dataMutex_);
+    int addedCount = 0;
+
+    for (const auto &file : mediaFiles)
+    {
+        if (!file) continue;
+        
+        const std::string &path = file->getPath();
+        if (pathIndex_.find(path) == pathIndex_.end())
+        {
+            mediaFiles_.push_back(file);
+            pathIndex_.insert(path);
+            file->setInLibrary(true);
+            addedCount++;
+        }
+    }
+
+    if (addedCount > 0)
+    {
+        Logger::info("Batch added " + std::to_string(addedCount) + " files to library");
+        Subject::notify();
+    }
+    
+    return addedCount;
+}
+
 bool Library::removeMedia(const std::string &filepath)
 {
     std::lock_guard<std::mutex> lock(dataMutex_);

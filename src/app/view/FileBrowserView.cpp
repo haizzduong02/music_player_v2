@@ -3,6 +3,8 @@
 #include "app/model/MediaFileFactory.h"
 #include "utils/Logger.h"
 #include <algorithm>
+#include <set>
+#include <unordered_set>
 #include <imgui.h>
 
 FileBrowserView::FileBrowserView(IFileSystem *fileSystem, LibraryController *libController)
@@ -25,6 +27,8 @@ FileBrowserView::FileBrowserView(IFileSystem *fileSystem, LibraryController *lib
 
 void FileBrowserView::show()
 {
+    // Refresh to ensure we have latest library state (important if library loaded after view init)
+    refreshCurrentDirectory();
     fileSelector_.clearSelection();
     BaseView::show();
 }
@@ -272,9 +276,61 @@ void FileBrowserView::refreshCurrentDirectory()
         mediaFiles.push_back(info);
     }
 
+    // 3. Filter and Sort logic
+    std::unordered_set<std::string> libraryPaths;
+    if (libController_)
+    {
+        libraryPaths = libController_->getAllTrackPaths();
+    }
+    
+    std::set<std::string> disabledPaths;
+
+    // Identify disabled files
+    for (const auto &file : mediaFiles)
+    {
+        bool found = false;
+        if (libraryPaths.count(file.path))
+        {
+            found = true;
+        }
+        else
+        {
+            // Try canonical path match in case of symlinks/normalization differences
+            try
+            {
+                std::error_code ec;
+                std::string avgCanonical = std::filesystem::canonical(file.path, ec).string();
+                if (!ec && libraryPaths.count(avgCanonical))
+                {
+                    found = true;
+                }
+            }
+            catch (...) {}
+        }
+
+        if (found)
+        {
+            disabledPaths.insert(file.path);
+        }
+    }
+
+    // Sort: Unadded first, then Added. Tie-break with name.
+    std::sort(mediaFiles.begin(), mediaFiles.end(), [&](const FileInfo &a, const FileInfo &b) {
+        bool aInLib = disabledPaths.count(a.path); // Use disabledPaths set which is already resolved
+        bool bInLib = disabledPaths.count(b.path);
+        
+        if (aInLib != bInLib)
+        {
+            return aInLib < bInLib; 
+        }
+        return a.name < b.name;
+    });
+
     currentTrackCount_ = (int)mediaFiles.size();
 
     fileSelector_.setItems(mediaFiles);
+    fileSelector_.setDisabledItems(disabledPaths); // Pass disabled items
+    
     // fileSelector_.clearSelection(); // Optional: clear when valid path changes?
     // Usually navigating to a new folder implies new context, so clearing is safer to avoid confusion.
     fileSelector_.clearSelection();
@@ -287,35 +343,29 @@ void FileBrowserView::processFiles(const std::vector<std::string> &paths)
     if (paths.empty())
         return;
 
-    int addedCount = 0;
-    std::vector<std::string> addedPaths;
+    if (paths.empty())
+        return;
 
-    for (const auto &path : paths)
+    if (mode_ == BrowserMode::PLAYLIST_SELECTION && playlistController_ && !targetPlaylistName_.empty())
     {
-        if (mode_ == BrowserMode::PLAYLIST_SELECTION && playlistController_ && !targetPlaylistName_.empty())
+        for (const auto &path : paths)
         {
             playlistController_->addToPlaylistAndLibrary(targetPlaylistName_, path);
         }
-        else
+        Logger::info("Added " + std::to_string(paths.size()) + " files to playlist.");
+    }
+    else
+    {
+        // Async add to library
+        // We pass all paths. The async method handles metadata reading.
+        libController_->addMediaFilesAsync(paths);
+        
+        // Return paths immediately for callback (e.g. if adding to current playlist view)
+        // Note: The files might not be in library yet, but usually callbacks handle string paths.
+        if (mode_ == BrowserMode::LIBRARY_ADD_AND_RETURN && onFilesAddedCallback_)
         {
-            libController_->addMediaFile(path);
-            addedPaths.push_back(path);
+            onFilesAddedCallback_(paths);
+            visible_ = false;
         }
-        addedCount++;
-    }
-
-    if (mode_ == BrowserMode::LIBRARY_ADD_AND_RETURN && onFilesAddedCallback_)
-    {
-        onFilesAddedCallback_(addedPaths);
-    }
-
-    if (addedCount > 0)
-    {
-        Logger::info("Added " + std::to_string(addedCount) + " files.");
-    }
-
-    if (mode_ == BrowserMode::LIBRARY_ADD_AND_RETURN && addedCount > 0)
-    {
-        visible_ = false;
     }
 }

@@ -43,6 +43,13 @@ class Library : public Subject, public ITrackCollection
     bool addMedia(std::shared_ptr<MediaFile> mediaFile);
 
     /**
+     * @brief Add multiple media files to the library efficiently
+     * @param mediaFiles Vector of media files to add
+     * @return Number of files successfully added
+     */
+    int addMediaBatch(const std::vector<std::shared_ptr<MediaFile>> &mediaFiles);
+
+    /**
      * @brief Remove a media file from the library
      * @param filepath Path of the file to remove
      * @return true if removed successfully
@@ -91,6 +98,12 @@ class Library : public Subject, public ITrackCollection
     const std::vector<std::shared_ptr<MediaFile>> &getAll() const
     {
         return mediaFiles_;
+    }
+
+    std::unordered_set<std::string> getPathIndex() const
+    {
+        std::lock_guard<std::mutex> lock(dataMutex_);
+        return pathIndex_;
     }
 
     void clear() override;

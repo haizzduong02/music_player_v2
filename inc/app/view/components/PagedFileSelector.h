@@ -98,9 +98,20 @@ class PagedFileSelector
         height_ = height;
     }
 
+    void setDisabledItems(const std::set<std::string> &paths)
+    {
+        disabledPaths_ = paths;
+    }
+
+    const std::set<std::string> &getDisabledItems() const
+    {
+        return disabledPaths_;
+    }
+
   private:
     std::vector<FileInfo> items_;
     std::set<std::string> selectedPaths_;
+    std::set<std::string> disabledPaths_;
 
     // UI Config
     std::string labelName_ = "Name";

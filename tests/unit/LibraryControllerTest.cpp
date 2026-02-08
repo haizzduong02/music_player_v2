@@ -5,6 +5,8 @@
 #include "tests/mocks/MockPersistence.h"
 #include "tests/mocks/MockPlaybackEngine.h"
 #include <gtest/gtest.h>
+#include <thread>
+#include <chrono>
 
 using ::testing::_;
 using ::testing::NiceMock;
@@ -213,4 +215,36 @@ TEST_F(LibraryControllerTest, PlayTrackWithPlaybackController)
     
     lc.playTrack(context, 0);
     EXPECT_EQ(state.getCurrentTrack()->getPath(), "/1.mp3");
+}
+
+TEST_F(LibraryControllerTest, AddMediaFilesAsync)
+{
+    // Need to wait for thread.
+    // We can loop check library size.
+    
+    std::vector<std::string> paths = {"/async1.mp3", "/async2.mp3"};
+    EXPECT_CALL(*mockMeta, readMetadata("/async1.mp3")).WillOnce(Return(MediaMetadata()));
+    EXPECT_CALL(*mockMeta, readMetadata("/async2.mp3")).WillOnce(Return(MediaMetadata()));
+    
+    controller->addMediaFilesAsync(paths);
+    
+    // Poll for completion (timeout 1s)
+    int retries = 0;
+    while(library->size() < 2 && retries < 100)
+    {
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+        retries++;
+    }
+    
+    EXPECT_EQ(library->size(), 2);
+    EXPECT_TRUE(library->contains("/async1.mp3"));
+}
+
+TEST_F(LibraryControllerTest, GetAllTrackPaths)
+{
+    library->addMedia(std::make_shared<MediaFile>("/t1.mp3"));
+    
+    auto paths = controller->getAllTrackPaths();
+    EXPECT_EQ(paths.size(), 1);
+    EXPECT_TRUE(paths.count("/t1.mp3"));
 }

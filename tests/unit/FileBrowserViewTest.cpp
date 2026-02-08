@@ -22,13 +22,22 @@ public:
     using FileBrowserView::processFiles;
 };
 
+class MockLibraryController : public LibraryController
+{
+  public:
+    MockLibraryController() : LibraryController(nullptr, nullptr, nullptr, nullptr) {}
+    MOCK_METHOD(bool, addMediaFile, (const std::string &), (override));
+    MOCK_METHOD(void, addMediaFilesAsync, (const std::vector<std::string> &), (override));
+    MOCK_METHOD(std::unordered_set<std::string>, getAllTrackPaths, (), (const, override));
+};
+
 class FileBrowserViewTest : public ::testing::Test
 {
   protected:
     std::shared_ptr<NiceMock<MockFileSystem>> mockFs;
     std::shared_ptr<MockPersistence> mockPersist;
     std::shared_ptr<Library> library;
-    std::unique_ptr<LibraryController> libraryController;
+    std::unique_ptr<NiceMock<MockLibraryController>> mockLibController; // Use Mock
     std::unique_ptr<TestFileBrowserView> view;
 
     void SetUp() override
@@ -44,15 +53,14 @@ class FileBrowserViewTest : public ::testing::Test
         io.Fonts->SetTexID((ImTextureID)(intptr_t)1);
 
         mockFs = std::make_shared<NiceMock<MockFileSystem>>();
-        mockPersist = std::make_shared<MockPersistence>();
+        mockPersist = std::make_shared<MockPersistence>(); // Keeping for Library constraint if needed, but we use MockController now
 
-        // Mock persistence behavior
-        EXPECT_CALL(*mockPersist, loadFromFile(_, _)).WillRepeatedly(Return(false));
+        mockLibController = std::make_unique<NiceMock<MockLibraryController>>();
+        
+        // Default behavior for getAllTrackPaths
+        EXPECT_CALL(*mockLibController, getAllTrackPaths()).WillRepeatedly(Return(std::unordered_set<std::string>{}));
 
-        library = std::make_shared<Library>(mockPersist.get());
-        libraryController = std::make_unique<LibraryController>(library.get(), mockFs.get(), nullptr, nullptr);
-
-        view = std::make_unique<TestFileBrowserView>(mockFs.get(), libraryController.get());
+        view = std::make_unique<TestFileBrowserView>(mockFs.get(), mockLibController.get());
     }
 
     void TearDown() override
@@ -325,4 +333,64 @@ TEST_F(FileBrowserViewTest, RenderContentBranches)
     view->setMode(FileBrowserView::BrowserMode::LIBRARY_ADD_AND_RETURN);
     view->render();
     endFrame();
+}
+
+TEST_F(FileBrowserViewTest, SortAndDisableTracks)
+{
+    // Setup files: A (in lib), B (not in lib), C (in lib)
+    // Sorted Names: A, B, C
+    // Expected Order: B (not in lib), A (in lib), C (in lib)
+    
+    std::vector<FileInfo> files;
+    auto addFile = [&](std::string name) {
+        FileInfo f; 
+        f.name = name; 
+        f.path = "/" + name; 
+        f.isDirectory = false;
+        files.push_back(f);
+    };
+    addFile("A.mp3"); // In Lib
+    addFile("B.mp3"); // Not In Lib
+    addFile("C.mp3"); // In Lib
+
+    EXPECT_CALL(*mockFs, browse(_)).WillRepeatedly(Return(files));
+    // Ensure navigation works
+    EXPECT_CALL(*mockFs, exists("/")).WillRepeatedly(Return(true));
+    EXPECT_CALL(*mockFs, isDirectory("/")).WillRepeatedly(Return(true));
+    
+    // Also mock getMediaFiles since browse is for folders only
+    EXPECT_CALL(*mockFs, getMediaFiles("/", _, _))
+        .WillRepeatedly(Return(std::vector<std::string>{"/A.mp3", "/B.mp3", "/C.mp3"}));
+
+    EXPECT_CALL(*mockLibController, getAllTrackPaths())
+        .WillRepeatedly(Return(std::unordered_set<std::string>{"/A.mp3", "/C.mp3"}));
+    
+    view->show(); 
+    view->navigateTo("/"); // Trigger refresh with new mock expectations
+    
+    const auto& disabled = view->fileSelector_.getDisabledItems();
+    EXPECT_EQ(disabled.size(), 2);
+    EXPECT_TRUE(disabled.count("/A.mp3"));
+    EXPECT_TRUE(disabled.count("/C.mp3"));
+    EXPECT_FALSE(disabled.count("/B.mp3"));
+}
+
+TEST_F(FileBrowserViewTest, AsyncAddWithLibraryMode)
+{
+    std::vector<FileInfo> files;
+    FileInfo f; f.name = "new.mp3"; f.path = "/new.mp3"; f.isDirectory = false;
+    files.push_back(f);
+    
+    EXPECT_CALL(*mockFs, browse(_)).WillRepeatedly(Return(files));
+    
+    view->show();
+    
+    // Select the file
+    view->fileSelector_.clearSelection();
+    view->fileSelector_.addSelection("/new.mp3");
+
+    // Expect async add call
+    EXPECT_CALL(*mockLibController, addMediaFilesAsync(std::vector<std::string>{"/new.mp3"})).Times(1);
+
+    view->processFiles({"/new.mp3"});
 }

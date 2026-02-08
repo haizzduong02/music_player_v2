@@ -6,7 +6,9 @@
 #include "app/model/Library.h"
 #include "app/view/TrackListView.h"
 #include <memory>
+#include <memory>
 #include <vector>
+#include <atomic>
 
 class PlaybackController;
 class FileBrowserView;
@@ -88,6 +90,8 @@ class LibraryView : public TrackListView
      * @brief Refresh displayed files
      */
     void refreshDisplay();
+
+    std::atomic<bool> needsRefresh_{false};
 };
 
 #endif // LIBRARY_VIEW_H
