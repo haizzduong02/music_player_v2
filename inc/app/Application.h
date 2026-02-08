@@ -63,16 +63,21 @@ class Application
 
     /**
      * @brief Initialize the application
-     * Loads config, creates all components, wires dependencies
+     * @param headless If true, skips SDL/ImGui initialization
      * @return true if initialized successfully
      */
-    bool init();
+    bool init(bool headless = false);
 
     /**
      * @brief Run the main application loop
-     * Handles events, updates, and rendering
      */
     void run();
+
+    /**
+     * @brief Run a single frame of the application
+     * @param deltaTime Time elapsed since last frame
+     */
+    void runOneFrame(float deltaTime);
 
     /**
      * @brief Shutdown the application
@@ -122,6 +127,7 @@ class Application
 
     bool shouldQuit_;
     bool initialized_;
+    bool headless_;
 
     /**
      * @brief Initialize SDL and ImGui

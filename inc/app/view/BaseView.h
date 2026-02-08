@@ -41,10 +41,12 @@ class BaseView : public IView
     virtual void show() override
     {
         visible_ = true;
+        onShow();
     }
     virtual void hide() override
     {
         visible_ = false;
+        onHide();
     }
     virtual bool isVisible() const override
     {
@@ -52,6 +54,9 @@ class BaseView : public IView
     }
 
   protected:
+    virtual void onShow() {} // Called when view is shown
+    virtual void onHide() {} // Called when view is hidden
+
     bool visible_ = false;
 };
 

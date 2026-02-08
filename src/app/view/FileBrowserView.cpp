@@ -161,55 +161,16 @@ void FileBrowserView::renderContent()
             else
                 addBtnText = "Add to Library";
 
-            // Helper lambda to process additions
-            auto processPaths = [&](const std::vector<std::string> &paths)
-            {
-                if (paths.empty())
-                    return;
-
-                int addedCount = 0;
-                std::vector<std::string> addedPaths;
-
-                for (const auto &path : paths)
-                {
-                    if (mode_ == BrowserMode::PLAYLIST_SELECTION && playlistController_ && !targetPlaylistName_.empty())
-                    {
-                        playlistController_->addToPlaylistAndLibrary(targetPlaylistName_, path);
-                    }
-                    else
-                    {
-                        libController_->addMediaFile(path);
-                        addedPaths.push_back(path);
-                    }
-                    addedCount++;
-                }
-
-                if (mode_ == BrowserMode::LIBRARY_ADD_AND_RETURN && onFilesAddedCallback_)
-                {
-                    onFilesAddedCallback_(addedPaths);
-                }
-
-                if (addedCount > 0)
-                {
-                    Logger::info("Added " + std::to_string(addedCount) + " files.");
-                }
-
-                if (mode_ == BrowserMode::LIBRARY_ADD_AND_RETURN && addedCount > 0)
-                {
-                    visible_ = false;
-                }
-            };
-
             if (ImGui::Button(addBtnText.c_str()))
             {
-                processPaths(fileSelector_.getSelectedPaths());
+                processFiles(fileSelector_.getSelectedPaths());
             }
 
             ImGui::SameLine();
             if (ImGui::Button("Add Random 20"))
             {
                 fileSelector_.selectRandom(20);
-                processPaths(fileSelector_.getSelectedPaths());
+                processFiles(fileSelector_.getSelectedPaths());
             }
 
             ImGui::SameLine();
@@ -320,3 +281,41 @@ void FileBrowserView::refreshCurrentDirectory()
 }
 
 // Pagination methods removed - delegated to PagedFileSelector
+
+void FileBrowserView::processFiles(const std::vector<std::string> &paths)
+{
+    if (paths.empty())
+        return;
+
+    int addedCount = 0;
+    std::vector<std::string> addedPaths;
+
+    for (const auto &path : paths)
+    {
+        if (mode_ == BrowserMode::PLAYLIST_SELECTION && playlistController_ && !targetPlaylistName_.empty())
+        {
+            playlistController_->addToPlaylistAndLibrary(targetPlaylistName_, path);
+        }
+        else
+        {
+            libController_->addMediaFile(path);
+            addedPaths.push_back(path);
+        }
+        addedCount++;
+    }
+
+    if (mode_ == BrowserMode::LIBRARY_ADD_AND_RETURN && onFilesAddedCallback_)
+    {
+        onFilesAddedCallback_(addedPaths);
+    }
+
+    if (addedCount > 0)
+    {
+        Logger::info("Added " + std::to_string(addedCount) + " files.");
+    }
+
+    if (mode_ == BrowserMode::LIBRARY_ADD_AND_RETURN && addedCount > 0)
+    {
+        visible_ = false;
+    }
+}

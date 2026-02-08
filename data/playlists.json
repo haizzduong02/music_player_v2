@@ -1,10 +1,10 @@
 [
     {
-        "name": "Favorites",
+        "name": "Now Playing",
         "tracks": []
     },
     {
-        "name": "Now Playing",
+        "name": "Favorites",
         "tracks": []
     }
 ]

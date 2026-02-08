@@ -19,7 +19,7 @@
 #include <thread>
 
 Application::Application()
-    : window_(nullptr), renderer_(nullptr), glContext_(nullptr), shouldQuit_(false), initialized_(false)
+    : window_(nullptr), renderer_(nullptr), glContext_(nullptr), shouldQuit_(false), initialized_(false), headless_(false)
 {
     Logger::info("Application instance created");
 }
@@ -30,16 +30,20 @@ Application::~Application()
     Logger::info("Application destroyed");
 }
 
-bool Application::init()
+bool Application::init(bool headless)
 {
-    Logger::info("Initializing application...");
+    headless_ = headless;
+    Logger::info("Initializing application" + std::string(headless_ ? " in headless mode" : "") + "...");
 
     try
     {
-        if (!initSDL())
-            return false;
-        if (!initImGui())
-            return false;
+        if (!headless_)
+        {
+            if (!initSDL())
+                return false;
+            if (!initImGui())
+                return false;
+        }
 
         if (!createServices())
             return false;
@@ -336,12 +340,31 @@ void Application::run()
         float deltaTime = std::chrono::duration<float>(currentTime - lastTime).count();
         lastTime = currentTime;
 
-        // Update playback controller
-        if (playbackController_)
-        {
-            playbackController_->updateTime(deltaTime);
-        }
+        runOneFrame(deltaTime);
 
+        // Small delay to reduce CPU usage if VSync doesn't handle it
+        if (headless_)
+        {
+            std::this_thread::sleep_for(std::chrono::milliseconds(10));
+        }
+    }
+
+    Logger::info("Application main loop ended");
+}
+
+void Application::runOneFrame(float deltaTime)
+{
+    if (!initialized_)
+        return;
+
+    // Update playback controller
+    if (playbackController_)
+    {
+        playbackController_->updateTime(deltaTime);
+    }
+
+    if (!headless_)
+    {
         // Update video frame for rendering
         if (playbackEngine_)
         {
@@ -364,42 +387,24 @@ void Application::run()
         ImGui_ImplSDL2_NewFrame();
         ImGui::NewFrame();
 
-        // DockSpace not available in master branch
-        // ImGui::DockSpaceOverViewport(ImGui::GetMainViewport());
-
         // Render main window logic
         if (mainWindow_)
         {
-            mainWindow_->handleInput(); // Can be empty if handled by ImGui
+            mainWindow_->handleInput();
             mainWindow_->render();
         }
 
         // Rendering
         ImGui::Render();
+
+        ImGuiIO &io = ImGui::GetIO();
         glViewport(0, 0, (int)io.DisplaySize.x, (int)io.DisplaySize.y);
         glClearColor(0.45f, 0.55f, 0.60f, 1.00f);
         glClear(GL_COLOR_BUFFER_BIT);
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
-        // Update and Render additional Platform Windows (for Docking) - Disabled for master branch
-        /*
-        if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
-        {
-            SDL_Window* backup_current_window = SDL_GL_GetCurrentWindow();
-            SDL_GLContext backup_current_context = SDL_GL_GetCurrentContext();
-            ImGui::UpdatePlatformWindows();
-            ImGui::RenderPlatformWindowsDefault();
-            SDL_GL_MakeCurrent(backup_current_window, backup_current_context);
-        }
-        */
-
         SDL_GL_SwapWindow(window_);
-
-        // Small delay to reduce CPU usage if needed, but VSync handles it mostly
-        // std::this_thread::sleep_for(std::chrono::milliseconds(1));
     }
-
-    Logger::info("Application main loop ended");
 }
 
 void Application::shutdown()
@@ -425,9 +430,18 @@ void Application::shutdown()
     playbackEngine_.reset();
 
     // Cleanup ImGui
-    ImGui_ImplOpenGL3_Shutdown();
-    ImGui_ImplSDL2_Shutdown();
-    ImGui::DestroyContext();
+    if (glContext_ || window_)
+    {
+        if (glContext_)
+        {
+            ImGui_ImplOpenGL3_Shutdown();
+        }
+        if (window_)
+        {
+            ImGui_ImplSDL2_Shutdown();
+        }
+        ImGui::DestroyContext();
+    }
 
     // Cleanup SDL
     if (glContext_)

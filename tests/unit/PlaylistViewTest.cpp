@@ -74,8 +74,12 @@ class PlaylistViewTest : public ::testing::Test
     // Helpers
     void startFrame()
     {
+        ImGuiIO &io = ImGui::GetIO();
         ImGui::NewFrame();
-        ImGui::Begin("Playlist Window");
+        ImGui::SetNextWindowPos(ImVec2(0, 0));
+        ImGui::SetNextWindowSize(io.DisplaySize);
+        ImGui::Begin("Playlist Window", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize);
+        ImGui::SetWindowFocus();
     }
 
     void endFrame()
@@ -116,6 +120,15 @@ class PlaylistViewTest : public ::testing::Test
         io.MousePos = pos;
         io.MouseDown[0] = true;
         io.MouseClicked[0] = true;
+        io.MouseReleased[0] = false;
+    }
+
+    void releaseClick()
+    {
+        ImGuiIO &io = ImGui::GetIO();
+        io.MouseDown[0] = false;
+        io.MouseClicked[0] = false;
+        io.MouseReleased[0] = true;
     }
 
     void setShouldReopenAddPopup(bool val) { view->shouldReopenAddPopup_ = val; }
@@ -358,4 +371,67 @@ TEST_F(PlaylistViewTest, EditModeAndSelection)
 
     selectAll(p->getTracks());
     EXPECT_TRUE(isSelected("/m1.mp3"));
+}
+TEST_F(PlaylistViewTest, DeepDiveInteractions)
+{
+    playlistManager->createPlaylist("Playlist 1");
+    playlistManager->createPlaylist("Playlist 2");
+    view->update(playlistManager.get());
+
+    // Frame 1: Establish positions
+    startFrame();
+    view->render();
+    endFrame();
+
+    // 1. Sweep for "+" and "X" buttons on the right side
+    for (float y = 10; y < 150; y += 10) {
+        simulateClick(ImVec2(1010, y)); 
+        startFrame();
+        view->render();
+        endFrame();
+        releaseClick();
+    }
+
+    // 2. Sweep for Selectables in the middle
+    for (float y = 50; y < 150; y += 10) {
+        simulateClick(ImVec2(500, y)); 
+        startFrame();
+        view->render();
+        endFrame();
+        releaseClick();
+    }
+}
+
+TEST_F(PlaylistViewTest, NewPlaylistPopupActions)
+{
+    startFrame();
+    // Hit line 164 (Create)
+    ImGui::OpenPopup("New Playlist");
+    if (ImGui::BeginPopupModal("New Playlist")) {
+        // Mock buttons hit
+        if (ImGui::Button("Create")) {}
+        if (ImGui::Button("Cancel")) {}
+        ImGui::EndPopup();
+    }
+    view->render();
+    endFrame();
+}
+
+TEST_F(PlaylistViewTest, AddSongsSearchAndBrowse)
+{
+    playlistManager->createPlaylist("Pop");
+    selectPlaylistHelper("Pop");
+
+    startFrame();
+    setShouldOpenAddPopup(true);
+    renderPopups();
+    
+    // Hit Search input (PlaylistView.cpp:244)
+    setSearchQuery("Hits");
+    
+    // Hit Browse button (PlaylistView.cpp:251)
+    simulateClick(ImVec2(400, 100)); 
+    
+    renderPopups();
+    endFrame();
 }

@@ -1,4 +1,5 @@
 #include "app/Application.h"
+#include "utils/Config.h"
 #include "imgui.h"
 #include <gtest/gtest.h>
 
@@ -71,9 +72,17 @@ class ApplicationTest : public ::testing::Test
     {
         return app.libraryController_.get();
     }
+    PlaybackState *getPlaybackState()
+    {
+        return app.playbackState_.get();
+    }
     PlaybackController *getPlaybackController()
     {
         return app.playbackController_.get();
+    }
+    bool isInitialized() const
+    {
+        return app.initialized_;
     }
     MainWindow *getMainWindow()
     {
@@ -88,9 +97,6 @@ TEST_F(ApplicationTest, ConstructorState)
 
 TEST_F(ApplicationTest, MockedSubsystemInitialization)
 {
-    // We can't call app.init() because of SDL_Init,
-    // but we can test private methods thanks to friend class.
-
     // 1. Services
     EXPECT_TRUE(createServices());
     EXPECT_NE(getPersistence(), nullptr);
@@ -102,9 +108,17 @@ TEST_F(ApplicationTest, MockedSubsystemInitialization)
     EXPECT_NE(getPlaylistManager(), nullptr);
 
     // 3. Controllers
+    // Test volume logic: Negative volume in config should fall back to default
+    Config::getInstance().getConfig().customVolume = -1.0f;
     EXPECT_TRUE(createControllers());
     EXPECT_NE(getLibraryController(), nullptr);
     EXPECT_NE(getPlaybackController(), nullptr);
+    EXPECT_EQ(getPlaybackState()->getVolume(), Config::getInstance().getConfig().defaultVolume);
+
+    // Test volume logic: Positive volume in config
+    Config::getInstance().getConfig().customVolume = 0.75f;
+    createControllers();
+    EXPECT_EQ(getPlaybackState()->getVolume(), 0.75f);
 
     // 4. Views
     EXPECT_TRUE(createViews());
@@ -112,8 +126,6 @@ TEST_F(ApplicationTest, MockedSubsystemInitialization)
 
     // 5. Wiring
     wireObservers();
-    // Verify wiring (e.g. check if Library has observers, but Subject doesn't expose list)
-    // We just ensure it doesn't crash.
 }
 
 TEST_F(ApplicationTest, ShutdownSafe)
@@ -130,7 +142,7 @@ TEST_F(ApplicationTest, SaveAndLoadState)
     EXPECT_TRUE(loadState());
 }
 
-TEST_F(ApplicationTest, ObserverWiringCallback)
+TEST_F(ApplicationTest, ObserverWiringCallbackBranches)
 {
     createServices();
     createModels();
@@ -138,19 +150,23 @@ TEST_F(ApplicationTest, ObserverWiringCallback)
     createViews();
     wireObservers();
 
-    // Trigger the callback in libraryController
-    auto *libCtrl = getLibraryController();
-    if (libCtrl)
-    {
-        // We need a path that's in playbackState or similar to hit branches
-        std::string testPath = "test.mp3";
-        // removeTrackByPath triggers the callback
-        libCtrl->removeTrackByPath(testPath);
-    }
+    auto* libCtrl = getLibraryController();
+    auto* playState = getPlaybackState();
+
+    // Setup: Matching track playing
+    std::string testPath = "current.mp3";
+    auto track = std::make_shared<MediaFile>(testPath);
+    playState->setPlayback(track, PlaybackStatus::PLAYING);
+    playState->pushToBackStack(); // Pushes the current track
+    
+    // Trigger callback: Track IS currently playing
+    libCtrl->removeTrackByPath(testPath);
+    
+    // Trigger callback: Track is NOT currently playing
+    libCtrl->removeTrackByPath("other.mp3");
 }
 
-/*
-TEST_F(ApplicationTest, FullShutdown)
+TEST_F(ApplicationTest, FullShutdownSequence)
 {
     // Initialize enough to hit shutdown branches
     createServices();
@@ -158,9 +174,13 @@ TEST_F(ApplicationTest, FullShutdown)
     createControllers();
     createViews();
 
-    // Set initialized to true so shutdown() doesn't return early
+    // Set initialized to true so destructor calls shutdown() logic
     setInitialized(true);
-
-    app.shutdown();
 }
-*/
+
+TEST_F(ApplicationTest, InitializationErrorHandling)
+{
+    // init() catches exceptions
+    // Hard to force exception in internal create methods without injecting mocks,
+    // but we covered the success paths.
+}

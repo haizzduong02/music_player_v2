@@ -63,6 +63,15 @@ class FileBrowserView : public BaseView
         onFilesAddedCallback_ = callback;
     }
 
+  protected:
+    PagedFileSelector fileSelector_;
+    int currentTrackCount_ = 0;
+    std::string currentPath_;
+
+    void navigateTo(const std::string &path);
+    void navigateUp();
+    void processFiles(const std::vector<std::string> &paths);
+
   private:
     IFileSystem *fileSystem_;
     LibraryController *libController_;
@@ -73,18 +82,15 @@ class FileBrowserView : public BaseView
     // ...
 
     // UI state
-    std::string currentPath_;
     std::vector<FileInfo> currentFiles_; // Folders for navigation
     // std::vector<FileInfo> currentMediaFiles_; // Recursive media files - Moved to PagedFileSelector
     // std::set<std::string> selectedFiles_;  // For multi-select - Moved to PagedFileSelector
 
-    PagedFileSelector fileSelector_;
 
     // Mode state
     BrowserMode mode_ = BrowserMode::LIBRARY;
     std::string targetPlaylistName_;
     std::function<void(const std::vector<std::string> &)> onFilesAddedCallback_;
-    int currentTrackCount_ = 0;
 
     /**
      * @brief Render actual content (shared between Window and Popup)
@@ -119,13 +125,6 @@ class FileBrowserView : public BaseView
     /**
      * @brief Navigate to parent directory
      */
-    void navigateUp();
-
-    /**
-     * @brief Navigate to directory
-     * @param path Directory to navigate to
-     */
-    void navigateTo(const std::string &path);
     void refreshCurrentDirectory();
 
     /**

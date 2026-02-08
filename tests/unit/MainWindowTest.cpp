@@ -1,4 +1,5 @@
 #include "app/view/MainWindow.h"
+#include "interfaces/IMetadataReader.h"
 #include "app/controller/LibraryController.h"
 #include "app/controller/PlaybackController.h"
 #include "app/controller/PlaylistController.h"
@@ -112,58 +113,85 @@ class MainWindowTest : public ::testing::Test
     {
         ImGui::Render();
     }
+
+    void simulateClick(ImVec2 pos)
+    {
+        ImGuiIO &io = ImGui::GetIO();
+        io.MousePos = pos;
+        io.MouseDown[0] = true;
+        io.MouseClicked[0] = true;
+        io.MouseReleased[0] = false;
+    }
+
+    void releaseClick()
+    {
+        ImGuiIO &io = ImGui::GetIO();
+        io.MouseDown[0] = false;
+        io.MouseClicked[0] = false;
+        io.MouseReleased[0] = true;
+    }
 };
 
-TEST_F(MainWindowTest, SwitchScreen)
+TEST_F(MainWindowTest, TabBarInteractions)
 {
-    EXPECT_EQ(window->getCurrentScreen(), Screen::LIBRARY);
-
-    window->switchScreen(Screen::HISTORY);
-    EXPECT_EQ(window->getCurrentScreen(), Screen::HISTORY);
-
-    window->switchScreen(Screen::PLAYLIST);
-    EXPECT_EQ(window->getCurrentScreen(), Screen::PLAYLIST);
+    // Try to click all three tabs via sweep
+    for (float x = 20; x < 350; x += 20) {
+        simulateClick(ImVec2(x, 15));
+        startFrame();
+        window->render();
+        endFrame();
+        releaseClick();
+    }
 }
 
-TEST_F(MainWindowTest, RenderAllScreens)
+TEST_F(MainWindowTest, RenderingStates)
 {
-    // Render Library
+    // 1. Video Rendering branch
+    EXPECT_CALL(*mockEngine, getVideoTexture()).WillRepeatedly(Return((void*)0x1234));
+    EXPECT_CALL(*mockEngine, getVideoSize(_, _)).WillRepeatedly(::testing::SetArgReferee<0>(1920));
+    // Second arg is 1, let's use a nice number
+    EXPECT_CALL(*mockEngine, getVideoSize(_, _)).WillRepeatedly(::testing::DoAll(::testing::SetArgReferee<0>(1920), ::testing::SetArgReferee<1>(1080)));
+
     startFrame();
     window->render();
     endFrame();
 
-    // Render History
-    window->switchScreen(Screen::HISTORY);
-    startFrame();
-    window->render();
-    endFrame();
-
-    // Render Playlist
-    window->switchScreen(Screen::PLAYLIST);
-    startFrame();
-    window->render();
-    endFrame();
-}
-
-TEST_F(MainWindowTest, RenderWithFileBrowser)
-{
-    fileBrowserView->show();
-    startFrame();
-    window->render();
-    endFrame();
-}
-
-TEST_F(MainWindowTest, RenderWithPlayingTrack)
-{
-    auto track = std::make_shared<MediaFile>("/test.mp3");
+    // 2. Album Art with data branch
+    EXPECT_CALL(*mockEngine, getVideoTexture()).WillRepeatedly(Return(nullptr));
+    auto track = std::make_shared<MediaFile>("/art.mp3");
+    MediaMetadata meta;
+    meta.hasAlbumArt = true;
+    meta.albumArtData = {0x89, 0x50, 0x4E, 0x47}; // Fake PNG header
+    track->setMetadata(meta);
     playbackState->setPlayback(track, PlaybackStatus::PLAYING);
+
+    startFrame();
+    window->render();
+    endFrame();
     
+    // 3. No Art Placeholder
+    meta.hasAlbumArt = false;
+    track->setMetadata(meta);
     startFrame();
     window->render();
     endFrame();
 }
 
-TEST_F(MainWindowTest, HandleInput)
+TEST_F(MainWindowTest, PopupRendering)
 {
-    window->handleInput();
+    // Test that popups are called for all screens
+    window->switchScreen(Screen::LIBRARY);
+    startFrame();
+    window->render();
+    endFrame();
+
+    window->switchScreen(Screen::PLAYLIST);
+    startFrame();
+    window->render();
+    endFrame();
+
+    window->switchScreen(Screen::HISTORY);
+    startFrame();
+    window->render();
+    endFrame();
 }

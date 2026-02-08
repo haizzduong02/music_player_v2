@@ -360,7 +360,7 @@ class TrackListView : public BaseView
         }
     }
 
-  private:
+  protected:
     bool isHoveredRow(const ImVec2 &screenPos, const ImVec2 &size)
     {
         return ImGui::IsMouseHoveringRect(screenPos, ImVec2(screenPos.x + size.x, screenPos.y + size.y));

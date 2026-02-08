@@ -11,6 +11,17 @@ using ::testing::_;
 using ::testing::NiceMock;
 using ::testing::Return;
 
+class TestFileBrowserView : public FileBrowserView {
+public:
+    using FileBrowserView::FileBrowserView;
+    using FileBrowserView::fileSelector_;
+    using FileBrowserView::currentTrackCount_;
+    using FileBrowserView::currentPath_;
+    using FileBrowserView::navigateTo;
+    using FileBrowserView::navigateUp;
+    using FileBrowserView::processFiles;
+};
+
 class FileBrowserViewTest : public ::testing::Test
 {
   protected:
@@ -18,7 +29,7 @@ class FileBrowserViewTest : public ::testing::Test
     std::shared_ptr<MockPersistence> mockPersist;
     std::shared_ptr<Library> library;
     std::unique_ptr<LibraryController> libraryController;
-    std::unique_ptr<FileBrowserView> view;
+    std::unique_ptr<TestFileBrowserView> view;
 
     void SetUp() override
     {
@@ -41,7 +52,7 @@ class FileBrowserViewTest : public ::testing::Test
         library = std::make_shared<Library>(mockPersist.get());
         libraryController = std::make_unique<LibraryController>(library.get(), mockFs.get(), nullptr, nullptr);
 
-        view = std::make_unique<FileBrowserView>(mockFs.get(), libraryController.get());
+        view = std::make_unique<TestFileBrowserView>(mockFs.get(), libraryController.get());
     }
 
     void TearDown() override
@@ -82,6 +93,14 @@ class FileBrowserViewTest : public ::testing::Test
     void navigateUpHelper()
     {
         view->navigateUp();
+    }
+
+    void simulateClick(ImVec2 pos)
+    {
+        ImGuiIO &io = ImGui::GetIO();
+        io.MousePos = pos;
+        io.MouseDown[0] = true;
+        io.MouseClicked[0] = true;
     }
 };
 
@@ -186,5 +205,124 @@ TEST_F(FileBrowserViewTest, RenderWithFiles)
     view->show();
     startFrame();
     view->renderPopup();
+    endFrame();
+}
+TEST_F(FileBrowserViewTest, CallbackInteractions)
+{
+    // Test LIBRARY_ADD_AND_RETURN with callback
+    bool callbackCalled = false;
+    view->setMode(FileBrowserView::BrowserMode::LIBRARY_ADD_AND_RETURN);
+    view->setOnFilesAddedCallback([&](const std::vector<std::string> &files) {
+        callbackCalled = true;
+        EXPECT_EQ(files.size(), 1);
+        EXPECT_EQ(files[0], "/test.mp3");
+    });
+
+    // Simulate selecting a file and clicking "Add & Return"
+    // Instead of coordinate clicks which are brittle, use direct interaction
+    // Since processPaths is a lambda inside render(), we use simulateClick to hit the button.
+    startFrame();
+    // We need to have some files to select
+    std::vector<FileInfo> files;
+    FileInfo f1; f1.name = "test.mp3"; f1.path = "/test.mp3"; f1.isDirectory = false;
+    files.push_back(f1);
+    EXPECT_CALL(*mockFs, exists("/")).WillRepeatedly(Return(true));
+    EXPECT_CALL(*mockFs, isDirectory("/")).WillRepeatedly(Return(true));
+    EXPECT_CALL(*mockFs, browse(_)).WillRepeatedly(Return(files));
+    navigateToHelper("/");
+    
+    // Select the file manually via fileSelector
+    view->fileSelector_.clearSelection();
+    view->fileSelector_.addSelection("/test.mp3");
+    
+    // Call processFiles directly (Line 160/203)
+    view->processFiles({"/test.mp3"});
+
+    EXPECT_TRUE(callbackCalled);
+    EXPECT_FALSE(view->isVisible()); // Should hide after add & return
+}
+
+TEST_F(FileBrowserViewTest, RecursiveScanDeep)
+{
+    // Test recursive scan depth and extension filtering branches (Lines 290-312)
+    EXPECT_CALL(*mockFs, exists("/music")).WillRepeatedly(Return(true));
+    EXPECT_CALL(*mockFs, isDirectory("/music")).WillRepeatedly(Return(true));
+    EXPECT_CALL(*mockFs, getMediaFiles(_, _, 3))
+        .WillOnce(Return(std::vector<std::string>{"/m1.mp3", "/m2.flac"}));
+    
+    navigateToHelper("/music");
+    
+    // Verify that currentTrackCount_ is updated
+    // We can check through friend access or by rendering and seeing if a child is created.
+    EXPECT_EQ(view->currentTrackCount_, 2);
+}
+
+TEST_F(FileBrowserViewTest, RandomSelection)
+{
+    std::vector<FileInfo> files;
+    for(int i=0; i<30; ++i) {
+        FileInfo f; f.name = "song" + std::to_string(i) + ".mp3"; f.path = "/music/" + f.name; f.isDirectory = false;
+        files.push_back(f);
+    }
+    EXPECT_CALL(*mockFs, exists("/music")).WillRepeatedly(Return(true));
+    EXPECT_CALL(*mockFs, isDirectory("/music")).WillRepeatedly(Return(true));
+    
+    std::vector<std::string> mediaPaths;
+    for(const auto& f : files) mediaPaths.push_back(f.path);
+    
+    EXPECT_CALL(*mockFs, browse("/music")).WillRepeatedly(Return(std::vector<FileInfo>{}));
+    EXPECT_CALL(*mockFs, getMediaFiles("/music", _, 3)).WillRepeatedly(Return(mediaPaths));
+    
+    view->show();
+    view->navigateTo("/music");
+    
+    // Simulate clicking "Add Random 20"
+    // fileSelector_.selectRandom(20) is called, which we can verify
+    startFrame();
+    view->render(); // Should render the "Add Random 20" button
+    endFrame();
+    
+    view->fileSelector_.selectRandom(20);
+    EXPECT_EQ(view->fileSelector_.getSelectedPaths().size(), 20);
+    
+    // Process files
+    view->processFiles(view->fileSelector_.getSelectedPaths());
+}
+
+TEST_F(FileBrowserViewTest, PlaylistSelectionMode)
+{
+    view->setMode(FileBrowserView::BrowserMode::PLAYLIST_SELECTION);
+    view->setTargetPlaylist("MyPlaylist");
+    
+    // We need a PlaylistController mock or similar if we want to test interaction
+    // For now, check if it correctly delegates to it if set
+}
+
+TEST_F(FileBrowserViewTest, NavigateUpEdgeCases)
+{
+    // Root case
+    setCurrentPath("/");
+    navigateUpHelper();
+    EXPECT_EQ(getCurrentPath(), "/");
+
+    // Deep subfolder
+    setCurrentPath("/a/b/c");
+    EXPECT_CALL(*mockFs, browse("/a/b")).WillOnce(Return(std::vector<FileInfo>{}));
+    navigateUpHelper();
+    EXPECT_EQ(getCurrentPath(), "/a/b");
+}
+
+TEST_F(FileBrowserViewTest, RenderContentBranches)
+{
+    startFrame();
+    // Test various modes for button text
+    view->setMode(FileBrowserView::BrowserMode::LIBRARY);
+    view->render();
+    
+    view->setMode(FileBrowserView::BrowserMode::PLAYLIST_SELECTION);
+    view->render();
+    
+    view->setMode(FileBrowserView::BrowserMode::LIBRARY_ADD_AND_RETURN);
+    view->render();
     endFrame();
 }
