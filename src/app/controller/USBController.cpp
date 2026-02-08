@@ -39,7 +39,7 @@ bool USBController::unmountUSB(const std::string &mountPoint)
 }
 
 std::vector<std::string> USBController::scanUSBMedia(const std::string &mountPoint,
-                                                     const std::vector<std::string> & /*extensions*/)
+                                                     const std::vector<std::string> &extensions)
 {
 
     if (!fileSystem_->exists(mountPoint) || !fileSystem_->isDirectory(mountPoint))
@@ -50,6 +50,8 @@ std::vector<std::string> USBController::scanUSBMedia(const std::string &mountPoi
 
     // Scan for media files with given extensions
     Logger::info("USB scanning: " + mountPoint);
-    // TODO: Full implementation needs LibraryController integration
-    return {};
+    // Use recursive scan (maxDepth -1 or similar if supported, effectively using default)
+    // The interface is getMediaFiles(path, extensions) usually
+    // Start with maxDepth = -1 (recursive)
+    return fileSystem_->getMediaFiles(mountPoint, extensions);
 }

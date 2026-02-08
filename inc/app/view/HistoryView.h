@@ -24,6 +24,8 @@
  */
 class HistoryView : public TrackListView
 {
+    friend class HistoryViewTest;
+
   public:
     /**
      * @brief Constructor with dependency injection

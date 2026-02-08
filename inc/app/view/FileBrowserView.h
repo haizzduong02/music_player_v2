@@ -26,6 +26,8 @@
  */
 class FileBrowserView : public BaseView
 {
+    friend class FileBrowserViewTest;
+
   public:
     FileBrowserView(IFileSystem *fileSystem, LibraryController *libController);
     ~FileBrowserView() override = default;

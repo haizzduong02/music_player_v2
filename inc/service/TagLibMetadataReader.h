@@ -37,6 +37,8 @@ class TagLibMetadataReader : public IMetadataReader
   private:
     std::string getExtension(const std::string &filepath);
     bool isFormatSupported(const std::string &extension);
+
+    friend class TagLibMetadataReaderTest;
 };
 
 #endif // TAGLIB_METADATA_READER_H

@@ -67,6 +67,8 @@ class MpvPlaybackEngine : public IPlaybackEngine
     void handleEvents();
 
     static void wakeupCallback(void *ctx);
+
+    friend class MpvPlaybackEngineTest;
 };
 
 #endif // MPV_PLAYBACK_ENGINE_H

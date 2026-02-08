@@ -154,12 +154,16 @@ class PlaybackController : public IObserver
      */
     bool hasFinished() const;
 
+    friend class PlaybackControllerTest;
+
+  private:
     /**
      * @brief Handle playback finished event
      * Automatically plays next track or stops based on playlist/loop
      */
     void handlePlaybackFinished();
 
+  public:
     /**
      * @brief Update playback time
      * Called from main loop with delta time

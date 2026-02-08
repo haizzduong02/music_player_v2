@@ -9,6 +9,8 @@
 
 class NowPlayingView : public BaseView
 {
+    friend class NowPlayingViewTest;
+
   public:
     NowPlayingView(PlaybackController *controller, PlaybackState *state);
     ~NowPlayingView() override;

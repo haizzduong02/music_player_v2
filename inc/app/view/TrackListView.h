@@ -20,6 +20,9 @@
  */
 class TrackListView : public BaseView
 {
+    friend class TrackListViewTest;
+    friend class HistoryViewTest;
+
   public:
     TrackListView()
         : isEditMode_(false), listController_(nullptr), playbackController_(nullptr), playlistManager_(nullptr)

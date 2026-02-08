@@ -41,7 +41,7 @@ bool LibraryController::addMediaFile(const std::string &filepath)
 
     // Create MediaFile and add to library
     auto file = MediaFileFactory::createMediaFile(filepath, metadataReader_);
-    if (!file)
+    if (!file || file->getType() == MediaType::UNKNOWN)
     {
         return false;
     }

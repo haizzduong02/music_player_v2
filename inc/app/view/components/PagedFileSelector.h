@@ -14,6 +14,8 @@
 
 class PagedFileSelector
 {
+    friend class PagedFileSelectorTest;
+
   public:
     PagedFileSelector();
     ~PagedFileSelector() = default;

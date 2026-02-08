@@ -188,3 +188,20 @@ void PlaybackState::clearPlayQueue()
     queueIndex_ = 0;
     Subject::notify();
 }
+
+void PlaybackState::reset()
+{
+    std::lock_guard<std::mutex> lock(dataMutex_);
+    currentTrack_ = nullptr;
+    status_ = PlaybackStatus::STOPPED;
+    volume_ = 0.7f;
+    position_ = 0.0;
+    duration_ = 0.0;
+    queueIndex_ = 0;
+
+    while (!backStack_.empty())
+        backStack_.pop();
+    playQueue_.clear();
+
+    Subject::notify();
+}

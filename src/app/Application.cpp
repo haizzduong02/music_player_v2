@@ -36,268 +36,26 @@ bool Application::init()
 
     try
     {
-        // Step 1: Initialize SDL Video (Audio handled by MPV)
-        Logger::info("Initializing SDL...");
-        if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_GAMECONTROLLER) != 0)
-        {
-            Logger::error("Error: " + std::string(SDL_GetError()));
+        if (!initSDL())
             return false;
-        }
-        Logger::info("SDL Initialized");
-
-        // Setup window
-        SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-        SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
-        SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
-        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
-        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
-        Uint32 window_flags = SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI;
-
-        window_ = SDL_CreateWindow("Music Player", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-                                   Config::getInstance().getConfig().windowWidth,
-                                   Config::getInstance().getConfig().windowHeight, window_flags);
-        if (window_ == nullptr)
-        {
-            Logger::error("Error: SDL_CreateWindow(): " + std::string(SDL_GetError()));
+        if (!initImGui())
             return false;
-        }
 
-        glContext_ = SDL_GL_CreateContext(window_);
-        SDL_GL_MakeCurrent(window_, glContext_);
-        SDL_GL_SetSwapInterval(1); // Enable vsync
-        Logger::info("Window and GL Context Created");
+        if (!createServices())
+            return false;
+        if (!createModels())
+            return false;
+        if (!createControllers())
+            return false;
+        if (!createViews())
+            return false;
 
-        // Step 2: Initialize ImGui
-        IMGUI_CHECKVERSION();
-        ImGui::CreateContext();
-        ImGuiIO &io = ImGui::GetIO();
-        io.IniFilename = nullptr; // Disable imgui.ini generation
-        (void)io;
-        io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard Controls
-        // io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;         // Enable Docking (Requires Docking Branch)
+        wireObservers();
 
-        // Load Inter font (modern, clean UI font)
-        // Try relative path from build directory first, then from project root
-        // Check file existence first to avoid ImGui assertion crash
-        const char *fontPath1 = "../assets/fonts/Inter-Variable.ttf";
-        const char *fontPath2 = "assets/fonts/Inter-Variable.ttf";
-
-        ImFont *mainFont = nullptr;
-
-        // Helper to check file existence
-        auto fileExists = [](const char *path)
+        if (!loadState())
         {
-            std::ifstream f(path);
-            return f.good();
-        };
-
-        ImFontConfig boldConfig;
-        boldConfig.RasterizerMultiply = 1.6f; // Simulate bold (thicker glyphs)
-
-        if (fileExists(fontPath1))
-        {
-            mainFont = io.Fonts->AddFontFromFileTTF(fontPath1, 16.0f);
-            // Index 1: Large Font
-            io.Fonts->AddFontFromFileTTF(fontPath1, 22.0f);
-            // Index 2: Large Bold Font
-            io.Fonts->AddFontFromFileTTF(fontPath1, 22.0f, &boldConfig);
+            Logger::warn("Failed to load application state");
         }
-        else if (fileExists(fontPath2))
-        {
-            mainFont = io.Fonts->AddFontFromFileTTF(fontPath2, 16.0f);
-            // Index 1: Large Font
-            io.Fonts->AddFontFromFileTTF(fontPath2, 22.0f);
-            // Index 2: Large Bold Font
-            io.Fonts->AddFontFromFileTTF(fontPath2, 22.0f, &boldConfig);
-        }
-        if (!mainFont)
-        {
-            Logger::warn("Could not load Inter font, using default");
-            io.Fonts->AddFontDefault();
-            io.Fonts->AddFontDefault(); // Index 1
-            io.Fonts->AddFontDefault(); // Index 2
-        }
-
-        // Setup Dear ImGui style
-        ImGui::StyleColorsDark();
-
-        // Apply custom color scheme
-        ImGuiStyle &style = ImGui::GetStyle();
-
-        // Background colors - Darker Teal/Green
-        style.Colors[ImGuiCol_WindowBg] = ImVec4(0.08f, 0.20f, 0.18f, 1.0f); // Darker
-        style.Colors[ImGuiCol_ChildBg] = ImVec4(0.05f, 0.15f, 0.14f, 1.0f);  // Darker for contrast
-        style.Colors[ImGuiCol_PopupBg] = ImVec4(0.08f, 0.20f, 0.18f, 0.95f);
-
-        // Frame colors
-        style.Colors[ImGuiCol_FrameBg] = ImVec4(0.15f, 0.35f, 0.30f, 1.0f);
-        style.Colors[ImGuiCol_FrameBgHovered] = ImVec4(0.25f, 0.55f, 0.45f, 1.0f);
-        style.Colors[ImGuiCol_FrameBgActive] = ImVec4(0.00f, 0.70f, 0.60f, 1.0f); // Bright Cyan
-
-        // Button colors
-        style.Colors[ImGuiCol_Button] = ImVec4(0.15f, 0.35f, 0.30f, 1.0f);
-        style.Colors[ImGuiCol_ButtonHovered] = ImVec4(0.25f, 0.50f, 0.45f, 1.0f); // More visible hover
-        style.Colors[ImGuiCol_ButtonActive] = ImVec4(0.00f, 0.70f, 0.60f, 1.0f);
-
-        // Header colors (Selectables) - High Contrast
-        style.Colors[ImGuiCol_Header] = ImVec4(0.15f, 0.35f, 0.30f, 0.6f);
-        style.Colors[ImGuiCol_HeaderHovered] = ImVec4(0.30f, 0.60f, 0.50f, 0.8f); // Brighter and less transparent
-        style.Colors[ImGuiCol_HeaderActive] = ImVec4(0.00f, 0.70f, 0.60f, 1.0f);  // Bright active state
-
-        // Slider colors
-        style.Colors[ImGuiCol_SliderGrab] = ImVec4(0.00f, 0.70f, 0.60f, 1.0f);
-        style.Colors[ImGuiCol_SliderGrabActive] = ImVec4(0.00f, 0.80f, 0.70f, 1.0f);
-
-        // Text
-        style.Colors[ImGuiCol_Text] = ImVec4(1.00f, 1.00f, 1.00f, 1.0f);
-        style.Colors[ImGuiCol_TextDisabled] = ImVec4(0.70f, 0.70f, 0.70f, 1.0f); // Brighter disabled text
-
-        // Separator
-        style.Colors[ImGuiCol_Separator] = ImVec4(0.30f, 0.60f, 0.50f, 0.5f);
-
-        // Style tweaks
-        style.WindowRounding = 0.0f;
-        style.FrameRounding = 4.0f;
-        style.GrabRounding = 4.0f;
-        style.FramePadding = ImVec2(8, 4);
-        style.ItemSpacing = ImVec2(8, 6);
-
-        // Setup Platform/Renderer backends
-        ImGui_ImplSDL2_InitForOpenGL(window_, glContext_);
-        ImGui_ImplOpenGL3_Init("#version 130");
-
-        // Step 3: Initialize Services, Models, Controllers...
-        Logger::info("Initializing services...");
-        persistence_ = std::make_unique<JsonPersistence>();
-
-        // Initialize Config singleton
-        Config::getInstance().init(persistence_.get());
-        if (!Config::getInstance().load())
-        {
-            Logger::warn("Failed to load configuration, using defaults");
-        }
-        // ... (rest of init remains checking Application.cpp content - wait, replace_file_content replaces blocks. I
-        // need to be careful with "Services, Models..." lines if they are not in TargetContent)
-        metadataReader_ = std::make_unique<TagLibMetadataReader>();
-        fileSystem_ = std::make_unique<LocalFileSystem>();
-        playbackEngine_ = std::make_unique<MpvPlaybackEngine>();
-
-        Logger::info("Services initialized");
-
-        Logger::info("Initializing models...");
-        library_ = std::make_unique<Library>(persistence_.get());
-        playlistManager_ = std::make_unique<PlaylistManager>(persistence_.get());
-        history_ = std::make_unique<History>(100);
-        playbackState_ = std::make_unique<PlaybackState>();
-        Logger::info("Models initialized");
-
-        Logger::info("Initializing controllers...");
-        playbackController_ = std::make_unique<PlaybackController>(playbackEngine_.get(), playbackState_.get(),
-                                                                   history_.get(), hardwareInterface_.get(), nullptr);
-        // Apply saved volume (prefer customVolume if set, otherwise defaultVolume)
-        float initialVolume = Config::getInstance().getConfig().customVolume;
-        if (initialVolume < 0.0f)
-        {
-            initialVolume = Config::getInstance().getConfig().defaultVolume;
-        }
-        playbackController_->setVolume(initialVolume);
-        libraryController_ = std::make_unique<LibraryController>(library_.get(), fileSystem_.get(),
-                                                                 metadataReader_.get(), playbackController_.get());
-        playlistController_ =
-            std::make_unique<PlaylistController>(playlistManager_.get(), library_.get(), metadataReader_.get());
-        historyController_ = std::make_unique<HistoryController>(history_.get(), playbackController_.get());
-        usbController_ = std::make_unique<USBController>(fileSystem_.get());
-        // Connect Library Delete to Playlist Sync
-        libraryController_->setOnTrackRemovedCallback(
-            [this](const std::string &path)
-            {
-                // Check if currently playing
-                if (playbackController_ && playbackState_)
-                {
-                    auto currentTrack = playbackState_->getCurrentTrack();
-                    if (currentTrack && currentTrack->getPath() == path)
-                    {
-                        Logger::info("Removed track is currently playing, skipping to next...");
-                        playbackController_->next();
-                    }
-                }
-
-                if (playlistController_)
-                {
-                    playlistController_->removeTrackFromAllPlaylists(path);
-                }
-
-                // Remove from History
-                if (history_)
-                {
-                    history_->removeTrackByPath(path);
-                }
-
-                // Remove from Playback BackStack
-                if (playbackState_)
-                {
-                    playbackState_->removeTrackFromBackStack(path);
-                }
-            });
-
-        Logger::info("Controllers initialized");
-
-        Logger::info("Initializing views...");
-        viewFactory_ = std::make_unique<ViewFactory>();
-
-        // Use ViewFactory to create MainWindow via interface (or direct if factory returns pointer)
-        IView *mainView = viewFactory_->createMainWindow();
-        mainWindow_.reset(
-            dynamic_cast<MainWindow *>(mainView)); // Safe cast as we know ViewFactory returns MainWindow* really
-        // OR simply:
-        if (!mainWindow_)
-            mainWindow_ = std::make_unique<MainWindow>();
-
-        // Set references in MainWindow
-        mainWindow_->setLibraryView(dynamic_cast<LibraryView *>(viewFactory_->createLibraryView(
-            libraryController_.get(), library_.get(), playbackController_.get(), playlistManager_.get())));
-        mainWindow_->setPlaylistView(dynamic_cast<PlaylistView *>(viewFactory_->createPlaylistView(
-            playlistController_.get(), playlistManager_.get(), playbackController_.get())));
-        mainWindow_->setNowPlayingView(dynamic_cast<NowPlayingView *>(
-            viewFactory_->createNowPlayingView(playbackController_.get(), playbackState_.get())));
-        // Inject PlaylistManager into NowPlayingView
-        if (auto *npView = dynamic_cast<NowPlayingView *>(mainWindow_->getNowPlayingView()))
-        {
-            npView->setPlaylistManager(playlistManager_.get());
-        }
-
-        mainWindow_->setHistoryView(dynamic_cast<HistoryView *>(viewFactory_->createHistoryView(
-            historyController_.get(), history_.get(), playbackController_.get(), playlistManager_.get())));
-        mainWindow_->setFileBrowserView(dynamic_cast<FileBrowserView *>(
-            viewFactory_->createFileBrowserView(fileSystem_.get(), libraryController_.get())));
-
-        // Connect FileBrowserView to LibraryView
-        if (mainWindow_->getLibraryView() && mainWindow_->getFileBrowserView())
-        {
-            mainWindow_->getLibraryView()->setFileBrowserView(mainWindow_->getFileBrowserView());
-        }
-
-        // Connect FileBrowserView to PlaylistView
-        if (mainWindow_->getPlaylistView() && mainWindow_->getFileBrowserView())
-        {
-            mainWindow_->getPlaylistView()->setFileBrowserView(mainWindow_->getFileBrowserView());
-        }
-
-        // Inject PlaylistController into FileBrowserView
-        if (mainWindow_->getFileBrowserView() && playlistController_)
-        {
-            mainWindow_->getFileBrowserView()->setPlaylistController(playlistController_.get());
-        }
-
-        // Inject Playback references into MainWindow for unified controls
-        mainWindow_->setPlaybackController(playbackController_.get());
-        mainWindow_->setPlaybackState(playbackState_.get());
-
-        Logger::info("Views initialized");
-
-        // Load data
-        library_->load();
-        playlistManager_->loadAll();
 
         initialized_ = true;
         Logger::info("Application initialized successfully");
@@ -308,6 +66,247 @@ bool Application::init()
         Logger::error("Application initialization failed: " + std::string(e.what()));
         return false;
     }
+}
+
+bool Application::initSDL()
+{
+    Logger::info("Initializing SDL...");
+    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_GAMECONTROLLER) != 0)
+    {
+        Logger::error("Error: " + std::string(SDL_GetError()));
+        return false;
+    }
+    Logger::info("SDL Initialized");
+
+    // Setup window
+    SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+    SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
+    SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
+    Uint32 window_flags = SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI;
+
+    window_ = SDL_CreateWindow("Music Player", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
+                               Config::getInstance().getConfig().windowWidth,
+                               Config::getInstance().getConfig().windowHeight, window_flags);
+    if (window_ == nullptr)
+    {
+        Logger::error("Error: SDL_CreateWindow(): " + std::string(SDL_GetError()));
+        return false;
+    }
+
+    glContext_ = SDL_GL_CreateContext(window_);
+    SDL_GL_MakeCurrent(window_, glContext_);
+    SDL_GL_SetSwapInterval(1); // Enable vsync
+    Logger::info("Window and GL Context Created");
+    return true;
+}
+
+bool Application::initImGui()
+{
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGuiIO &io = ImGui::GetIO();
+    io.IniFilename = nullptr; // Disable imgui.ini generation
+    (void)io;
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard Controls
+
+    const char *fontPath1 = "../assets/fonts/Inter-Variable.ttf";
+    const char *fontPath2 = "assets/fonts/Inter-Variable.ttf";
+
+    ImFont *mainFont = nullptr;
+    auto fileExists = [](const char *path)
+    {
+        std::ifstream f(path);
+        return f.good();
+    };
+
+    ImFontConfig boldConfig;
+    boldConfig.RasterizerMultiply = 1.6f;
+
+    if (fileExists(fontPath1))
+    {
+        mainFont = io.Fonts->AddFontFromFileTTF(fontPath1, 16.0f);
+        io.Fonts->AddFontFromFileTTF(fontPath1, 22.0f);
+        io.Fonts->AddFontFromFileTTF(fontPath1, 22.0f, &boldConfig);
+    }
+    else if (fileExists(fontPath2))
+    {
+        mainFont = io.Fonts->AddFontFromFileTTF(fontPath2, 16.0f);
+        io.Fonts->AddFontFromFileTTF(fontPath2, 22.0f);
+        io.Fonts->AddFontFromFileTTF(fontPath2, 22.0f, &boldConfig);
+    }
+    if (!mainFont)
+    {
+        Logger::warn("Could not load Inter font, using default");
+        io.Fonts->AddFontDefault();
+        io.Fonts->AddFontDefault();
+        io.Fonts->AddFontDefault();
+    }
+
+    ImGui::StyleColorsDark();
+    ImGuiStyle &style = ImGui::GetStyle();
+    style.Colors[ImGuiCol_WindowBg] = ImVec4(0.08f, 0.20f, 0.18f, 1.0f);
+    style.Colors[ImGuiCol_ChildBg] = ImVec4(0.05f, 0.15f, 0.14f, 1.0f);
+    style.Colors[ImGuiCol_PopupBg] = ImVec4(0.08f, 0.20f, 0.18f, 0.95f);
+    style.Colors[ImGuiCol_FrameBg] = ImVec4(0.15f, 0.35f, 0.30f, 1.0f);
+    style.Colors[ImGuiCol_FrameBgHovered] = ImVec4(0.25f, 0.55f, 0.45f, 1.0f);
+    style.Colors[ImGuiCol_FrameBgActive] = ImVec4(0.00f, 0.70f, 0.60f, 1.0f);
+    style.Colors[ImGuiCol_Button] = ImVec4(0.15f, 0.35f, 0.30f, 1.0f);
+    style.Colors[ImGuiCol_ButtonHovered] = ImVec4(0.25f, 0.50f, 0.45f, 1.0f);
+    style.Colors[ImGuiCol_ButtonActive] = ImVec4(0.00f, 0.70f, 0.60f, 1.0f);
+    style.Colors[ImGuiCol_Header] = ImVec4(0.15f, 0.35f, 0.30f, 0.6f);
+    style.Colors[ImGuiCol_HeaderHovered] = ImVec4(0.30f, 0.60f, 0.50f, 0.8f);
+    style.Colors[ImGuiCol_HeaderActive] = ImVec4(0.00f, 0.70f, 0.60f, 1.0f);
+    style.Colors[ImGuiCol_SliderGrab] = ImVec4(0.00f, 0.70f, 0.60f, 1.0f);
+    style.Colors[ImGuiCol_SliderGrabActive] = ImVec4(0.00f, 0.80f, 0.70f, 1.0f);
+    style.Colors[ImGuiCol_Text] = ImVec4(1.00f, 1.00f, 1.00f, 1.0f);
+    style.Colors[ImGuiCol_TextDisabled] = ImVec4(0.70f, 0.70f, 0.70f, 1.0f);
+    style.Colors[ImGuiCol_Separator] = ImVec4(0.30f, 0.60f, 0.50f, 0.5f);
+
+    style.WindowRounding = 0.0f;
+    style.FrameRounding = 4.0f;
+    style.GrabRounding = 4.0f;
+    style.FramePadding = ImVec2(8, 4);
+    style.ItemSpacing = ImVec2(8, 6);
+
+    ImGui_ImplSDL2_InitForOpenGL(window_, glContext_);
+    ImGui_ImplOpenGL3_Init("#version 130");
+    return true;
+}
+
+bool Application::createServices()
+{
+    persistence_ = std::make_unique<JsonPersistence>();
+    Config::getInstance().init(persistence_.get());
+    if (!Config::getInstance().load())
+    {
+        Logger::warn("Failed to load configuration, using defaults");
+    }
+    metadataReader_ = std::make_unique<TagLibMetadataReader>();
+    fileSystem_ = std::make_unique<LocalFileSystem>();
+    playbackEngine_ = std::make_unique<MpvPlaybackEngine>();
+    return true;
+}
+
+bool Application::createModels()
+{
+    library_ = std::make_unique<Library>(persistence_.get());
+    playlistManager_ = std::make_unique<PlaylistManager>(persistence_.get());
+    history_ = std::make_unique<History>(100);
+    playbackState_ = std::make_unique<PlaybackState>();
+    return true;
+}
+
+bool Application::createControllers()
+{
+    playbackController_ = std::make_unique<PlaybackController>(playbackEngine_.get(), playbackState_.get(),
+                                                               history_.get(), hardwareInterface_.get(), nullptr);
+    float initialVolume = Config::getInstance().getConfig().customVolume;
+    if (initialVolume < 0.0f)
+    {
+        initialVolume = Config::getInstance().getConfig().defaultVolume;
+    }
+    playbackController_->setVolume(initialVolume);
+    libraryController_ = std::make_unique<LibraryController>(library_.get(), fileSystem_.get(), metadataReader_.get(),
+                                                             playbackController_.get());
+    playlistController_ =
+        std::make_unique<PlaylistController>(playlistManager_.get(), library_.get(), metadataReader_.get());
+    historyController_ = std::make_unique<HistoryController>(history_.get(), playbackController_.get());
+    usbController_ = std::make_unique<USBController>(fileSystem_.get());
+
+    return true;
+}
+
+bool Application::createViews()
+{
+    viewFactory_ = std::make_unique<ViewFactory>();
+    IView *mainView = viewFactory_->createMainWindow();
+    mainWindow_.reset(dynamic_cast<MainWindow *>(mainView));
+    if (!mainWindow_)
+        mainWindow_ = std::make_unique<MainWindow>();
+
+    mainWindow_->setLibraryView(dynamic_cast<LibraryView *>(viewFactory_->createLibraryView(
+        libraryController_.get(), library_.get(), playbackController_.get(), playlistManager_.get())));
+    mainWindow_->setPlaylistView(dynamic_cast<PlaylistView *>(viewFactory_->createPlaylistView(
+        playlistController_.get(), playlistManager_.get(), playbackController_.get())));
+    mainWindow_->setNowPlayingView(dynamic_cast<NowPlayingView *>(
+        viewFactory_->createNowPlayingView(playbackController_.get(), playbackState_.get())));
+    if (auto *npView = dynamic_cast<NowPlayingView *>(mainWindow_->getNowPlayingView()))
+    {
+        npView->setPlaylistManager(playlistManager_.get());
+    }
+    mainWindow_->setHistoryView(dynamic_cast<HistoryView *>(viewFactory_->createHistoryView(
+        historyController_.get(), history_.get(), playbackController_.get(), playlistManager_.get())));
+    mainWindow_->setFileBrowserView(dynamic_cast<FileBrowserView *>(
+        viewFactory_->createFileBrowserView(fileSystem_.get(), libraryController_.get())));
+    return true;
+}
+
+void Application::wireObservers()
+{
+    if (libraryController_)
+    {
+        libraryController_->setOnTrackRemovedCallback(
+            [this](const std::string &path)
+            {
+                if (playbackController_ && playbackState_)
+                {
+                    auto currentTrack = playbackState_->getCurrentTrack();
+                    if (currentTrack && currentTrack->getPath() == path)
+                    {
+                        Logger::info("Removed track is currently playing, skipping to next...");
+                        playbackController_->next();
+                    }
+                }
+                if (playlistController_)
+                {
+                    playlistController_->removeTrackFromAllPlaylists(path);
+                }
+                if (history_)
+                {
+                    history_->removeTrackByPath(path);
+                }
+                if (playbackState_)
+                {
+                    playbackState_->removeTrackFromBackStack(path);
+                }
+            });
+    }
+
+    if (mainWindow_->getLibraryView() && mainWindow_->getFileBrowserView())
+    {
+        mainWindow_->getLibraryView()->setFileBrowserView(mainWindow_->getFileBrowserView());
+    }
+    if (mainWindow_->getPlaylistView() && mainWindow_->getFileBrowserView())
+    {
+        mainWindow_->getPlaylistView()->setFileBrowserView(mainWindow_->getFileBrowserView());
+    }
+    if (mainWindow_->getFileBrowserView() && playlistController_)
+    {
+        mainWindow_->getFileBrowserView()->setPlaylistController(playlistController_.get());
+    }
+    mainWindow_->setPlaybackController(playbackController_.get());
+    mainWindow_->setPlaybackState(playbackState_.get());
+}
+
+bool Application::loadState()
+{
+    if (library_)
+        library_->load();
+    if (playlistManager_)
+        playlistManager_->loadAll();
+    return true;
+}
+
+bool Application::saveState()
+{
+    Config::getInstance().save();
+    if (library_)
+        library_->save();
+    if (playlistManager_)
+        playlistManager_->saveAll();
+    return true;
 }
 
 void Application::run()
@@ -414,18 +413,12 @@ void Application::shutdown()
     Logger::info("Shutting down application...");
 
     // Save data
-    Config::getInstance().save();
-    if (library_)
-        library_->save();
-    if (playlistManager_)
-        playlistManager_->saveAll();
+    saveState();
 
     // Release specific controllers and engine BEFORE destroying GL context
     if (playbackController_)
     {
         playbackController_->stop();
-        // Give a tiny moment for the async stop to register if needed,
-        // though strictly not required if mpv handles it well.
     }
 
     playbackController_.reset();

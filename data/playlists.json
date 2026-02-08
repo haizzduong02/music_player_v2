@@ -1,94 +1,10 @@
 [
     {
-        "name": "abc",
-        "tracks": [
-            {
-                "inLibrary": true,
-                "metadata": {
-                    "album": "",
-                    "artist": "Stock Studio",
-                    "duration": 289,
-                    "genre": "Ambient",
-                    "title": "Deep Meditation",
-                    "track": 2,
-                    "year": 2020
-                },
-                "path": "/home/duong/media/055-1755448-Stock Studio-Deep Meditation.mp3"
-            },
-            {
-                "inLibrary": true,
-                "metadata": {
-                    "album": "",
-                    "artist": "Yigit Atilla",
-                    "duration": 179,
-                    "genre": "Pop",
-                    "title": "Broken Love",
-                    "track": 1,
-                    "year": 2022
-                },
-                "path": "/home/duong/media/071-1912687-Yigit Atilla-Broken Love.mp3"
-            },
-            {
-                "inLibrary": true,
-                "metadata": {
-                    "album": "Short n' Sweet",
-                    "artist": "Sabrina Carpenter",
-                    "duration": 164,
-                    "genre": "",
-                    "title": "Coincidence",
-                    "track": 5,
-                    "year": 2024
-                },
-                "path": "/home/duong/media/y2mate.com - Sabrina Carpenter  Coincidence Official Lyric Video.mp3"
-            }
-        ]
+        "name": "Favorites",
+        "tracks": []
     },
     {
         "name": "Now Playing",
         "tracks": []
-    },
-    {
-        "name": "Favorites",
-        "tracks": [
-            {
-                "inLibrary": true,
-                "metadata": {
-                    "album": "",
-                    "artist": "Stock Studio",
-                    "duration": 289,
-                    "genre": "Ambient",
-                    "title": "Deep Meditation",
-                    "track": 2,
-                    "year": 2020
-                },
-                "path": "/home/duong/media/055-1755448-Stock Studio-Deep Meditation.mp3"
-            },
-            {
-                "inLibrary": true,
-                "metadata": {
-                    "album": "",
-                    "artist": "Yigit Atilla",
-                    "duration": 179,
-                    "genre": "Pop",
-                    "title": "Broken Love",
-                    "track": 1,
-                    "year": 2022
-                },
-                "path": "/home/duong/media/071-1912687-Yigit Atilla-Broken Love.mp3"
-            },
-            {
-                "inLibrary": true,
-                "metadata": {
-                    "album": "MAYHEM",
-                    "artist": "Lady Gaga",
-                    "duration": 223,
-                    "genre": "Dance Pop",
-                    "title": "Abracadabra",
-                    "track": 2,
-                    "year": 2025
-                },
-                "path": "/home/duong/media/YAbracadabra.mp3"
-            }
-        ]
     }
 ]

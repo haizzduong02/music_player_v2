@@ -41,6 +41,8 @@ enum class Screen
  */
 class MainWindow : public BaseView
 {
+    friend class MainWindowTest;
+
   public:
     MainWindow();
     ~MainWindow() override = default;

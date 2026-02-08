@@ -26,6 +26,8 @@ class FileBrowserView;
  */
 class PlaylistView : public TrackListView
 {
+    friend class PlaylistViewTest;
+
   public:
     PlaylistView(PlaylistController *controller, PlaylistManager *manager, PlaybackController *playbackController);
     ~PlaylistView() override;

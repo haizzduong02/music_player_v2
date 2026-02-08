@@ -116,24 +116,14 @@ void MpvPlaybackEngine::cleanup()
         mpv_ = nullptr;
         mpv_gl_ = nullptr;
 
+        // Offload MPV destruction to detached thread to avoid blocking UI on audio timeouts
         std::thread(
             [mpv, mpv_gl]()
             {
-                Logger::info("Async cleanup thread started");
-
                 if (mpv_gl)
-                {
-                    Logger::info("Freeing mpv render context (async)...");
                     mpv_render_context_free(mpv_gl);
-                    Logger::info("mpv render context freed (async)");
-                }
-
                 if (mpv)
-                {
-                    Logger::info("Terminating mpv core (async)...");
                     mpv_terminate_destroy(mpv);
-                    Logger::info("mpv core terminated (async)");
-                }
             })
             .detach();
     }

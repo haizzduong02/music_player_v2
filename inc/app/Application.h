@@ -48,6 +48,8 @@ struct SDL_Renderer;
  */
 class Application
 {
+    friend class ApplicationTest;
+
   public:
     /**
      * @brief Constructor

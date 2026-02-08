@@ -385,3 +385,13 @@ unsigned int NowPlayingView::loadIconTexture(const std::string &path)
     stbi_image_free(data);
     return texture;
 }
+
+std::string NowPlayingView::formatTime(double seconds) const
+{
+    int totalSeconds = static_cast<int>(seconds);
+    int minutes = totalSeconds / 60;
+    int secs = totalSeconds % 60;
+    char buffer[16];
+    snprintf(buffer, sizeof(buffer), "%d:%02d", minutes, secs);
+    return std::string(buffer);
+}

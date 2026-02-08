@@ -141,6 +141,24 @@ class Config
         return (it != config_.customSettings.end()) ? it->second : defaultValue;
     }
 
+    /**
+     * @brief Set complete configuration (for testing/dependency injection)
+     * @param config New configuration
+     */
+    void setAppConfig(const AppConfig &config)
+    {
+        config_ = config;
+    }
+
+    /**
+     * @brief Get mutable reference to configuration (for testing/runtime changes)
+     * @return Reference to config structure
+     */
+    AppConfig &getMutable()
+    {
+        return config_;
+    }
+
   private:
     Config() : persistence_(nullptr)
     {

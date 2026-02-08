@@ -27,6 +27,8 @@ class FileBrowserView;
  */
 class LibraryView : public TrackListView
 {
+    friend class LibraryViewTest;
+
   public:
     LibraryView(LibraryController *controller, Library *library, PlaybackController *playbackController,
                 class PlaylistManager *playlistManager);

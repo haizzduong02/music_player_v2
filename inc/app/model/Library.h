@@ -110,6 +110,7 @@ class Library : public Subject, public ITrackCollection
     }
 
   private:
+    friend class LibraryTest;
     std::vector<std::shared_ptr<MediaFile>> mediaFiles_;
     std::unordered_set<std::string> pathIndex_; // For fast lookup
     IPersistence *persistence_;

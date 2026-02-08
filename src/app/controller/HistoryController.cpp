@@ -16,22 +16,29 @@ void HistoryController::addToHistory(std::shared_ptr<MediaFile> track)
 
 std::vector<std::shared_ptr<MediaFile>> HistoryController::getRecentTracks(size_t count)
 {
+    if (!history_)
+        return {};
     return history_->getRecent(count);
 }
 
 bool HistoryController::removeFromHistory(size_t index)
 {
+    if (!history_)
+        return false;
     return history_->removeTrack(index);
 }
 
 bool HistoryController::removeFromHistoryByPath(const std::string &filepath)
 {
+    if (!history_)
+        return false;
     return history_->removeTrackByPath(filepath);
 }
 
 void HistoryController::clearHistory()
 {
-    history_->clear();
+    if (history_)
+        history_->clear();
 }
 
 void HistoryController::playTrack(const std::vector<std::shared_ptr<MediaFile>> &context, size_t index)
@@ -63,4 +70,10 @@ void HistoryController::clearAll()
 {
     if (history_)
         history_->clear();
+}
+
+const std::vector<std::shared_ptr<MediaFile>> &HistoryController::getAllHistory()
+{
+    static const std::vector<std::shared_ptr<MediaFile>> empty;
+    return history_ ? history_->getTracks() : empty;
 }

@@ -52,7 +52,7 @@ class BaseView : public IView
     }
 
   protected:
-    bool visible_;
+    bool visible_ = false;
 };
 
 #endif // BASE_VIEW_H

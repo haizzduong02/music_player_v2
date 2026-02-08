@@ -58,6 +58,8 @@ class JsonPersistence : public IPersistence
      * @return true if valid JSON
      */
     bool isValidJson(const std::string &jsonStr);
+
+    friend class JsonPersistenceTest;
 };
 
 #endif // JSON_PERSISTENCE_H

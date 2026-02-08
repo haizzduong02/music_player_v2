@@ -2,6 +2,7 @@
 #define PLAYLIST_TRACK_LIST_CONTROLLER_H
 
 #include "app/controller/PlaylistController.h"
+#include "app/controller/PlaybackController.h"
 #include "app/model/Playlist.h"
 #include "interfaces/ITrackListController.h"
 

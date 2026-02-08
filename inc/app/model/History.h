@@ -112,6 +112,11 @@ class History : public Subject, public ITrackCollection
     mutable std::mutex dataMutex_; ///< Thread-safety for history operations
 
     /**
+     * @brief Internal save helper (expects mutex to be locked)
+     */
+    bool saveInternal();
+
+    /**
      * @brief Find index of track by path
      * @param filepath Path to find
      * @return Index if found, -1 otherwise
