@@ -11,7 +11,6 @@ bool JsonPersistence::saveToFile(const std::string &filepath, const std::string 
 {
     try
     {
-        // Ensure parent directory exists
         fs::path path(filepath);
         if (path.has_parent_path())
         {
@@ -55,7 +54,6 @@ bool JsonPersistence::loadFromFile(const std::string &filepath, std::string &dat
             return false;
         }
 
-        // Read entire file into string
         data.assign((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
 
         file.close();
@@ -100,7 +98,6 @@ std::string JsonPersistence::serialize(const void *data)
     if (!data)
         return "{}";
 
-    // Unused by current models (Library/Config manage their own serialization)
     return "{}";
 }
 
@@ -109,7 +106,6 @@ bool JsonPersistence::deserialize(const std::string &serialized, void *data)
     if (serialized.empty() || !data)
         return false;
 
-    // Unused by current models
     return false;
 }
 
@@ -135,7 +131,6 @@ bool JsonPersistence::isValidJson(const std::string &jsonStr)
 {
     if (jsonStr.empty())
         return false;
-    // Simple basic check for stub
     char first = jsonStr.front();
     char last = jsonStr.back();
     return (first == '{' && last == '}') || (first == '[' && last == ']');

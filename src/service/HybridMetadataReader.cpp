@@ -9,7 +9,6 @@ HybridMetadataReader::HybridMetadataReader(std::unique_ptr<IMetadataReader> prim
 
 MediaMetadata HybridMetadataReader::readMetadata(const std::string &filepath)
 {
-    // Try primary reader (TagLib) first
     MediaMetadata metadata = primary_->readMetadata(filepath);
 
     // Heuristic: If duration is 0, primary failed or file is unsupported (like video).
@@ -43,12 +42,10 @@ MediaMetadata HybridMetadataReader::readMetadata(const std::string &filepath)
 
 bool HybridMetadataReader::writeMetadata(const std::string &filepath, const MediaMetadata &metadata)
 {
-    // Prioritize primary for writing (TagLib supports writing)
     if (primary_->supportsEditing(filepath))
     {
         return primary_->writeMetadata(filepath, metadata);
     }
-    // Secondary (Mpv) likely doesn't support writing
     return false;
 }
 

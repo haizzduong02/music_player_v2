@@ -13,13 +13,11 @@ NowPlayingView::NowPlayingView(PlaybackController *controller, PlaybackState *st
     : controller_(controller), state_(state)
 {
 
-    // Attach as observer to playback state
     if (state_)
     {
         state_->attach(this);
     }
 
-    // Load icons
     playTexture_ = loadIconTexture("assets/icons/play.tga");
     pauseTexture_ = loadIconTexture("assets/icons/pause.tga");
     nextTexture_ = loadIconTexture("assets/icons/next.tga");
@@ -30,19 +28,16 @@ NowPlayingView::NowPlayingView(PlaybackController *controller, PlaybackState *st
 
 NowPlayingView::~NowPlayingView()
 {
-    // Detach from state
     if (state_)
     {
         state_->detach(this);
     }
 
-    // Cleanup texture
     if (albumArtTexture_)
     {
         glDeleteTextures(1, &albumArtTexture_);
     }
 
-    // Cleanup icons
     if (playTexture_)
         glDeleteTextures(1, &playTexture_);
     if (pauseTexture_)
@@ -57,7 +52,6 @@ NowPlayingView::~NowPlayingView()
         glDeleteTextures(1, &heartOutlineTexture_);
 }
 
-// Color scheme (Redefined for NowPlayingView)
 static const ImVec4 COLOR_BG_TEAL = ImVec4(0.11f, 0.40f, 0.35f, 1.0f); // #1C6758
 static const ImVec4 COLOR_ACCENT = ImVec4(0.94f, 0.35f, 0.49f, 1.0f);  // #F05A7E
 static const ImVec4 COLOR_TEXT_DIM = ImVec4(0.70f, 0.70f, 0.70f, 1.0f);
@@ -66,7 +60,6 @@ void NowPlayingView::render()
 {
     ImGui::Separator();
 
-    // Style settings
     ImGui::PushStyleColor(ImGuiCol_Button, COLOR_BG_TEAL);
     ImGui::PushStyleColor(ImGuiCol_ButtonHovered, COLOR_ACCENT);
     ImGui::PushStyleColor(ImGuiCol_SliderGrab, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
@@ -77,7 +70,6 @@ void NowPlayingView::render()
     renderProgressBar();
     ImGui::Spacing();
 
-    // --- ROW 2: Info | Controls | Volume ---
     ImGui::Columns(3, "PlaybackColumns", false);
 
     renderMetadata();
@@ -196,7 +188,6 @@ void NowPlayingView::renderPlaybackControls()
 
     auto set_icon_pos = [&]() { ImGui::SetCursorPosY(baseLineY + iconOffset); };
 
-    // Favorites toggle (move to front)
     if (state_ && playlistManager_)
     {
         set_icon_pos();

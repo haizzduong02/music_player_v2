@@ -2,31 +2,19 @@
 #include "utils/Logger.h"
 #include <iostream>
 
-/**
- * @file main.cpp
- * @brief Entry point for the Music Player application
- */
-
 int main(int argc, char *argv[])
 {
-    // WSL Audio Fix: Explicitly set PULSE_SERVER if not set
-    // Check if /mnt/wslg/PulseServer exists is implied by typical WSLg setup
-    setenv("PULSE_SERVER", "unix:/mnt/wslg/PulseServer", 0); // 0 = do not overwrite if already set
-
-    // Force SDL to use PulseAudio as well
+    setenv("PULSE_SERVER", "unix:/mnt/wslg/PulseServer", 0);
     setenv("SDL_AUDIODRIVER", "pulseaudio", 1);
 
-    // Initialize logger
     Logger::info("=================================");
     Logger::info("Music Player Application Starting");
     Logger::info("=================================");
 
     try
     {
-        // Create application instance
         Application app;
 
-        // Initialize all components
         Logger::info("Initializing application...");
         if (!app.init())
         {
@@ -37,11 +25,9 @@ int main(int argc, char *argv[])
 
         Logger::info("Application initialized successfully");
 
-        // Run main loop
         Logger::info("Starting main loop...");
         app.run();
 
-        // Shutdown gracefully
         Logger::info("Shutting down application...");
         app.shutdown();
 

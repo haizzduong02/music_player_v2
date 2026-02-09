@@ -4,12 +4,6 @@
 #include <iostream>
 #include <sstream>
 
-/**
- * @file Logger.cpp
- * @brief Simple logging utility implementation
- */
-
-// Static member initialization
 LogLevel Logger::currentLevel_ = LogLevel::INFO;
 std::mutex Logger::logMutex_;
 

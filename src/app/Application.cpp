@@ -12,7 +12,6 @@
 #include "utils/Logger.h"
 #include "hal/S32K144Interface.h"
 
-// SDL and ImGui includes
 #include <SDL.h>
 #include <SDL_opengl.h>
 #include <backends/imgui_impl_opengl3.h>
@@ -96,7 +95,6 @@ bool Application::initSDL()
     }
     Logger::info("SDL Initialized");
 
-    // Setup window
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
     SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
     SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
@@ -115,7 +113,7 @@ bool Application::initSDL()
 
     glContext_ = SDL_GL_CreateContext(window_);
     SDL_GL_MakeCurrent(window_, glContext_);
-    SDL_GL_SetSwapInterval(1); // Enable vsync
+    SDL_GL_SetSwapInterval(1);
     Logger::info("Window and GL Context Created");
     return true;
 }
@@ -125,9 +123,7 @@ bool Application::initImGui()
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGuiIO &io = ImGui::GetIO();
-    io.IniFilename = nullptr; // Disable imgui.ini generation
-    (void)io;
-    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard Controls
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
 
     const char *fontPath1 = "../assets/fonts/Inter-Variable.ttf";
     const char *fontPath2 = "assets/fonts/Inter-Variable.ttf";
@@ -207,10 +203,8 @@ bool Application::createServices()
     fileSystem_ = std::make_unique<LocalFileSystem>();
     playbackEngine_ = std::make_unique<MpvPlaybackEngine>();
 
-    // Initialize Hardware Interface (S32K144 via TCP)
     auto s32k = std::make_unique<S32K144Interface>();
     
-    // Configure based on settings
     const auto& config = Config::getInstance().getConfig();
     if (config.hardwareEnabled && !Config::getInstance().isTestMode()) {
         if (s32k->initialize(config.hardwareIp, config.hardwarePort)) { 
@@ -388,21 +382,16 @@ void Application::run()
         mainWindow_->show();
     }
 
-    // Main application loop
-    ImGuiIO &io = ImGui::GetIO();
-
     auto lastTime = std::chrono::high_resolution_clock::now();
 
     while (!shouldQuit_)
     {
-        // Calculate delta time
         auto currentTime = std::chrono::high_resolution_clock::now();
         float deltaTime = std::chrono::duration<float>(currentTime - lastTime).count();
         lastTime = currentTime;
 
         runOneFrame(deltaTime);
 
-        // Small delay to reduce CPU usage if VSync doesn't handle it
         if (headless_)
         {
             std::this_thread::sleep_for(std::chrono::milliseconds(10));
@@ -454,7 +443,6 @@ void Application::runOneFrame(float deltaTime)
             mainWindow_->render();
         }
 
-        // Rendering
         ImGui::Render();
 
         ImGuiIO &io = ImGui::GetIO();
@@ -477,10 +465,8 @@ void Application::shutdown()
 
     Logger::info("Shutting down application...");
 
-    // Save data
     saveState();
 
-    // Release specific controllers and engine BEFORE destroying GL context
     if (playbackController_)
     {
         playbackController_->stop();
@@ -489,7 +475,6 @@ void Application::shutdown()
     playbackController_.reset();
     playbackEngine_.reset();
 
-    // Cleanup ImGui
     if (glContext_ || window_)
     {
         if (glContext_)
@@ -503,7 +488,6 @@ void Application::shutdown()
         ImGui::DestroyContext();
     }
 
-    // Cleanup SDL
     if (glContext_)
     {
         SDL_GL_DeleteContext(glContext_);
@@ -516,7 +500,6 @@ void Application::shutdown()
     }
     SDL_Quit();
 
-    // Cleanup members
     views_.clear();
     mainWindow_.reset();
     viewFactory_.reset();

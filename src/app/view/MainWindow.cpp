@@ -15,7 +15,6 @@
 #endif
 
 // Color scheme
-// Color scheme - Swapped (Black Window, Teal Panels)
 static const ImVec4 COLOR_BG_BLACK = ImVec4(0.12f, 0.12f, 0.12f, 1.0f); // Dark Grey instead of Pitch Black
 static const ImVec4 COLOR_BG_TEAL = ImVec4(0.08f, 0.25f, 0.25f, 1.0f);  // Darker Teal for better text contrast
 static const ImVec4 COLOR_ACCENT = ImVec4(0.00f, 0.70f, 0.60f, 1.0f);   // Brighter Teal/Cyan for Accent
@@ -43,36 +42,31 @@ void MainWindow::render()
 
     ImGuiIO &io = ImGui::GetIO();
 
-    // Set up fullscreen window
     ImGui::SetNextWindowPos(ImVec2(0, 0));
     ImGui::SetNextWindowSize(io.DisplaySize);
 
     ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove |
                                    ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoBringToFrontOnFocus |
                                    ImGuiWindowFlags_NoScrollbar |
-                                   ImGuiWindowFlags_NoScrollWithMouse; // Fix mouse scrolling
+                                   ImGuiWindowFlags_NoScrollWithMouse;
 
-    ImGui::PushStyleColor(ImGuiCol_WindowBg, COLOR_BG_BLACK); // Main background black
+    ImGui::PushStyleColor(ImGuiCol_WindowBg, COLOR_BG_BLACK);
     ImGui::PushStyleColor(ImGuiCol_Text, COLOR_TEXT);
 
     if (ImGui::Begin("MainWindow", nullptr, windowFlags))
-    { // Begin MainWindow
-        // Tab bar at top
+    {
         renderTabBar();
 
         ImGui::Separator();
 
-        // Calculate layout sizes
         float availableWidth = ImGui::GetContentRegionAvail().x;
-        float availableHeight = ImGui::GetContentRegionAvail().y; // Use full remaining height
+        float availableHeight = ImGui::GetContentRegionAvail().y;
 
-        // Left Panel: Track List (~25%)
         float leftPanelWidth = availableWidth * 0.25f;
 
         // Right Panel: Art + Controls (~65%)
-        float rightPanelWidth = availableWidth - leftPanelWidth - 5.0f; // Subtract spacing
+        float rightPanelWidth = availableWidth - leftPanelWidth - 5.0f;
 
-        // --- Left Panel ---
         ImGui::PushStyleColor(ImGuiCol_ChildBg, COLOR_BG_TEAL);
         ImGui::BeginChild("LeftPanel", ImVec2(leftPanelWidth, availableHeight), true,
                           ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
@@ -99,13 +93,9 @@ void MainWindow::render()
 
         ImGui::SameLine();
 
-        // --- Right Panel ---
         ImGui::BeginGroup();
         {
             ImGui::PushStyleColor(ImGuiCol_TextDisabled, COLOR_TEXT_DIM);
-            // Bottom Controls Height
-            // NowPlayingView contains progress bar, slider, buttons, volume, metadata...
-            // It needs significant vertical space. Let's reserve ~200px for it, or use remaining height for Art.
             float controlsHeight = 100.0f;
             float artHeight = availableHeight - controlsHeight;
             float artWidth = rightPanelWidth;
@@ -120,22 +110,20 @@ void MainWindow::render()
             ImGui::EndChild();
 
             // 2. Playback Controls (Bottom Right)
-            ImGui::BeginChild("ControlsPanel", ImVec2(rightPanelWidth, controlsHeight), true); // Using frame
+            ImGui::BeginChild("ControlsPanel", ImVec2(rightPanelWidth, controlsHeight), true);
             renderPlaybackControls();
             ImGui::EndChild();
-            ImGui::PopStyleColor(); // Pop TextDisabled
+            ImGui::PopStyleColor();
         }
-        ImGui::EndGroup(); // End Right Panel Group
+        ImGui::EndGroup();
     }
     ImGui::End();
 
     ImGui::PopStyleColor(2);
 
-    // Render file browser if open
     if (fileBrowserView_)
         fileBrowserView_->render();
 
-    // Render View Popups (Root Level)
     if (currentScreen_ == Screen::LIBRARY && libraryView_)
         libraryView_->renderPopups();
     if (currentScreen_ == Screen::PLAYLIST && playlistView_)
@@ -317,7 +305,6 @@ void MainWindow::renderAlbumArt()
         auto track = playbackState_->getCurrentTrack();
         const auto &meta = track->getMetadata();
 
-        // --- LOGIC LOAD ẢNH (Đã tối ưu để giảm lag) ---
         if (currentTrackPath_ != track->getPath())
         {
             currentTrackPath_ = track->getPath();
@@ -349,13 +336,10 @@ void MainWindow::renderAlbumArt()
             }
         }
 
-        // --- RENDER ALBUM ART ---
-        // Tính toán vị trí căn giữa
         float albumSize = minDimension;
         float startX = (usableWidth - albumSize) / 2.0f;
         float startY = (usableHeight - albumSize) / 2.0f;
 
-        // Đặt con trỏ vẽ (Cộng thêm padding để tính từ mép cửa sổ vào)
         ImGui::SetCursorPos(ImVec2(padding.x + startX, padding.y + startY));
 
         if (albumArtTexture_)
@@ -384,7 +368,6 @@ void MainWindow::renderAlbumArt()
     }
     else
     {
-        // --- NO PLAYING ---
 
         ImGui::SetCursorPos(ImVec2(padding.x, padding.y));
 
@@ -429,5 +412,4 @@ void MainWindow::scrollToCurrentTrack()
 
 void MainWindow::handleInput()
 {
-    // Input handled through ImGui
 }

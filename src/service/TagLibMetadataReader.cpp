@@ -47,7 +47,6 @@ MediaMetadata TagLibMetadataReader::readMetadata(const std::string &filepath)
 
     TagLib::Tag *tag = file.tag();
 
-    // Read basic tags
     metadata.title = tag->title().to8Bit(true);
     metadata.artist = tag->artist().to8Bit(true);
     metadata.album = tag->album().to8Bit(true);
@@ -56,7 +55,6 @@ MediaMetadata TagLibMetadataReader::readMetadata(const std::string &filepath)
     metadata.track = tag->track();
     metadata.comment = tag->comment().to8Bit(true);
 
-    // Read audio properties
     if (file.audioProperties())
     {
         TagLib::AudioProperties *props = file.audioProperties();
@@ -66,11 +64,6 @@ MediaMetadata TagLibMetadataReader::readMetadata(const std::string &filepath)
         metadata.channels = props->channels();
     }
 
-    // Audio properties read above
-
-    // Codec already determined at start of function
-
-    // Extract album art
     metadata.hasAlbumArt = false;
 
     // Try MP3 (ID3v2)
