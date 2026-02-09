@@ -4,6 +4,8 @@
 #include <fstream>
 #include <gtest/gtest.h>
 
+namespace fs = std::filesystem;
+
 class LocalFileSystemTest : public ::testing::Test
 {
   protected:
@@ -135,4 +137,50 @@ TEST_F(LocalFileSystemTest, ErrorPaths)
 
     // scan exception
     EXPECT_TRUE(fsClient.scanDirectory("\0", {}).empty());
+}
+
+TEST_F(LocalFileSystemTest, PermissionDenied)
+{
+    std::string protectedDir = testDir + "/protected";
+    fs::create_directories(protectedDir);
+    std::ofstream(protectedDir + "/secret.mp3").close();
+
+    // Remove permissions
+    fs::permissions(protectedDir, fs::perms::none);
+
+    // browse should catch exception
+    auto results = fsClient.browse(protectedDir);
+    EXPECT_TRUE(results.empty());
+
+    // scan should catch exception
+    auto results2 = fsClient.scanDirectory(protectedDir, {".mp3"});
+    EXPECT_TRUE(results2.empty());
+
+    // Restore for cleanup (or TearDown will fail)
+    fs::permissions(protectedDir, fs::perms::owner_all);
+}
+
+TEST_F(LocalFileSystemTest, ScanDepthLimits)
+{
+    // Create deep structure: testDir/level1/level2/level3/file.mp3
+    std::string d1 = testDir + "/level1";
+    std::string d2 = d1 + "/level2";
+    std::string d3 = d2 + "/level3";
+    fs::create_directories(d3);
+    std::ofstream(d3 + "/file.mp3").close();
+
+    // 1. Depth 0 (non-recursive)
+    EXPECT_EQ(fsClient.scanDirectory(testDir, {".mp3"}, 0).size(), 1); // Only root file1.mp3
+
+    // 2. Depth 1 (root + level1 + subdir)
+    // subdir/file3.mp3 is at depth 1
+    EXPECT_EQ(fsClient.scanDirectory(testDir, {".mp3"}, 1).size(), 2); 
+
+    // 3. Depth 2
+    // level2 is at depth 2, but level3/file.mp3 is at depth 3
+    EXPECT_EQ(fsClient.scanDirectory(testDir, {".mp3"}, 2).size(), 2);
+
+    // 4. Depth 3
+    // level3/file.mp3 is at depth 3
+    EXPECT_EQ(fsClient.scanDirectory(testDir, {".mp3"}, 3).size(), 3); 
 }

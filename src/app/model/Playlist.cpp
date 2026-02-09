@@ -158,7 +158,7 @@ void from_json(const nlohmann::json &j, Playlist &p)
     if (j.contains("name"))
         p.name_ = j.at("name").get<std::string>();
     // Tracks handled in load() mostly, but if used for full deserialization:
-    if (j.contains("tracks"))
+    if (j.contains("tracks") && j.at("tracks").is_array())
     {
         p.tracks_.clear();
         for (const auto &item : j["tracks"])

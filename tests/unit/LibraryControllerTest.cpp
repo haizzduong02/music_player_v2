@@ -248,3 +248,26 @@ TEST_F(LibraryControllerTest, GetAllTrackPaths)
     EXPECT_EQ(paths.size(), 1);
     EXPECT_TRUE(paths.count("/t1.mp3"));
 }
+TEST_F(LibraryControllerTest, AddMediaFilesAsyncLargeBatch)
+{
+    // Need more than 20 files to hit the batch trigger
+    std::vector<std::string> paths;
+    for (int i = 0; i < 25; ++i) {
+        paths.push_back("/async" + std::to_string(i) + ".mp3");
+    }
+    
+    // We can use WillRepeatedly for metadata
+    EXPECT_CALL(*mockMeta, readMetadata(_)).WillRepeatedly(Return(MediaMetadata()));
+    
+    controller->addMediaFilesAsync(paths);
+    
+    // Poll for completion (timeout 2s)
+    int retries = 0;
+    while(library->size() < 25 && retries < 200)
+    {
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+        retries++;
+    }
+    
+    EXPECT_EQ(library->size(), 25);
+}

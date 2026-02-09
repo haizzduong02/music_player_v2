@@ -108,16 +108,16 @@ void FileBrowserView::renderContent()
         float navBtnWidth = (ImGui::GetContentRegionAvail().x - 10.0f) / 3.0f;
 
         if (ImGui::Button("Up", ImVec2(navBtnWidth, 0)))
-            navigateUp();
+            onNavigateUpClicked();
         ImGui::SameLine();
         if (ImGui::Button("Refresh", ImVec2(navBtnWidth, 0)))
-            refreshCurrentDirectory();
+            onRefreshClicked();
         ImGui::SameLine();
 
         const char *homeEnv = std::getenv("HOME");
         std::string homePath = homeEnv ? std::string(homeEnv) : "/home";
         if (ImGui::Button("Home", ImVec2(navBtnWidth, 0)))
-            navigateTo(homePath);
+            onHomeClicked();
 
         ImGui::Separator();
         ImGui::Text("Folders (%d tracks)", currentTrackCount_);
@@ -133,7 +133,7 @@ void FileBrowserView::renderContent()
             {
                 if (ImGui::IsMouseDoubleClicked(0))
                 {
-                    navigateTo(fileInfo.path);
+                    onFolderDoubleClicked(fileInfo.path);
                 }
             }
         }
@@ -167,14 +167,13 @@ void FileBrowserView::renderContent()
 
             if (ImGui::Button(addBtnText.c_str()))
             {
-                processFiles(fileSelector_.getSelectedPaths());
+                onAddSelectedClicked();
             }
 
             ImGui::SameLine();
             if (ImGui::Button("Add Random 20"))
             {
-                fileSelector_.selectRandom(20);
-                processFiles(fileSelector_.getSelectedPaths());
+                onAddRandomClicked();
             }
 
             ImGui::SameLine();
@@ -338,11 +337,41 @@ void FileBrowserView::refreshCurrentDirectory()
 
 // Pagination methods removed - delegated to PagedFileSelector
 
+void FileBrowserView::onNavigateUpClicked()
+{
+    navigateUp();
+}
+
+void FileBrowserView::onRefreshClicked()
+{
+    refreshCurrentDirectory();
+}
+
+void FileBrowserView::onHomeClicked()
+{
+    const char *homeEnv = std::getenv("HOME");
+    std::string homePath = homeEnv ? std::string(homeEnv) : "/home";
+    navigateTo(homePath);
+}
+
+void FileBrowserView::onFolderDoubleClicked(const std::string &path)
+{
+    navigateTo(path);
+}
+
+void FileBrowserView::onAddSelectedClicked()
+{
+    processFiles(fileSelector_.getSelectedPaths());
+}
+
+void FileBrowserView::onAddRandomClicked()
+{
+    fileSelector_.selectRandom(20);
+    processFiles(fileSelector_.getSelectedPaths());
+}
+
 void FileBrowserView::processFiles(const std::vector<std::string> &paths)
 {
-    if (paths.empty())
-        return;
-
     if (paths.empty())
         return;
 

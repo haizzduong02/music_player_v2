@@ -137,6 +137,13 @@ class FileBrowserView : public BaseView
     // int itemsPerPage_ = 15;
     // int totalPages_ = 1;
     // char pageInputBuffer_[16] = "1";
+    // Event handlers for testing
+    void onNavigateUpClicked();
+    void onRefreshClicked();
+    void onHomeClicked();
+    void onFolderDoubleClicked(const std::string &path);
+    void onAddSelectedClicked();
+    void onAddRandomClicked();
 };
 
 #endif // FILE_BROWSER_VIEW_H

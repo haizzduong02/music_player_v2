@@ -126,6 +126,11 @@ class PagedFileSelector
     void updatePagination();
     void renderPaginationControls();
     void renderTable();
+
+    // Event Handlers for testing
+    void onPrevPageClicked();
+    void onNextPageClicked();
+    void onGoToPageClicked();
 };
 
 #endif // PAGED_FILE_SELECTOR_H

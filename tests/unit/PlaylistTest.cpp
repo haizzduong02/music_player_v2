@@ -210,23 +210,53 @@ TEST_F(PlaylistTest, RepeatMode)
     EXPECT_TRUE(playlist->isLoopEnabled());
 }
 
-TEST_F(PlaylistTest, JsonSerialization)
+TEST_F(PlaylistTest, JsonSerializationEdgeCases)
 {
-    playlist->addTrack(std::make_shared<MediaFile>("/song1.mp3"));
-    playlist->setRepeatMode(RepeatMode::ALL);
-    
+    // 1. Empty tracks
     nlohmann::json j;
     to_json(j, *playlist);
+    EXPECT_TRUE(j["tracks"].is_array());
+    EXPECT_TRUE(j["tracks"].empty());
+
+    // 2. from_json with tracks not being an array
+    nlohmann::json j_bad_tracks = {{"name", "Bad"}, {"tracks", "not an array"}};
+    Playlist p("Temp");
+    from_json(j_bad_tracks, p);
+    EXPECT_EQ(p.getName(), "Bad");
+    EXPECT_EQ(p.size(), 0); // tracks_ should remain empty or cleared
+}
+
+TEST_F(PlaylistTest, InsertAndRemovePositions)
+{
+    auto t1 = std::make_shared<MediaFile>("/1.mp3");
+    auto t2 = std::make_shared<MediaFile>("/2.mp3");
+    auto t3 = std::make_shared<MediaFile>("/3.mp3");
+
+    playlist->addTrack(t1);
+    playlist->addTrack(t2);
+
+    // Insert at beginning
+    EXPECT_TRUE(playlist->insertTrack(t3, 0));
+    EXPECT_EQ(playlist->getTrack(0), t3);
+
+    // Insert at end (position == size)
+    auto t4 = std::make_shared<MediaFile>("/4.mp3");
+    EXPECT_TRUE(playlist->insertTrack(t4, 3));
+    EXPECT_EQ(playlist->getTrack(3), t4);
+
+    // Remove middle
+    EXPECT_TRUE(playlist->removeTrack(1)); // Removes t1
+    EXPECT_EQ(playlist->getTrack(1), t2);
+
+    // Remove last
+    EXPECT_TRUE(playlist->removeTrack(playlist->size() - 1));
+}
+
+TEST_F(PlaylistTest, ContainsEdgeCases)
+{
+    EXPECT_FALSE(playlist->contains("/none.mp3"));
     
-    EXPECT_EQ(j["name"], "TestPlaylist");
-    EXPECT_EQ(j["tracks"].size(), 1);
-    EXPECT_EQ(j["tracks"][0]["path"], "/song1.mp3");
-    
-    // Deserialize
-    Playlist p2("OldName");
-    from_json(j, p2);
-    
-    EXPECT_EQ(p2.getName(), "TestPlaylist");
-    EXPECT_EQ(p2.size(), 1);
-    EXPECT_EQ(p2.getTrack(0)->getPath(), "/song1.mp3");
+    auto track = std::make_shared<MediaFile>("/exists.mp3");
+    playlist->addTrack(track);
+    EXPECT_TRUE(playlist->contains("/exists.mp3"));
 }

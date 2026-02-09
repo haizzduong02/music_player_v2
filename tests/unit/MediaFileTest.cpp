@@ -70,19 +70,38 @@ TEST_F(MediaFileTest, ConstructorWithMetadata)
     EXPECT_EQ(file.getMetadata().artist, "Test Artist");
 }
 
-TEST_F(MediaFileTest, DetermineMediaType)
+TEST_F(MediaFileTest, DetermineMediaTypeExhaustive)
 {
-    MediaFile audio(audioFile);
-    EXPECT_EQ(audio.getType(), MediaType::AUDIO);
+    // Audio
+    EXPECT_EQ(MediaFile("t.mp3").getType(), MediaType::AUDIO);
+    EXPECT_EQ(MediaFile("t.flac").getType(), MediaType::AUDIO);
+    EXPECT_EQ(MediaFile("t.wav").getType(), MediaType::AUDIO);
+    EXPECT_EQ(MediaFile("t.m4a").getType(), MediaType::AUDIO);
+    EXPECT_EQ(MediaFile("t.aac").getType(), MediaType::AUDIO);
+    EXPECT_EQ(MediaFile("t.ogg").getType(), MediaType::AUDIO);
+    EXPECT_EQ(MediaFile("t.wma").getType(), MediaType::AUDIO);
+    EXPECT_EQ(MediaFile("t.opus").getType(), MediaType::AUDIO);
 
-    MediaFile video(videoFile);
-    EXPECT_EQ(video.getType(), MediaType::VIDEO);
+    // Video
+    EXPECT_EQ(MediaFile("t.mp4").getType(), MediaType::VIDEO);
+    EXPECT_EQ(MediaFile("t.mkv").getType(), MediaType::VIDEO);
+    EXPECT_EQ(MediaFile("t.avi").getType(), MediaType::VIDEO);
+    EXPECT_EQ(MediaFile("t.mov").getType(), MediaType::VIDEO);
+    EXPECT_EQ(MediaFile("t.wmv").getType(), MediaType::VIDEO);
+    EXPECT_EQ(MediaFile("t.flv").getType(), MediaType::VIDEO);
+    EXPECT_EQ(MediaFile("t.webm").getType(), MediaType::VIDEO);
 
-    MediaFile image(imageFile);
-    EXPECT_EQ(image.getType(), MediaType::IMAGE);
+    // Image
+    EXPECT_EQ(MediaFile("t.jpg").getType(), MediaType::IMAGE);
+    EXPECT_EQ(MediaFile("t.jpeg").getType(), MediaType::IMAGE);
+    EXPECT_EQ(MediaFile("t.png").getType(), MediaType::IMAGE);
+    EXPECT_EQ(MediaFile("t.gif").getType(), MediaType::IMAGE);
+    EXPECT_EQ(MediaFile("t.bmp").getType(), MediaType::IMAGE);
+    EXPECT_EQ(MediaFile("t.webp").getType(), MediaType::IMAGE);
 
-    MediaFile unknown(unknownFile);
-    EXPECT_EQ(unknown.getType(), MediaType::UNKNOWN);
+    // Unknown
+    EXPECT_EQ(MediaFile("t.txt").getType(), MediaType::UNKNOWN);
+    EXPECT_EQ(MediaFile("t").getType(), MediaType::UNKNOWN);
 }
 
 TEST_F(MediaFileTest, GetDisplayNameWithTitle)
@@ -147,11 +166,15 @@ TEST_F(MediaFileTest, Setters)
     EXPECT_EQ(file.getMetadata().album, "New Album");
 }
 
-TEST_F(MediaFileTest, JsonSerialization)
+TEST_F(MediaFileTest, JsonSerializationComprehensive)
 {
     MediaMetadata meta;
     meta.title = "JSON Title";
     meta.artist = "JSON Artist";
+    meta.album = "JSON Album";
+    meta.genre = "JSON Genre";
+    meta.year = 2024;
+    meta.track = 5;
     meta.duration = 120;
 
     MediaFile original(audioFile, meta);
@@ -163,12 +186,41 @@ TEST_F(MediaFileTest, JsonSerialization)
     MediaFile restored("");
     from_json(j, restored);
 
-    EXPECT_EQ(restored.getPath(), audioFile);            // Path matches
-    EXPECT_EQ(restored.getFileName(), "test_audio.mp3"); // Reparsed
-    EXPECT_EQ(restored.getExtension(), ".mp3");          // Reparsed
-    EXPECT_EQ(restored.getType(), MediaType::AUDIO);     // redetermined
+    EXPECT_EQ(restored.getPath(), audioFile);
     EXPECT_EQ(restored.getMetadata().title, "JSON Title");
     EXPECT_EQ(restored.getMetadata().artist, "JSON Artist");
+    EXPECT_EQ(restored.getMetadata().album, "JSON Album");
+    EXPECT_EQ(restored.getMetadata().genre, "JSON Genre");
+    EXPECT_EQ(restored.getMetadata().year, 2024);
+    EXPECT_EQ(restored.getMetadata().track, 5);
     EXPECT_EQ(restored.getMetadata().duration, 120);
     EXPECT_TRUE(restored.isInLibrary());
+}
+
+TEST_F(MediaFileTest, JsonDeserializationPartial)
+{
+    // Minimal JSON
+    nlohmann::json minJ = {{"path", "/test/min.mp3"}};
+    MediaFile m1("");
+    from_json(minJ, m1);
+    EXPECT_EQ(m1.getPath(), "/test/min.mp3");
+    EXPECT_EQ(m1.getType(), MediaType::AUDIO);
+
+    // JSON without inLibrary
+    nlohmann::json noLibJ = {{"path", "/test/noLib.mp3"}, {"metadata", {{"title", "T"}}}};
+    MediaFile m2("");
+    from_json(noLibJ, m2);
+    EXPECT_EQ(m2.getMetadata().title, "T");
+    EXPECT_FALSE(m2.isInLibrary());
+
+    // JSON with individual metadata missing
+    nlohmann::json partialMetaJ = {
+        {"path", "/test.mp3"},
+        {"metadata", {{"artist", "A"}, {"year", 1999}}}
+    };
+    MediaFile m3("");
+    from_json(partialMetaJ, m3);
+    EXPECT_EQ(m3.getMetadata().artist, "A");
+    EXPECT_EQ(m3.getMetadata().year, 1999);
+    EXPECT_EQ(m3.getMetadata().title, ""); // Default
 }

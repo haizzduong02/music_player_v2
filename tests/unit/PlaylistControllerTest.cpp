@@ -294,3 +294,22 @@ TEST_F(PlaylistControllerTest, AddToPlaylistAndLibraryFailureBranch)
     // Using a path that Factory will return null for (e.g. empty extension)
     EXPECT_FALSE(controller->addToPlaylistAndLibrary("Mix", "/invalid_file"));
 }
+TEST_F(PlaylistControllerTest, RemoveFromPlaylistByPathFailures)
+{
+    // 1. Non-existent playlist
+    EXPECT_FALSE(controller->removeFromPlaylistByPath("Ghost", "/anything.mp3"));
+    
+    // 2. Playlist exists but track does not (already hit by removeFromPlaylistByPath sucessfully? let's be sure)
+    controller->createPlaylist("List");
+    EXPECT_FALSE(controller->removeFromPlaylistByPath("List", "/nonexistent.mp3"));
+}
+
+TEST_F(PlaylistControllerTest, ShuffleFailures)
+{
+    EXPECT_FALSE(controller->shufflePlaylist("Ghost"));
+}
+
+TEST_F(PlaylistControllerTest, LoopFailures)
+{
+    EXPECT_FALSE(controller->setPlaylistLoop("Ghost", true));
+}

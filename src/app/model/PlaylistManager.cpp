@@ -182,6 +182,10 @@ bool PlaylistManager::loadAll()
                 migrationNeeded = true;
             }
         }
+        else
+        {
+            migrationNeeded = true;
+        }
     }
     else
     {

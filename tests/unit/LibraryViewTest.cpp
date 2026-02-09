@@ -2,9 +2,11 @@
 #include "app/controller/LibraryController.h"
 #include "app/controller/PlaybackController.h"
 #include "app/model/Library.h"
+#include "app/view/FileBrowserView.h"
 #include "app/model/PlaylistManager.h"
 #include "imgui.h"
 #include "tests/mocks/MockPersistence.h"
+#include "tests/mocks/MockFileSystem.h"
 #include "tests/mocks/MockPlaybackEngine.h"
 #include "utils/Config.h"
 #include <gtest/gtest.h>
@@ -223,10 +225,22 @@ TEST_F(LibraryViewTest, RenderWithPopups)
     endFrame();
 }
 
-TEST_F(LibraryViewTest, HandleInput)
+TEST_F(LibraryViewTest, AddFilesButtonWithBrowser)
 {
-    // Hits LibraryView.cpp line 82
-    view->handleInput();
+    // Mock FileSystem for the browser
+    auto mockFS = std::make_unique<NiceMock<MockFileSystem>>();
+    ON_CALL(*mockFS, exists(_)).WillByDefault(Return(true));
+    ON_CALL(*mockFS, isDirectory(_)).WillByDefault(Return(true));
+    ON_CALL(*mockFS, browse(_)).WillByDefault(Return(std::vector<FileInfo>{}));
+    ON_CALL(*mockFS, getMediaFiles(_, _, _)).WillByDefault(Return(std::vector<std::string>{}));
+
+    FileBrowserView browser(mockFS.get(), libraryController.get());
+    view->setFileBrowserView(&browser);
+    
+    startFrame();
+    simulateClick(ImVec2(100, 50)); // Click "Add Files"
+    view->render();
+    endFrame();
 }
 
 TEST_F(LibraryViewTest, RenderWithEditMode)
@@ -262,6 +276,41 @@ TEST_F(LibraryViewTest, RenderEmptyLibrary)
     view->update(library.get());
 
     startFrame();
+    view->render();
+    endFrame();
+}
+TEST_F(LibraryViewTest, NullLibrary)
+{
+    LibraryView nullView(nullptr, nullptr, nullptr, nullptr);
+    startFrame();
+    nullView.render();
+    endFrame();
+    // Destructor hits if(library_)
+}
+
+TEST_F(LibraryViewTest, AddFilesButton)
+{
+    // Mock FileBrowserView
+    // LibraryView expects a FileBrowserView pointer
+    // We can't easily mock it without a header, but we can hit the button click
+    startFrame();
+    // Simulate clicking "Add Files"
+    // The button is at the top.
+    simulateClick(ImVec2(50, 50)); 
+    view->render();
+    endFrame();
+}
+
+TEST_F(LibraryViewTest, SearchInputInteraction)
+{
+    startFrame();
+    // Simulate search input
+    ImGui::SetNextItemAllowOverlap();
+    static char buf[128] = "test search";
+    ImGui::InputText("Search", buf, sizeof(buf)); 
+    
+    // The view's search bar will also be rendered and might capture input if we are clever,
+    // but simply hitting the renderSearchBar logic is enough for coverage.
     view->render();
     endFrame();
 }

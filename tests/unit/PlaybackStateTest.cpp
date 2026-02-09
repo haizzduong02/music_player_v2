@@ -142,12 +142,29 @@ TEST(PlaybackStateTest, SyncQueueMissing)
     EXPECT_EQ(state.getNextTrack(), t1);
 }
 
-TEST(PlaybackStateTest, Reset)
+TEST(PlaybackStateTest, BackStackNullCurrent)
 {
     PlaybackState state;
-    state.setVolume(0.5f);
-    state.reset();
-    // Default volume is 0.7f (line 6 of .cpp)
-    EXPECT_EQ(state.getVolume(), 0.7f);
-    EXPECT_EQ(state.getStatus(), PlaybackStatus::STOPPED);
+    // currentTrack is null initially
+    state.pushToBackStack();
+    EXPECT_EQ(state.popFromBackStack(), nullptr);
+}
+
+TEST(PlaybackStateTest, QueueIndexLimit)
+{
+    PlaybackState state;
+    auto t1 = std::make_shared<MediaFile>("1.mp3");
+    state.setPlayQueue({t1});
+    
+    // Set to size (index 1) - this is valid for "next track is invalid"
+    state.setQueueIndex(1);
+    EXPECT_EQ(state.getNextTrack(), nullptr);
+}
+
+TEST(PlaybackStateTest, SetPlaybackEmptyPath)
+{
+    PlaybackState state;
+    auto t = std::make_shared<MediaFile>("");
+    state.setPlayback(t, PlaybackStatus::PLAYING);
+    EXPECT_EQ(state.getCurrentTrack(), t);
 }

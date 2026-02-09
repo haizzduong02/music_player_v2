@@ -133,3 +133,28 @@ TEST_F(JsonPersistenceTest, ExceptionPaths)
     // Exception in saveToFile (via ensureDirectoryExists)
     EXPECT_FALSE(persistence.saveToFile(fileAsDir + "/deep/file.json", "{}"));
 }
+
+TEST_F(JsonPersistenceTest, LoadFailures)
+{
+    // 1. File does not exist
+    std::string loaded;
+    EXPECT_FALSE(persistence.loadFromFile("/nonexistent/path", loaded));
+
+    // 2. Permission denied (hard to test without root, but we can try making it read-only)
+    std::string unreadable = testDir + "/unreadable.json";
+    {
+        std::ofstream ofs(unreadable);
+        ofs << "{}";
+    }
+    fs::permissions(unreadable, fs::perms::none);
+    // On some systems/environments as root or same user this might still open
+    // but typically it fails or throws. 
+    // lcov will tell us if we hit it.
+    EXPECT_FALSE(persistence.loadFromFile(unreadable, loaded));
+}
+
+TEST_F(JsonPersistenceTest, DeserializeNull)
+{
+    EXPECT_FALSE(persistence.deserialize("{}", nullptr));
+    EXPECT_FALSE(persistence.deserialize("", (void*)1));
+}

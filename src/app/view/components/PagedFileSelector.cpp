@@ -149,6 +149,35 @@ void PagedFileSelector::renderPagination()
     renderPaginationControls();
 }
 
+void PagedFileSelector::onPrevPageClicked()
+{
+    if (currentPage_ > 0)
+    {
+        currentPage_--;
+        snprintf(pageInputBuffer_, sizeof(pageInputBuffer_), "%d", currentPage_ + 1);
+    }
+}
+
+void PagedFileSelector::onNextPageClicked()
+{
+    if (currentPage_ < totalPages_ - 1)
+    {
+        currentPage_++;
+        snprintf(pageInputBuffer_, sizeof(pageInputBuffer_), "%d", currentPage_ + 1);
+    }
+}
+
+void PagedFileSelector::onGoToPageClicked()
+{
+    int page = std::atoi(pageInputBuffer_);
+    if (page < 1)
+        page = 1;
+    if (page > totalPages_)
+        page = totalPages_;
+    currentPage_ = page - 1;
+    snprintf(pageInputBuffer_, sizeof(pageInputBuffer_), "%d", currentPage_ + 1);
+}
+
 void PagedFileSelector::renderPaginationControls()
 {
     if (totalPages_ <= 1)
@@ -162,13 +191,8 @@ void PagedFileSelector::renderPaginationControls()
 
     if (ImGui::Button("Prev", ImVec2(buttonWidth, 0)))
     {
-        if (currentPage_ > 0)
-        {
-            currentPage_--;
-            snprintf(pageInputBuffer_, sizeof(pageInputBuffer_), "%d", currentPage_ + 1);
-        }
+        onPrevPageClicked();
     }
-
     ImGui::SameLine();
 
     // Page Input
@@ -176,13 +200,7 @@ void PagedFileSelector::renderPaginationControls()
     if (ImGui::InputText("##PageInputSelector", pageInputBuffer_, sizeof(pageInputBuffer_),
                          ImGuiInputTextFlags_CharsDecimal | ImGuiInputTextFlags_EnterReturnsTrue))
     {
-        int page = std::atoi(pageInputBuffer_);
-        if (page < 1)
-            page = 1;
-        if (page > totalPages_)
-            page = totalPages_;
-        currentPage_ = page - 1;
-        snprintf(pageInputBuffer_, sizeof(pageInputBuffer_), "%d", currentPage_ + 1);
+        onGoToPageClicked();
     }
     ImGui::PopItemWidth();
 
@@ -190,26 +208,16 @@ void PagedFileSelector::renderPaginationControls()
     ImGui::Text("of %d", totalPages_);
 
     ImGui::SameLine();
-    if (ImGui::Button("Go", ImVec2(buttonWidth, 0)))
+    if (ImGui::Button("Go", ImVec2(40.0f, 0)))
     {
-        int page = std::atoi(pageInputBuffer_);
-        if (page < 1)
-            page = 1;
-        if (page > totalPages_)
-            page = totalPages_;
-        currentPage_ = page - 1;
-        snprintf(pageInputBuffer_, sizeof(pageInputBuffer_), "%d", currentPage_ + 1);
+        onGoToPageClicked();
     }
 
     ImGui::SameLine();
 
     if (ImGui::Button("Next", ImVec2(buttonWidth, 0)))
     {
-        if (currentPage_ < totalPages_ - 1)
-        {
-            currentPage_++;
-            snprintf(pageInputBuffer_, sizeof(pageInputBuffer_), "%d", currentPage_ + 1);
-        }
+        onNextPageClicked();
     }
 }
 

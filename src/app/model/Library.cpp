@@ -69,6 +69,9 @@ bool Library::load()
 
         for (const auto &item : libraryJson)
         {
+            if (!item.contains("path"))
+                continue;
+
             auto file = std::make_shared<MediaFile>("");
             item.get_to(*file); // Uses MediaFile friend
 

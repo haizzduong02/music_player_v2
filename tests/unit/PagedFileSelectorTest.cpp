@@ -31,13 +31,31 @@ class PagedFileSelectorTest : public ::testing::Test
     void startFrame()
     {
         ImGui::NewFrame();
-        ImGui::Begin("Selector Window");
+        ImGui::SetNextWindowPos(ImVec2(0,0));
+        ImGui::SetNextWindowSize(ImVec2(1024, 768));
+        ImGui::Begin("Selector Window", nullptr, ImGuiWindowFlags_NoDecoration);
     }
 
     void endFrame()
     {
         ImGui::End();
         ImGui::Render();
+    }
+
+    void simulateClick(ImVec2 pos)
+    {
+        ImGuiIO &io = ImGui::GetIO();
+        io.MousePos = pos;
+        io.MouseDown[0] = true;
+        io.MouseClicked[0] = true;
+    }
+
+    void simulateDrag(ImVec2 start, ImVec2 end)
+    {
+        ImGuiIO &io = ImGui::GetIO();
+        io.MousePos = start;
+        io.MouseDown[0] = true;
+        io.MousePos = end;
     }
 
     bool isSelected(const std::string& path) const
@@ -63,6 +81,19 @@ class PagedFileSelectorTest : public ::testing::Test
     {
         selector.currentPage_ = page;
     }
+
+    void setPageInputBuffer(const std::string& text)
+    {
+        snprintf(selector.pageInputBuffer_, sizeof(selector.pageInputBuffer_), "%s", text.c_str());
+    }
+
+    void renderPaginationHelper() { selector.renderPagination(); }
+    void renderListHelper() { selector.renderList(); }
+    void updatePaginationHelper() { selector.updatePagination(); }
+    
+    void onPrevPageClickedHelper() { selector.onPrevPageClicked(); }
+    void onNextPageClickedHelper() { selector.onNextPageClicked(); }
+    void onGoToPageClickedHelper() { selector.onGoToPageClicked(); }
 };
 
 TEST_F(PagedFileSelectorTest, InitialState)
@@ -161,6 +192,58 @@ TEST_F(PagedFileSelectorTest, RenderMethods)
     selector.renderActions();
     selector.renderList();
     selector.renderPagination();
+    endFrame();
+}
+
+TEST_F(PagedFileSelectorTest, RenderPaginationInteractions)
+{
+    std::vector<FileInfo> items;
+    for (int i = 0; i < 30; i++)
+        items.push_back({"/p/" + std::to_string(i), "f", "mp3", 0, false});
+    
+    selector.setItemsPerPage(10);
+    selector.setItems(items); // 3 pages
+    selector.setListHeight(400); // Shorter list for higher pagination
+
+    // 1. Manually hit branches by calling handlers directly
+    onNextPageClickedHelper();
+    EXPECT_EQ(getCurrentPage(), 1);
+    
+    onPrevPageClickedHelper();
+    EXPECT_EQ(getCurrentPage(), 0);
+    
+    setPageInputBuffer("3");
+    onGoToPageClickedHelper();
+    EXPECT_EQ(getCurrentPage(), 2);
+}
+
+TEST_F(PagedFileSelectorTest, RenderPaginationEdgeCasesDirect)
+{
+    std::vector<FileInfo> items(30, {"/p", "f", "mp3", 0, false});
+    selector.setItems(items);
+    
+    // Hit Go with valid/invalid
+    setPageInputBuffer("100"); // Too high
+    onGoToPageClickedHelper();
+    EXPECT_EQ(getCurrentPage(), 1); // 30 items / 15 per page = 2 pages (0, 1)
+
+    setPageInputBuffer("0"); // Too low
+    onGoToPageClickedHelper();
+    EXPECT_EQ(getCurrentPage(), 0);
+}
+
+TEST_F(PagedFileSelectorTest, RenderWithDisabledItems)
+{
+    std::vector<FileInfo> items;
+    items.push_back({"/p/disabled", "disabled", "mp3", 0, false});
+    selector.setItems(items);
+    
+    std::set<std::string> disabled;
+    disabled.insert("/p/disabled");
+    selector.setDisabledItems(disabled);
+
+    startFrame();
+    selector.renderList(); // Hits isDisabled logic (line 120-128)
     endFrame();
 }
 

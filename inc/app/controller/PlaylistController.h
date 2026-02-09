@@ -30,6 +30,7 @@ class PlaylistController
      * @param metadataReader Metadata reader for new tracks
      */
     PlaylistController(PlaylistManager *playlistManager, Library *library, IMetadataReader *metadataReader);
+    virtual ~PlaylistController() = default;
 
     /**
      * @brief Create a new playlist
@@ -68,7 +69,7 @@ class PlaylistController
      * @param filepath Track to add
      * @return true if added successfully
      */
-    bool addToPlaylistAndLibrary(const std::string &playlistName, const std::string &filepath);
+    virtual bool addToPlaylistAndLibrary(const std::string &playlistName, const std::string &filepath);
 
     /**
      * @brief Remove track from playlist

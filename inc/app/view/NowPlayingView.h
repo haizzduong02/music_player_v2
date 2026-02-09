@@ -82,6 +82,13 @@ class NowPlayingView : public BaseView
      * @return Formatted string (MM:SS)
      */
     std::string formatTime(double seconds) const;
+
+    // Event Handlers for testing
+    void onPlayClicked();
+    void onPrevClicked();
+    void onNextClicked();
+    void onRepeatClicked();
+    void onFavoriteClicked(bool currentlyFavorite);
 };
 
 #endif // NOW_PLAYING_VIEW_H

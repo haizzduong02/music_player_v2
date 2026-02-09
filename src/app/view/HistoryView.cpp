@@ -32,8 +32,11 @@ HistoryView::~HistoryView()
 
 void HistoryView::render()
 {
-    // Embedded render: no Begin/End
+    if (!history_)
+        return;
 
+    // Embedded render: no Begin/End
+ 
     auto historyTracks = history_->getAll();
 
     ImGui::Text("Playback History (%zu tracks)", historyTracks.size());

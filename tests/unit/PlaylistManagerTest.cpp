@@ -125,3 +125,71 @@ TEST_F(PlaylistManagerTest, LoadEmptyNewFormat)
     PlaylistManager pm(mockPersist.get());
     EXPECT_TRUE(pm.loadAll());
 }
+TEST_F(PlaylistManagerTest, RenameNonExistent)
+{
+    EXPECT_CALL(*mockPersist, loadFromFile(_, _)).WillRepeatedly(Return(false));
+    PlaylistManager pm(mockPersist.get());
+    EXPECT_FALSE(pm.renamePlaylist("NonExistent", "NewName"));
+}
+
+TEST_F(PlaylistManagerTest, DeleteNonExistent)
+{
+    EXPECT_CALL(*mockPersist, loadFromFile(_, _)).WillRepeatedly(Return(false));
+    PlaylistManager pm(mockPersist.get());
+    EXPECT_FALSE(pm.deletePlaylist("NonExistent"));
+}
+
+TEST_F(PlaylistManagerTest, SaveFailures)
+{
+    // 1. No persistence
+    PlaylistManager pmNull(nullptr);
+    EXPECT_FALSE(pmNull.saveAll());
+
+    // 2. Save to file fails
+    EXPECT_CALL(*mockPersist, loadFromFile(_, _)).WillRepeatedly(Return(false));
+    EXPECT_CALL(*mockPersist, saveToFile(_, _)).WillOnce(Return(false));
+    PlaylistManager pm(mockPersist.get());
+    EXPECT_FALSE(pm.saveAll());
+}
+
+TEST_F(PlaylistManagerTest, LoadFailuresFileNotFoundUnique)
+{
+    using ::testing::NiceMock;
+    NiceMock<MockPersistence> localMock;
+    
+    ON_CALL(localMock, fileExists(_)).WillByDefault(Return(true));
+    ON_CALL(localMock, loadFromFile(_, _)).WillByDefault(Return(false));
+    ON_CALL(localMock, saveToFile(_, _)).WillByDefault(Return(true));
+    
+    PlaylistManager pm(&localMock);
+    EXPECT_TRUE(pm.loadAll());
+}
+
+TEST_F(PlaylistManagerTest, LoadFailuresParseError)
+{
+    using ::testing::StrEq;
+    ON_CALL(*mockPersist, fileExists(_)).WillByDefault(Return(false));
+    ON_CALL(*mockPersist, fileExists(StrEq("data/playlists.json"))).WillByDefault(Return(true));
+    ON_CALL(*mockPersist, loadFromFile(StrEq("data/playlists.json"), _))
+        .WillByDefault(::testing::DoAll(::testing::SetArgReferee<1>("invalid json"), Return(true)));
+    ON_CALL(*mockPersist, saveToFile(_, _)).WillByDefault(Return(true));
+
+    PlaylistManager pm(mockPersist.get());
+    EXPECT_TRUE(pm.loadAll());
+}
+
+TEST_F(PlaylistManagerTest, MigrationEdgeCases)
+{
+    // Legacy file exists but contains invalid tracks field (not array)
+    EXPECT_CALL(*mockPersist, fileExists("data/playlists.json")).WillRepeatedly(Return(false));
+    EXPECT_CALL(*mockPersist, fileExists("data/playlist_Now Playing.json")).WillOnce(Return(true));
+    EXPECT_CALL(*mockPersist, loadFromFile("data/playlist_Now Playing.json", _))
+        .WillOnce(::testing::DoAll(::testing::SetArgReferee<1>("{\"tracks\": \"not an array\"}"), Return(true)));
+    
+    EXPECT_CALL(*mockPersist, fileExists("data/playlist_Favorites.json")).WillOnce(Return(false));
+    EXPECT_CALL(*mockPersist, deleteFile("data/playlist_Now Playing.json")).WillOnce(Return(true));
+    EXPECT_CALL(*mockPersist, saveToFile(_, _)).WillOnce(Return(true));
+
+    PlaylistManager pm(mockPersist.get());
+    EXPECT_TRUE(pm.loadAll());
+}

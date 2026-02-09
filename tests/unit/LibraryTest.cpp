@@ -269,12 +269,64 @@ TEST_F(LibraryTest, AddMediaBatch)
     EXPECT_EQ(lib.size(), 3);
 }
 
-TEST_F(LibraryTest, GetPathIndex)
+TEST_F(LibraryTest, AddMediaBatchEdgeCases)
+{
+    Library lib(nullptr);
+    // 1. Empty batch
+    EXPECT_EQ(lib.addMediaBatch({}), 0);
+
+    // 2. Batch with nulls
+    std::vector<std::shared_ptr<MediaFile>> batch = {nullptr, std::make_shared<MediaFile>("/valid.mp3")};
+    EXPECT_EQ(lib.addMediaBatch(batch), 1);
+}
+
+TEST_F(LibraryTest, SearchWithCaseVariation)
+{
+    Library lib(nullptr);
+    MediaMetadata meta;
+    meta.title = "Mixed CASE Title";
+    lib.addMedia(std::make_shared<MediaFile>("/case.mp3", meta));
+
+    EXPECT_EQ(lib.search("mixed", {"title"}).size(), 1);
+    EXPECT_EQ(lib.search("CASE", {"title"}).size(), 1);
+    EXPECT_EQ(lib.search("mIXed caSE", {"title"}).size(), 1);
+}
+
+TEST_F(LibraryTest, SearchMatchesVariousFields)
+{
+    Library lib(nullptr);
+    MediaMetadata meta;
+    meta.title = "T"; meta.artist = "A"; meta.album = "Al"; meta.genre = "G";
+    lib.addMedia(std::make_shared<MediaFile>("/all.mp3", meta));
+
+    EXPECT_EQ(lib.search("T", {"title"}).size(), 1);
+    EXPECT_EQ(lib.search("A", {"artist"}).size(), 1);
+    EXPECT_EQ(lib.search("Al", {"album"}).size(), 1);
+    EXPECT_EQ(lib.search("G", {"genre"}).size(), 1);
+}
+
+TEST_F(LibraryTest, GetPathIndexExhaustive)
 {
     Library lib(nullptr);
     lib.addMedia(std::make_shared<MediaFile>("/p1.mp3"));
-    
+    lib.addMedia(std::make_shared<MediaFile>("/p2.mp3"));
+
     auto index = lib.getPathIndex();
-    EXPECT_EQ(index.size(), 1);
+    EXPECT_EQ(index.size(), 2);
     EXPECT_TRUE(index.count("/p1.mp3"));
+    EXPECT_TRUE(index.count("/p2.mp3"));
+}
+
+TEST_F(LibraryTest, LoadPartialJsonItems)
+{
+    // JSON items missing "path"
+    std::string json = "[{\"artist\": \"Unknown\"}, {\"path\": \"/valid.mp3\"}]";
+    
+    EXPECT_CALL(*mockPersist, fileExists(_)).WillOnce(Return(true));
+    EXPECT_CALL(*mockPersist, loadFromFile(_, _))
+        .WillOnce(::testing::DoAll(::testing::SetArgReferee<1>(json), Return(true)));
+        
+    Library lib(mockPersist.get());
+    EXPECT_TRUE(lib.load());
+    EXPECT_EQ(lib.size(), 1);
 }
