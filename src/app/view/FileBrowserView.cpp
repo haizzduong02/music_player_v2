@@ -171,6 +171,29 @@ void FileBrowserView::renderContent()
             }
 
             ImGui::SameLine();
+            // Filter Dropdown
+            ImGui::SetNextItemWidth(100);
+            if (ImGui::BeginCombo("##ExtensionFilter", selectedExtension_.c_str()))
+            {
+                for (const auto &ext : availableExtensions_)
+                {
+                    bool isSelected = (selectedExtension_ == ext);
+                    std::string label = ext;
+                    if (label.empty()) label = "Unknown";
+                    else if (label[0] == '.') label = label.substr(1); // Remove dot for display
+
+                    if (ImGui::Selectable(label.c_str(), isSelected))
+                    {
+                        selectedExtension_ = ext;
+                        applyFilter();
+                    }
+                    if (isSelected)
+                        ImGui::SetItemDefaultFocus();
+                }
+                ImGui::EndCombo();
+            }
+
+            ImGui::SameLine();
             if (ImGui::Button("Add Random 20"))
             {
                 onAddRandomClicked();
@@ -249,7 +272,11 @@ void FileBrowserView::refreshCurrentDirectory()
     }
 
     // 2. Get recursive media files with max depth (Right Panel)
-    std::vector<FileInfo> mediaFiles;
+    allMediaFiles_.clear();
+    availableExtensions_.clear();
+    availableExtensions_.insert("All");
+
+    std::vector<FileInfo> mediaFiles; // Temporary scan result container
 
     // Get all supported extensions
     std::vector<std::string> extensions = MediaFileFactory::getAllSupportedFormats();
@@ -272,10 +299,37 @@ void FileBrowserView::refreshCurrentDirectory()
         info.isDirectory = false;
         info.size = 0;
 
-        mediaFiles.push_back(info);
+        if (!info.extension.empty())
+        {
+            availableExtensions_.insert(info.extension);
+        }
+
+        allMediaFiles_.push_back(info);
     }
 
+    applyFilter();
+}
+
+void FileBrowserView::applyFilter()
+{
     // 3. Filter and Sort logic
+    std::vector<FileInfo> filteredFiles;
+    if (selectedExtension_ == "All")
+    {
+        filteredFiles = allMediaFiles_;
+    }
+    else
+    {
+        for (const auto &file : allMediaFiles_)
+        {
+            if (file.extension == selectedExtension_)
+            {
+                filteredFiles.push_back(file);
+            }
+        }
+    }
+    
+    std::vector<FileInfo> &mediaFiles = filteredFiles; // Ref for sorting code block compatibility
     std::unordered_set<std::string> libraryPaths;
     if (libController_)
     {

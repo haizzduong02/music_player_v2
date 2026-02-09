@@ -2,7 +2,7 @@
     "baudRate": 115200,
     "configPath": "./data/config.json",
     "customSettings": {},
-    "customVolume": 0.9903846383094788,
+    "customVolume": 0.5240537524223328,
     "defaultVolume": 0.699999988079071,
     "hardwareEnabled": true,
     "historyPath": "./data/history.json",

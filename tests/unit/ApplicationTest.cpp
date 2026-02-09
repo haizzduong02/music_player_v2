@@ -11,6 +11,8 @@ class ApplicationTest : public ::testing::Test
     void SetUp() override
     {
         ImGui::CreateContext();
+        // Disable hardware for unit tests to avoid race conditions
+        Config::getInstance().setTestMode(true);
     }
 
     void TearDown() override

@@ -48,7 +48,10 @@ void MpvPlaybackEngine::initMpv()
 
     mpv_set_option_string(mpv_, "terminal", "yes");
     mpv_set_option_string(mpv_, "msg-level", "all=v");
-    mpv_set_option_string(mpv_, "vd-lavc-threads", "4");
+    // Use auto threads for decoding
+    mpv_set_option_string(mpv_, "vd-lavc-threads", "0"); 
+    // Enable hardware decoding
+    mpv_set_option_string(mpv_, "hwdec", "auto");
 
     // Explicitly prioritize PulseAudio, then ALSA, then SDL
     mpv_set_option_string(mpv_, "ao", "pulse,alsa,sdl");
@@ -155,6 +158,12 @@ void MpvPlaybackEngine::updateVideo()
                 Logger::info("MPV_EVENT_END_FILE (EOF) detected");
                 notify();
             }
+            else if (end_file->reason == MPV_END_FILE_REASON_ERROR)
+            {
+                Logger::error("MPV_EVENT_END_FILE (Error) detected");
+                errorOccurred_ = true;
+                notify();
+            }
             else
             {
                 Logger::info("MPV_EVENT_END_FILE (Reason: " + std::to_string(end_file->reason) + ") - ignored");
@@ -233,10 +242,15 @@ void MpvPlaybackEngine::updateVideo()
                 glBindTexture(GL_TEXTURE_2D, texture_);
                 glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
                 glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+                // Allocate texture storage
+                glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixelBuffer.data());
             }
-
-            glBindTexture(GL_TEXTURE_2D, texture_);
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixelBuffer.data());
+            else
+            {
+                // Update existing texture (faster)
+                glBindTexture(GL_TEXTURE_2D, texture_);
+                glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, pixelBuffer.data());
+            }
 
             // Should report swap to mpv
             mpv_render_context_report_swap(mpv_gl_);
@@ -264,8 +278,9 @@ void MpvPlaybackEngine::getVideoSize(int &width, int &height)
 // Implement standard IPlaybackEngine methods
 bool MpvPlaybackEngine::play(const std::string &filepath)
 {
-    // Reset EOF flag when starting new file
+    // Reset EOF and Error flags when starting new file
     eofReached_ = false;
+    errorOccurred_ = false;
 
     const char *cmd[] = {"loadfile", filepath.c_str(), NULL};
     // Use async command to avoid blocking on audio drain (e.g. pulse timeout)
@@ -319,6 +334,9 @@ PlaybackStatus MpvPlaybackEngine::getState() const
 {
     if (!mpv_)
         return PlaybackStatus::STOPPED;
+
+    if (errorOccurred_)
+        return PlaybackStatus::ERROR;
 
     int paused = 0;
     mpv_get_property(mpv_, "pause", MPV_FORMAT_FLAG, &paused);

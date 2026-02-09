@@ -112,8 +112,48 @@ class LibraryViewTest : public ::testing::Test
     void toggleEditMode() { view->toggleEditMode(); }
     bool isEditMode() const { return view->isEditMode_; }
     void selectAll(const std::vector<std::shared_ptr<MediaFile>>& tracks) { view->selectAll(tracks); }
-    bool isSelected(const std::string& path) const { return view->isSelected(path); }
+    void setFilterExtension(const std::string& ext) { view->selectedExtension_ = ext; }
+    const std::set<std::string>& getAvailableExtensions() const { return view->availableExtensions_; }
 };
+
+    TEST_F(LibraryViewTest, FilterByExtension) {
+        // Arrange
+        auto f1 = std::make_shared<MediaFile>("/music/song1.mp3");
+        auto f2 = std::make_shared<MediaFile>("/music/song2.flac");
+        auto f3 = std::make_shared<MediaFile>("/music/song3.mp3");
+        
+        library->addMedia(f1);
+        library->addMedia(f2);
+        library->addMedia(f3);
+        
+        // Initial update
+        view->update(library.get());
+        performRefresh(); 
+
+        // Act & Assert - All
+        setFilterExtension("All");
+        performRefresh();
+        EXPECT_EQ(getDisplayedFiles().size(), 3);
+        
+        // Act & Assert - Filter mp3
+        setFilterExtension("mp3");
+        performRefresh();
+        EXPECT_EQ(getDisplayedFiles().size(), 2);
+        EXPECT_EQ(getDisplayedFiles()[0]->getExtension(), ".mp3");
+        EXPECT_EQ(getDisplayedFiles()[1]->getExtension(), ".mp3");
+
+        // Act & Assert - Filter flac
+        setFilterExtension("flac");
+        performRefresh();
+        EXPECT_EQ(getDisplayedFiles().size(), 1);
+        EXPECT_EQ(getDisplayedFiles()[0]->getExtension(), ".flac");
+        
+        // Act & Assert - Check available extensions
+        const auto& exts = getAvailableExtensions();
+        EXPECT_TRUE(exts.count("All"));
+        EXPECT_TRUE(exts.count("mp3"));
+        EXPECT_TRUE(exts.count("flac"));
+    }
 
 TEST_F(LibraryViewTest, UpdateRefreshesDisplayedFiles)
 {

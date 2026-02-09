@@ -8,6 +8,7 @@
 #include "interfaces/IObserver.h"
 #include "interfaces/IPlaybackEngine.h"
 #include <memory>
+#include <functional>
 
 /**
  * @file PlaybackController.h
@@ -39,6 +40,11 @@ class PlaybackController : public IObserver
      */
     PlaybackController(IPlaybackEngine *engine, PlaybackState *state, History *history,
                        IHardwareInterface *hardware = nullptr, Playlist *currentPlaylist = nullptr);
+
+    /**
+     * @brief Destructor
+     */
+    ~PlaybackController() override;
 
     /**
      * @brief Play a specific track
@@ -210,7 +216,24 @@ class PlaybackController : public IObserver
      * @brief Send track metadata to hardware LCD
      * @param track Track to display
      */
+    /**
+     * @brief Send track metadata to hardware LCD
+     * @param track Track to display
+     */
     void sendMetadataToHardware(std::shared_ptr<MediaFile> track);
+
+  public:
+    /**
+     * @brief Set callback for when a track fails to load
+     * @param callback Function to call with failed track path
+     */
+    void setOnTrackLoadFailedCallback(std::function<void(const std::string&)> callback)
+    {
+        onTrackLoadFailedCallback_ = std::move(callback);
+    }
+
+  private:
+    std::function<void(const std::string&)> onTrackLoadFailedCallback_;
 };
 
 #endif // PLAYBACK_CONTROLLER_H

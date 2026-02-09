@@ -17,6 +17,13 @@ MediaMetadata TagLibMetadataReader::readMetadata(const std::string &filepath)
 
     // Determine codec from file extension first (fallback if TagLib fails)
     std::string ext = getExtension(filepath);
+
+    // Check if format is supported by TagLib
+    if (!isFormatSupported(ext))
+    {
+        // Not supported (e.g. video files), return empty to allow fallback
+        return metadata;
+    }
     if (ext == ".mp3")
         metadata.codec = "MP3";
     else if (ext == ".flac")

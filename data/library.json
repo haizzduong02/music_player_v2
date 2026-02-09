@@ -3,677 +3,248 @@
         "inLibrary": true,
         "metadata": {
             "album": "",
-            "artist": "Robot Swing",
-            "duration": 242,
-            "genre": "alternativerock, rnb",
-            "title": "I Think We're Ok",
-            "track": 0,
-            "year": 2025
-        },
-        "path": "/home/duong/media_8/001-2281948-Robot Swing-I Think We_re Ok.mp3"
-    },
-    {
-        "inLibrary": true,
-        "metadata": {
-            "album": "",
-            "artist": "RA unsKrypted",
-            "duration": 223,
-            "genre": "alternativernb, hiphop",
-            "title": "Hey Ma How You",
-            "track": 0,
-            "year": 2025
-        },
-        "path": "/home/duong/media_8/002-2244068-RA unsKrypted-Hey Ma How You.mp3"
-    },
-    {
-        "inLibrary": true,
-        "metadata": {
-            "album": "",
-            "artist": "Samie Bower",
-            "duration": 296,
-            "genre": "alternativernb, rnb",
-            "title": "What U Be Doin",
-            "track": 0,
-            "year": 2024
-        },
-        "path": "/home/duong/media_8/003-2215829-Samie Bower-What U Be Doin.mp3"
-    },
-    {
-        "inLibrary": true,
-        "metadata": {
-            "album": "",
-            "artist": "Tom Orlando",
-            "duration": 213,
-            "genre": "",
-            "title": "Over You",
-            "track": 0,
-            "year": 2024
-        },
-        "path": "/home/duong/media_8/004-2203703-Tom Orlando-Over You.mp3"
-    },
-    {
-        "inLibrary": true,
-        "metadata": {
-            "album": "",
-            "artist": "S.C. Chris",
-            "duration": 217,
-            "genre": "electronic, hiphop",
-            "title": "Bad",
-            "track": 0,
-            "year": 2025
-        },
-        "path": "/home/duong/media_8/005-2244088-S.C. Chris-Bad.mp3"
-    },
-    {
-        "inLibrary": true,
-        "metadata": {
-            "album": "",
-            "artist": "Kentix",
-            "duration": 142,
-            "genre": "trap, rap",
-            "title": "Kentix - Ça Rend Heureux",
-            "track": 0,
-            "year": 2024
-        },
-        "path": "/home/duong/media_8/006-2207760-Kentix-Kentix - C_a Rend Heureux.mp3"
-    },
-    {
-        "inLibrary": true,
-        "metadata": {
-            "album": "",
-            "artist": "PUETO PA LO MIO RECORDS",
-            "duration": 170,
-            "genre": "reggaeton, latin",
-            "title": "JORDAN 23 - PUETO PA LO MIO RECORDS Presenta",
-            "track": 0,
-            "year": 2025
-        },
-        "path": "/home/duong/media_8/007-2155784-PUETO PA LO MIO RECORDS-JORDAN 23 - PUETO PA LO MIO RECORDS Presenta.mp3"
-    },
-    {
-        "inLibrary": true,
-        "metadata": {
-            "album": "",
-            "artist": "Royalty Free Music",
-            "duration": 156,
-            "genre": "synthwave, hiphop",
-            "title": "Synthwave Phonk",
-            "track": 0,
-            "year": 2024
-        },
-        "path": "/home/duong/media_8/008-2146312-Janevo-Synthwave Phonk.mp3"
-    },
-    {
-        "inLibrary": true,
-        "metadata": {
-            "album": "",
-            "artist": "Dreadpool",
-            "duration": 191,
-            "genre": "trap, rap, hiphop",
-            "title": "Easy Work ft. Maya Miko",
-            "track": 0,
-            "year": 2023
-        },
-        "path": "/home/duong/media_8/009-2041854-Dreadpool-Easy Work ft. Maya Miko.mp3"
-    },
-    {
-        "inLibrary": true,
-        "metadata": {
-            "album": "",
-            "artist": "Boulvard X-Audi",
-            "duration": 199,
-            "genre": "trap, rap",
-            "title": "Make a level",
-            "track": 0,
-            "year": 2023
-        },
-        "path": "/home/duong/media_8/010-2026422-Boulvard X-Audi-Make a level.mp3"
-    },
-    {
-        "inLibrary": true,
-        "metadata": {
-            "album": "",
-            "artist": "Kentix",
-            "duration": 253,
-            "genre": "frenchpop, rap",
-            "title": "Sur la Lune",
-            "track": 0,
-            "year": 2023
-        },
-        "path": "/home/duong/media_8/011-2020849-Kentix-Sur la Lune.mp3"
-    },
-    {
-        "inLibrary": true,
-        "metadata": {
-            "album": "",
-            "artist": "Abigail Christine Hill",
-            "duration": 190,
-            "genre": "alternativernb, alternativepop",
-            "title": "Backstabber",
-            "track": 0,
-            "year": 2023
-        },
-        "path": "/home/duong/media_8/012-2015181-Abigail Christine Hill-Backstabber.mp3"
-    },
-    {
-        "inLibrary": true,
-        "metadata": {
-            "album": "",
-            "artist": "FROSTiE",
-            "duration": 217,
-            "genre": "trap, hiphop",
-            "title": "FROSTiE - G-CODE",
-            "track": 0,
-            "year": 2022
-        },
-        "path": "/home/duong/media_8/013-1940158-FROSTiE-FROSTiE - G-CODE.mp3"
-    },
-    {
-        "inLibrary": true,
-        "metadata": {
-            "album": "",
-            "artist": "Shon Tha Phenom",
-            "duration": 210,
-            "genre": "rap, hiphop",
-            "title": "Alright Anyway Ft. Taelor Gray",
-            "track": 0,
-            "year": 2022
-        },
-        "path": "/home/duong/media_8/014-1984534-Shon Tha Phenom-Alright Anyway Ft. Taelor Gray.mp3"
-    },
-    {
-        "inLibrary": true,
-        "metadata": {
-            "album": "",
-            "artist": "Buck Slenderly",
-            "duration": 181,
-            "genre": "hiphop, rnb",
-            "title": "Balance (Produced by Lazuli)",
-            "track": 0,
-            "year": 2022
-        },
-        "path": "/home/duong/media_8/015-1983375-Buck Slenderly-Balance _Produced by Lazuli_.mp3"
-    },
-    {
-        "inLibrary": true,
-        "metadata": {
-            "album": "",
-            "artist": "!Mc'Lain!",
-            "duration": 146,
-            "genre": "Soul",
-            "title": "It Be Like That",
-            "track": 5,
-            "year": 2019
-        },
-        "path": "/home/duong/media_8/016-1932663-_Mc_Lain_-It Be Like That.mp3"
-    },
-    {
-        "inLibrary": true,
-        "metadata": {
-            "album": "",
-            "artist": "PUETO PA LO MIO RECORDS",
-            "duration": 133,
-            "genre": "latin, hiphop",
-            "title": "Los money - Pueto pa lo mio records presenta Neycom Ft Choque Dineral",
-            "track": 0,
-            "year": 2025
-        },
-        "path": "/home/duong/media_8/017-1916728-PUETO PA LO MIO RECORDS-Los money - Pueto pa lo mio records presenta Neycom Ft Choque Dineral.mp3"
-    },
-    {
-        "inLibrary": true,
-        "metadata": {
-            "album": "",
-            "artist": "MaC Asylum",
-            "duration": 166,
-            "genre": "trap",
-            "title": "Anomaly Villain",
-            "track": 0,
-            "year": 2021
-        },
-        "path": "/home/duong/media_8/018-1920366-MaC Asylum-Anomaly Villain.mp3"
-    },
-    {
-        "inLibrary": true,
-        "metadata": {
-            "album": "",
-            "artist": "FayroMusic",
-            "duration": 193,
-            "genre": "trap",
-            "title": "Weight On It",
-            "track": 0,
+            "artist": "Nehilo",
+            "duration": 167,
+            "genre": "edm",
+            "title": "Alone - Nehilo",
+            "track": 1,
             "year": 2020
         },
-        "path": "/home/duong/media_8/019-1923856-FayroMusic-Weight On It.mp3"
+        "path": "/home/duong/media/064-1859499-Nehilo-Alone - Nehilo.mp3"
     },
     {
         "inLibrary": true,
         "metadata": {
             "album": "",
-            "artist": "3za Do$€",
-            "duration": 173,
-            "genre": "trap, rap",
-            "title": "COCA (Feat. Simba La Rue)",
+            "artist": "",
+            "duration": 19,
+            "genre": "",
+            "title": "",
+            "track": 0,
+            "year": 0
+        },
+        "path": "/home/duong/media_10/100_D_ElecGuitar_01_724 - Copy (7).wav"
+    },
+    {
+        "inLibrary": true,
+        "metadata": {
+            "album": "",
+            "artist": "zero-project",
+            "duration": 204,
+            "genre": "bluesrock, blues",
+            "title": "Pass me by (feat. Konnie)",
             "track": 0,
             "year": 2025
         },
-        "path": "/home/duong/media_8/020-2278632-3za Do$-COCA _Feat. Simba La Rue_.mp3"
+        "path": "/home/duong/media_3/004-2250638-zero-project-Pass me by _feat. Konnie_.mp3"
     },
     {
         "inLibrary": true,
         "metadata": {
             "album": "",
-            "artist": "Dreadpool",
-            "duration": 178,
-            "genre": "hiphop",
-            "title": "Let The Sunshine In",
+            "artist": "Acconumber",
+            "duration": 230,
+            "genre": "House",
+            "title": "The Naked Sun (Instrumental)",
+            "track": 3,
+            "year": 2016
+        },
+        "path": "/home/duong/media_3/011-1377990-Acconumber-The Naked Sun _Instrumental_.mp3"
+    },
+    {
+        "inLibrary": true,
+        "metadata": {
+            "album": "",
+            "artist": "Smoking With Poets",
+            "duration": 213,
+            "genre": "indiepop, postrock",
+            "title": "Nothing,With You",
+            "track": 0,
+            "year": 2022
+        },
+        "path": "/home/duong/media_3/033-1945368-Smoking With Poets-Nothing,With You.mp3"
+    },
+    {
+        "inLibrary": true,
+        "metadata": {
+            "album": "",
+            "artist": "MODUS",
+            "duration": 233,
+            "genre": "chillout",
+            "title": "My Love",
+            "track": 1,
+            "year": 2021
+        },
+        "path": "/home/duong/media_3/042-1891977-MODUS-My Love.mp3"
+    },
+    {
+        "inLibrary": true,
+        "metadata": {
+            "album": "",
+            "artist": "Cole Powell",
+            "duration": 235,
+            "genre": "Pop",
+            "title": "Not the One to Say (I Told You So) (24-bit Master)",
+            "track": 1,
+            "year": 2021
+        },
+        "path": "/home/duong/media_3/060-1826189-Cole Powell-Not the One to Say _I Told You So_ _24-bit Master_.mp3"
+    },
+    {
+        "inLibrary": true,
+        "metadata": {
+            "album": "",
+            "artist": "THE SAME PERSONS",
+            "duration": 120,
+            "genre": "synthpop, synthwave, pop",
+            "title": "Ooh",
+            "track": 0,
+            "year": 2026
+        },
+        "path": "/home/duong/media_3/075-2224073-THE SAME PERSONS-Ooh.mp3"
+    },
+    {
+        "inLibrary": true,
+        "metadata": {
+            "album": "",
+            "artist": "The Vow",
+            "duration": 181,
+            "genre": "poprock, indierock",
+            "title": "Spread Some Love",
             "track": 0,
             "year": 2023
         },
-        "path": "/home/duong/media_8/021-2041855-Dreadpool-Let The Sunshine In.mp3"
+        "path": "/home/duong/media_4/015-2059903-The Vow-Spread Some Love.mp3"
     },
     {
         "inLibrary": true,
         "metadata": {
             "album": "",
-            "artist": "FROSTiE",
-            "duration": 278,
-            "genre": "hiphop",
-            "title": "Modern Day Slaves",
+            "artist": "Anitek",
+            "duration": 145,
+            "genre": "electronic, hiphop",
+            "title": "North Shore",
+            "track": 0,
+            "year": 2025
+        },
+        "path": "/home/duong/media_5/002-2259148-Anitek-North Shore.mp3"
+    },
+    {
+        "inLibrary": true,
+        "metadata": {
+            "album": "",
+            "artist": "Cole Powell",
+            "duration": 235,
+            "genre": "Pop",
+            "title": "Not the One to Say (I Told You So) (24-bit Master)",
+            "track": 1,
+            "year": 2021
+        },
+        "path": "/home/duong/media_5/034-1826189-Cole Powell-Not the One to Say _I Told You So_ _24-bit Master_.mp3"
+    },
+    {
+        "inLibrary": true,
+        "metadata": {
+            "album": "",
+            "artist": "Alex Che",
+            "duration": 153,
+            "genre": "chillhop",
+            "title": "Urban Life",
+            "track": 195,
+            "year": 2020
+        },
+        "path": "/home/duong/media_5/053-1769399-Alex Che-Urban Life.mp3"
+    },
+    {
+        "inLibrary": true,
+        "metadata": {
+            "album": "",
+            "artist": "So Far As I Know",
+            "duration": 390,
+            "genre": "shoegaze, postrock, rock",
+            "title": "l'espérance",
+            "track": 0,
+            "year": 2025
+        },
+        "path": "/home/duong/media_6/003-2270663-So Far As I Know-l_espe_rance.mp3"
+    },
+    {
+        "inLibrary": true,
+        "metadata": {
+            "album": "",
+            "artist": "Alex Davletshin",
+            "duration": 245,
+            "genre": "neoclassical, classical",
+            "title": "Prelude in C",
             "track": 0,
             "year": 2022
         },
-        "path": "/home/duong/media_8/022-1942626-FROSTiE-Modern Day Slaves.mp3"
+        "path": "/home/duong/media_6/010-1989123-Alex Davletshin-Prelude in C.mp3"
     },
     {
         "inLibrary": true,
         "metadata": {
             "album": "",
-            "artist": "Shon Tha Phenom",
-            "duration": 152,
-            "genre": "hiphop",
-            "title": "Blink Of An Eye",
-            "track": 0,
-            "year": 2022
-        },
-        "path": "/home/duong/media_8/023-1942672-Shon Tha Phenom-Blink Of An Eye.mp3"
-    },
-    {
-        "inLibrary": true,
-        "metadata": {
-            "album": "",
-            "artist": "INTERNOTHERNALZ",
-            "duration": 270,
-            "genre": "hiphop",
-            "title": "Internorthernalz -- where am from",
-            "track": 1,
-            "year": 2017
-        },
-        "path": "/home/duong/media_8/024-1450874-INTERNOTHERNALZ-Internorthernalz -- where am from.mp3"
-    },
-    {
-        "inLibrary": true,
-        "metadata": {
-            "album": "",
-            "artist": "Shiva III",
-            "duration": 166,
-            "genre": "trap",
-            "title": "Complimenti",
-            "track": 2,
-            "year": 2021
-        },
-        "path": "/home/duong/media_8/025-1881980-Shiva III-Complimenti.mp3"
-    },
-    {
-        "inLibrary": true,
-        "metadata": {
-            "album": "",
-            "artist": "Elephant Funeral",
-            "duration": 155,
-            "genre": "",
-            "title": "Its Alright",
-            "track": 87,
-            "year": 2019
-        },
-        "path": "/home/duong/media_8/026-1694662-Elephant Funeral-Its Alright.mp3"
-    },
-    {
-        "inLibrary": true,
-        "metadata": {
-            "album": "Dungeon Diaries",
-            "artist": "Wayne Gordon",
-            "duration": 199,
-            "genre": "Rap",
-            "title": "No Handlebars",
-            "track": 2,
-            "year": 2014
-        },
-        "path": "/home/duong/media_8/027-1242765-Wayne Gordon-No Handlebars.mp3"
-    },
-    {
-        "inLibrary": true,
-        "metadata": {
-            "album": "",
-            "artist": "Santa Sallet",
-            "duration": 202,
-            "genre": "trap",
-            "title": "No Sleep",
-            "track": 1,
-            "year": 2021
-        },
-        "path": "/home/duong/media_8/028-1881967-Santa Sallet-No Sleep.mp3"
-    },
-    {
-        "inLibrary": true,
-        "metadata": {
-            "album": "",
-            "artist": "Young Keys",
-            "duration": 148,
-            "genre": "rnb",
-            "title": "You The Best (Remix) Feat. Young Redd",
-            "track": 8,
-            "year": 2021
-        },
-        "path": "/home/duong/media_8/029-1885259-Young Keys-You The Best _Remix_ Feat. Young Redd.mp3"
-    },
-    {
-        "inLibrary": true,
-        "metadata": {
-            "album": "",
-            "artist": "Carbon Casca",
-            "duration": 226,
-            "genre": "trap",
-            "title": "Carbon Casca - Coming Up (Feat. Gee Flaggz)",
-            "track": 6,
-            "year": 2021
-        },
-        "path": "/home/duong/media_8/030-1869796-Carbon Casca-Carbon Casca - Coming Up _Feat. Gee Flaggz_.mp3"
-    },
-    {
-        "inLibrary": true,
-        "metadata": {
-            "album": "",
-            "artist": "Edfish",
-            "duration": 224,
-            "genre": "hiphop",
-            "title": "Cerebro reptiliano(Prod.K.El Nigromante)",
+            "artist": "PeryCreep",
+            "duration": 156,
+            "genre": "lofi",
+            "title": "Background Music Lofi Hip Hop Beat Chill Lofi Chill jazz lofi type beat",
             "track": 0,
             "year": 2021
         },
-        "path": "/home/duong/media_8/031-1870140-Edfish-Cerebro reptiliano_Prod.K.El Nigromante_.mp3"
+        "path": "/home/duong/media_6/057-1864300-PeryCreep-Background Music Lofi Hip Hop Beat Chill Lofi Chill jazz lofi type beat.mp3"
     },
     {
         "inLibrary": true,
         "metadata": {
             "album": "",
-            "artist": "Quesabe",
-            "duration": 147,
-            "genre": "rnb",
-            "title": "Confession",
-            "track": 1,
+            "artist": "Sylwar",
+            "duration": 268,
+            "genre": "chillhop",
+            "title": "breath of time",
+            "track": 2,
             "year": 2021
         },
-        "path": "/home/duong/media_8/032-1870094-Quesabe-Confession.mp3"
+        "path": "/home/duong/media_6/066-1878274-Sylwar-breath of time.mp3"
     },
     {
         "inLibrary": true,
         "metadata": {
             "album": "",
-            "artist": "Ralph Da God",
-            "duration": 193,
+            "artist": "XENEZE",
+            "duration": 138,
+            "genre": "deephouse, dance",
+            "title": "XENEZE - Hush",
+            "track": 0,
+            "year": 2024
+        },
+        "path": "/home/duong/media_7/020-2170473-XENEZE-XENEZE - Hush.mp3"
+    },
+    {
+        "inLibrary": true,
+        "metadata": {
+            "album": "NO WORRIES FOR A NEW DAY (2019)",
+            "artist": "MOGU",
+            "duration": 241,
             "genre": "indierock",
-            "title": "Benz Truck ft. Swagg Milly",
-            "track": 3,
-            "year": 2021
-        },
-        "path": "/home/duong/media_8/033-1864205-Ralph Da God-Benz Truck ft. Swagg Milly.mp3"
-    },
-    {
-        "inLibrary": true,
-        "metadata": {
-            "album": "Obscure",
-            "artist": "EJAY IVAN LAC",
-            "duration": 210,
-            "genre": "hiphop",
-            "title": "All The Best",
-            "track": 8,
+            "title": "Opportunity Steals Your Love",
+            "track": 4,
             "year": 2019
         },
-        "path": "/home/duong/media_8/034-1617561-EJAY IVAN LAC-All The Best.mp3"
+        "path": "/home/duong/media_7/030-1616933-MOGU-Opportunity Steals Your Love.mp3"
     },
     {
         "inLibrary": true,
         "metadata": {
             "album": "",
             "artist": "DR GROOVE GANG",
-            "duration": 193,
-            "genre": "Soul",
-            "title": "LE BAL MASQUE",
-            "track": 1,
-            "year": 2021
-        },
-        "path": "/home/duong/media_8/035-1889606-DR GROOVE GANG-LE BAL MASQUE.mp3"
-    },
-    {
-        "inLibrary": true,
-        "metadata": {
-            "album": "",
-            "artist": "Archangeur",
-            "duration": 219,
-            "genre": "hiphop",
-            "title": "GET IT",
-            "track": 17,
-            "year": 2021
-        },
-        "path": "/home/duong/media_8/036-1861735-Archangeur-GET IT.mp3"
-    },
-    {
-        "inLibrary": true,
-        "metadata": {
-            "album": "ÿ῾䌄䄄䈄㸄䈄〄\u0004",
-            "artist": "ÿ᫾㸄␄㰀㸄㴄䀄㈀䈄\u0004",
-            "duration": 148,
-            "genre": "trap",
-            "title": "ÿ᫾㸄␄㰀㸄㴄䀄㈀䈄 ⴀ ᰀ〄㌄\u0004",
-            "track": 3,
-            "year": 2021
-        },
-        "path": "/home/duong/media_8/037-1860898-__$______-__$______ - ___.mp3"
-    },
-    {
-        "inLibrary": true,
-        "metadata": {
-            "album": "",
-            "artist": "LowDown Brass Band",
-            "duration": 134,
-            "genre": "",
-            "title": "LowDown Mini Reel #6 (No Ceiling)",
-            "track": 47,
-            "year": 2021
-        },
-        "path": "/home/duong/media_8/038-1848396-LowDown Brass Band-LowDown Mini Reel #6 _No Ceiling_.mp3"
-    },
-    {
-        "inLibrary": true,
-        "metadata": {
-            "album": "Escapism x Nem Nieves: Ordo Ab Chao",
-            "artist": "Tab",
-            "duration": 254,
-            "genre": "downtempo",
-            "title": "Napalm Mourning",
-            "track": 11,
-            "year": 2020
-        },
-        "path": "/home/duong/media_8/039-1790673-Tab-Napalm Mourning.mp3"
-    },
-    {
-        "inLibrary": true,
-        "metadata": {
-            "album": "MAGMA",
-            "artist": "MAGMA",
-            "duration": 170,
-            "genre": "hiphop",
-            "title": "FREE21",
-            "track": 3,
-            "year": 2021
-        },
-        "path": "/home/duong/media_8/040-1843900-MAGMA-FREE21.mp3"
-    },
-    {
-        "inLibrary": true,
-        "metadata": {
-            "album": "The Consciousness",
-            "artist": "El J",
-            "duration": 236,
-            "genre": "hiphop",
-            "title": "Reminisce feat. Blends.One &amp; Chemist (Prod. Blends.One)",
-            "track": 18,
-            "year": 2014
-        },
-        "path": "/home/duong/media_8/041-1487648-El J-Reminisce feat. Blends.One _amp_ Chemist _Prod. Blends.One_.mp3"
-    },
-    {
-        "inLibrary": true,
-        "metadata": {
-            "album": "EARWORMS",
-            "artist": "Jaief &amp; Asong",
-            "duration": 180,
-            "genre": "hiphop",
-            "title": "Been Waiting (feat. Rebekka Salomea)",
-            "track": 1,
-            "year": 2014
-        },
-        "path": "/home/duong/media_8/042-1169939-Jaief _amp_ Asong-Been Waiting _feat. Rebekka Salomea_.mp3"
-    },
-    {
-        "inLibrary": true,
-        "metadata": {
-            "album": "",
-            "artist": "Double Lyrical",
-            "duration": 193,
-            "genre": "hiphop",
-            "title": "Double Lyrical - Little Crazy (WAV)",
-            "track": 3,
+            "duration": 230,
+            "genre": "electrofunk",
+            "title": "A l'ancienne",
+            "track": 21,
             "year": 2019
         },
-        "path": "/home/duong/media_8/043-1676543-Double Lyrical-Double Lyrical - Little Crazy _WAV_.mp3"
-    },
-    {
-        "inLibrary": true,
-        "metadata": {
-            "album": "Empty the Bank (Single)",
-            "artist": "King Hitz",
-            "duration": 286,
-            "genre": "Dance",
-            "title": "Empty the Bank",
-            "track": 1,
-            "year": 2015
-        },
-        "path": "/home/duong/media_8/044-1187848-King Hitz-Empty the Bank.mp3"
-    },
-    {
-        "inLibrary": true,
-        "metadata": {
-            "album": "",
-            "artist": "PTOWN1200",
-            "duration": 167,
-            "genre": "gangstarap",
-            "title": "Caught-off-guard",
-            "track": 1,
-            "year": 2021
-        },
-        "path": "/home/duong/media_8/045-1847969-PTOWN1200-Caught-off-guard.mp3"
-    },
-    {
-        "inLibrary": true,
-        "metadata": {
-            "album": "",
-            "artist": "PUETO PA LO MIO RECORDS",
-            "duration": 142,
-            "genre": "hiphop, latin",
-            "title": "CHAKA CHAKA I - Pueto pa lo mio records Presenta - Choque Dineral (Musica urbana, trap, rap, hiphop, dembow)",
-            "track": 0,
-            "year": 2025
-        },
-        "path": "/home/duong/media_8/046-1838840-PUETO PA LO MIO RECORDS-CHAKA CHAKA I - Pueto pa lo mio records Presenta - Choque Dineral _Musica urbana, trap, rap, hiphop, dembow_.mp3"
-    },
-    {
-        "inLibrary": true,
-        "metadata": {
-            "album": "",
-            "artist": "Shon Tha Phenom",
-            "duration": 161,
-            "genre": "trap",
-            "title": "Early",
-            "track": 3,
-            "year": 2020
-        },
-        "path": "/home/duong/media_8/047-1781363-Shon Tha Phenom-Early.mp3"
-    },
-    {
-        "inLibrary": true,
-        "metadata": {
-            "album": "",
-            "artist": "Ralph Da God",
-            "duration": 143,
-            "genre": "Indie",
-            "title": "Big Spenders",
-            "track": 20,
-            "year": 2021
-        },
-        "path": "/home/duong/media_8/048-1837563-Ralph Da God-Big Spenders.mp3"
-    },
-    {
-        "inLibrary": true,
-        "metadata": {
-            "album": "",
-            "artist": "Wordsmith",
-            "duration": 193,
-            "genre": "Rap",
-            "title": "On the Come Up",
-            "track": 18,
-            "year": 2018
-        },
-        "path": "/home/duong/media_8/049-1564155-Wordsmith-On the Come Up.mp3"
-    },
-    {
-        "inLibrary": true,
-        "metadata": {
-            "album": "Iceberg Forces [CC Edition]",
-            "artist": "Doctor Frost",
-            "duration": 183,
-            "genre": "trap",
-            "title": "Different Me feat. Fega Michaels (Guitar by Cmdt. Guile)",
-            "track": 2,
-            "year": 2020
-        },
-        "path": "/home/duong/media_8/050-1816401-Doctor Frost-Different Me feat. Fega Michaels _Guitar by Cmdt. Guile_.mp3"
-    },
-    {
-        "inLibrary": true,
-        "metadata": {
-            "album": "",
-            "artist": "Childsanonymous",
-            "duration": 181,
-            "genre": "trap, hiphop",
-            "title": "TRENCHES",
-            "track": 1,
-            "year": 2023
-        },
-        "path": "/home/duong/media_8/051-1828771-Childsanonymous-TRENCHES.mp3"
-    },
-    {
-        "inLibrary": true,
-        "metadata": {
-            "album": "",
-            "artist": "Mindfull",
-            "duration": 189,
-            "genre": "hiphop",
-            "title": "Mellow Dreams",
-            "track": 1,
-            "year": 2017
-        },
-        "path": "/home/duong/media_8/052-1487733-Mindfull-Mellow Dreams.mp3"
+        "path": "/home/duong/media_7/043-1640849-DR GROOVE GANG-A l_ancienne.mp3"
     },
     {
         "inLibrary": true,
@@ -687,330 +258,5 @@
             "year": 2016
         },
         "path": "/home/duong/media_8/053-1396771-El Corma-No Es Capricho.mp3"
-    },
-    {
-        "inLibrary": true,
-        "metadata": {
-            "album": "Escapism x Nem Nieves: Ordo Ab Chao",
-            "artist": "Tab",
-            "duration": 182,
-            "genre": "downtempo",
-            "title": "Hidden Hand",
-            "track": 5,
-            "year": 2020
-        },
-        "path": "/home/duong/media_8/054-1790663-Tab-Hidden Hand.mp3"
-    },
-    {
-        "inLibrary": true,
-        "metadata": {
-            "album": "Mit der Schaufel auf's Ei",
-            "artist": "Coehn&Foehrb",
-            "duration": 222,
-            "genre": "hiphop",
-            "title": "Erich kommt rein",
-            "track": 7,
-            "year": 2007
-        },
-        "path": "/home/duong/media_8/055-111126-Coehn_Foehrb-Erich kommt rein.mp3"
-    },
-    {
-        "inLibrary": true,
-        "metadata": {
-            "album": "The UnAmerican LP",
-            "artist": "Emcee Lynx",
-            "duration": 157,
-            "genre": "hiphop",
-            "title": "summertimewav",
-            "track": 4,
-            "year": 2004
-        },
-        "path": "/home/duong/media_8/056-118887-Emcee Lynx-summertimewav.mp3"
-    },
-    {
-        "inLibrary": true,
-        "metadata": {
-            "album": "Passioni Maledette Infuocate ad Aprilia",
-            "artist": "P.Yo",
-            "duration": 256,
-            "genre": "hiphop",
-            "title": "Movi 'e Chiappe",
-            "track": 3,
-            "year": 2007
-        },
-        "path": "/home/duong/media_8/057-128881-P.Yo-Movi _e Chiappe.mp3"
-    },
-    {
-        "inLibrary": true,
-        "metadata": {
-            "album": "Won Oh Too",
-            "artist": "Dave Foster",
-            "duration": 78,
-            "genre": "Rap",
-            "title": "The Tester",
-            "track": 2,
-            "year": 2007
-        },
-        "path": "/home/duong/media_8/058-166421-Dave Foster-The Tester.mp3"
-    },
-    {
-        "inLibrary": true,
-        "metadata": {
-            "album": "",
-            "artist": "SMS",
-            "duration": 166,
-            "genre": "trap",
-            "title": "ÿ᳾⼄⌄\u0004",
-            "track": 1,
-            "year": 2021
-        },
-        "path": "/home/duong/media_8/059-1844621-SMS-___.mp3"
-    },
-    {
-        "inLibrary": true,
-        "metadata": {
-            "album": "Love Me Notts (Single)",
-            "artist": "Hazernomical",
-            "duration": 171,
-            "genre": "hiphop",
-            "title": "Love Me Notts",
-            "track": 1,
-            "year": 2008
-        },
-        "path": "/home/duong/media_8/060-168966-Hazernomical-Love Me Notts.mp3"
-    },
-    {
-        "inLibrary": true,
-        "metadata": {
-            "album": "Outside the Box (feat. Paradeigma)",
-            "artist": "Ogi Feel the Beat",
-            "duration": 166,
-            "genre": "chillhop",
-            "title": "Only On This Planet (feat. A Bit Advanced Music, Paradeigma)",
-            "track": 6,
-            "year": 2021
-        },
-        "path": "/home/duong/media_8/061-1834934-Ogi Feel the Beat-Only On This Planet _feat. A Bit Advanced Music, Paradeigma_.mp3"
-    },
-    {
-        "inLibrary": true,
-        "metadata": {
-            "album": "The Lost Tracks",
-            "artist": "Cartel",
-            "duration": 227,
-            "genre": "hiphop",
-            "title": "Pourin Moe by The East Side Hustlas",
-            "track": 7,
-            "year": 2008
-        },
-        "path": "/home/duong/media_8/062-190869-Cartel-Pourin Moe by The East Side Hustlas.mp3"
-    },
-    {
-        "inLibrary": true,
-        "metadata": {
-            "album": "Beats Un.",
-            "artist": "Branton",
-            "duration": 250,
-            "genre": "",
-            "title": "Collective",
-            "track": 2,
-            "year": 2009
-        },
-        "path": "/home/duong/media_8/063-269054-Branton-Collective.mp3"
-    },
-    {
-        "inLibrary": true,
-        "metadata": {
-            "album": "Glitchez In My World",
-            "artist": "Elric Virtuoso",
-            "duration": 224,
-            "genre": "hiphop",
-            "title": "ShinDiG",
-            "track": 4,
-            "year": 2019
-        },
-        "path": "/home/duong/media_8/064-1656803-Elric Virtuoso-ShinDiG.mp3"
-    },
-    {
-        "inLibrary": true,
-        "metadata": {
-            "album": "Some More Ol' School Crap For Y'all  (Various 1999-2004) Vol. #1",
-            "artist": "LarG Productions",
-            "duration": 156,
-            "genre": "Funk",
-            "title": "Skank Shift",
-            "track": 1,
-            "year": 2008
-        },
-        "path": "/home/duong/media_8/065-178030-LarG Productions-Skank Shift.mp3"
-    },
-    {
-        "inLibrary": true,
-        "metadata": {
-            "album": "Aullidos de un Geomante",
-            "artist": "Picatoste",
-            "duration": 200,
-            "genre": "hiphop",
-            "title": "El Cambio Definitivo ft. Dj Rihla",
-            "track": 3,
-            "year": 2017
-        },
-        "path": "/home/duong/media_8/066-1453136-Picatoste-El Cambio Definitivo ft. Dj Rihla.mp3"
-    },
-    {
-        "inLibrary": true,
-        "metadata": {
-            "album": "Skulastic",
-            "artist": "Skulastic",
-            "duration": 150,
-            "genre": "hiphop",
-            "title": "The Bridge",
-            "track": 2,
-            "year": 2014
-        },
-        "path": "/home/duong/media_8/067-1139414-Skulastic-The Bridge.mp3"
-    },
-    {
-        "inLibrary": true,
-        "metadata": {
-            "album": "",
-            "artist": "J.Salazar",
-            "duration": 142,
-            "genre": "trap, rap, hiphop",
-            "title": "J.Salazar - Mentiras (By SavageBeatz)",
-            "track": 0,
-            "year": 2023
-        },
-        "path": "/home/duong/media_8/068-2008448-J.Salazar-J.Salazar - Mentiras _By SavageBeatz_.mp3"
-    },
-    {
-        "inLibrary": true,
-        "metadata": {
-            "album": "",
-            "artist": "Anitek",
-            "duration": 124,
-            "genre": "hiphop",
-            "title": "TimesUp feat. Tab",
-            "track": 0,
-            "year": 2023
-        },
-        "path": "/home/duong/media_8/069-2065297-Anitek-TimesUp feat. Tab.mp3"
-    },
-    {
-        "inLibrary": true,
-        "metadata": {
-            "album": "",
-            "artist": "",
-            "duration": 0,
-            "genre": "",
-            "title": "",
-            "track": 0,
-            "year": 0
-        },
-        "path": "/home/duong/music_player/tests/assets/sample.flac"
-    },
-    {
-        "inLibrary": true,
-        "metadata": {
-            "album": "",
-            "artist": "Test Artist",
-            "duration": 5,
-            "genre": "",
-            "title": "Test Title",
-            "track": 0,
-            "year": 0
-        },
-        "path": "/home/duong/music_player/tests/assets/sample.mp3"
-    },
-    {
-        "inLibrary": true,
-        "metadata": {
-            "album": "",
-            "artist": "",
-            "duration": 244,
-            "genre": "",
-            "title": "",
-            "track": 0,
-            "year": 0
-        },
-        "path": "/home/duong/music_player/usb/(268) Ch?c G? Anh Y?u C? ?y (Vi?t C?i Remix) - H??ng Ly  Ch?c g? Anh ?? Th??ng C? ?y Th?t L?ng Remix - YouTube.mp4"
-    },
-    {
-        "inLibrary": true,
-        "metadata": {
-            "album": "",
-            "artist": "",
-            "duration": 368,
-            "genre": "",
-            "title": "",
-            "track": 0,
-            "year": 0
-        },
-        "path": "/home/duong/music_player/usb/(268) N?ng ?m Qu? H??ng - Anh Th? [Official HD] - YouTube.mp4"
-    },
-    {
-        "inLibrary": true,
-        "metadata": {
-            "album": "",
-            "artist": "",
-            "duration": 324,
-            "genre": "",
-            "title": "",
-            "track": 0,
-            "year": 0
-        },
-        "path": "/home/duong/music_player/usb/(268) V? Qu? - Anh Th? [Audio] - YouTube.mp4"
-    },
-    {
-        "inLibrary": true,
-        "metadata": {
-            "album": "NhacCuaTui.com",
-            "artist": "F47 & meChill & Đặng Thanh Tuyền",
-            "duration": 299,
-            "genre": "",
-            "title": "50 Năm Về Sau",
-            "track": 0,
-            "year": 0
-        },
-        "path": "/home/duong/music_player/usb/50 N?m V? Sau.mp3"
-    },
-    {
-        "inLibrary": true,
-        "metadata": {
-            "album": "NhacCuaTui.com",
-            "artist": "VSTRA, Tyronee",
-            "duration": 199,
-            "genre": "",
-            "title": "Ai Ngoài Anh",
-            "track": 0,
-            "year": 0
-        },
-        "path": "/home/duong/music_player/usb/Ai Ngo?i Anh.mp3"
-    },
-    {
-        "inLibrary": true,
-        "metadata": {
-            "album": "NhacCuaTui.com",
-            "artist": "Trọng Nhân feat. Tiểu Mỹ",
-            "duration": 186,
-            "genre": "",
-            "title": "Hôn Lễ Của Em",
-            "track": 0,
-            "year": 0
-        },
-        "path": "/home/duong/music_player/usb/H?n L? C?a Em.mp3"
-    },
-    {
-        "inLibrary": true,
-        "metadata": {
-            "album": "NhacCuaTui.com",
-            "artist": "Trúc Nhân",
-            "duration": 245,
-            "genre": "",
-            "title": "Vạn Sự Như Ý",
-            "track": 0,
-            "year": 0
-        },
-        "path": "/home/duong/music_player/usb/V?n S? Nh? ?.mp3"
     }
 ]

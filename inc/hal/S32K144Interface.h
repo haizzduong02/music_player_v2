@@ -8,6 +8,10 @@
 #include <queue>
 #include <string>
 #include <thread>
+#include <sys/socket.h>
+#include <arpa/inet.h>
+#include <unistd.h>
+#include <iostream>
 
 /**
  * @file S32K144Interface.h
@@ -46,25 +50,47 @@ class S32K144Interface : public IHardwareInterface, public Subject
     void sendVolume(float volume) override;
     void displayText(const std::string &text) override;
     float readADC() override;
+    int readButton() override;
     HardwareEvent getLastEvent() const override;
     void startListening() override;
     void stopListening() override;
 
     // ISubject implementation (inherited from Subject)
-    using Subject::attach;
-    using Subject::detach;
-    using Subject::notify;
+    // ISubject implementation (resolving diamond inheritance)
+    void attach(IObserver *observer) override { Subject::attach(observer); }
+    void detach(IObserver *observer) override { Subject::detach(observer); }
+    void notify() override
+    {
+        std::lock_guard<std::mutex> lock(observerMutex_);
+        for (auto *observer : observers_)
+        {
+            if (observer)
+            {
+                observer->update(this);
+            }
+        }
+    }
 
   private:
-    int serialFd_; // Serial port file descriptor
-    std::string portName_;
-    int baudRate_;
+    int socketFd_; // Socket file descriptor
+    std::string ipAddress_;
+    int port_;
     std::atomic<bool> connected_;
     std::atomic<bool> listening_;
+    std::atomic<int> currentButton_;
+    std::atomic<float> currentAdc_;
 
     std::thread listenerThread_;
+    std::thread connectThread_;
     mutable std::mutex mutex_;
+    
+    std::atomic<bool> running_;
+    std::atomic<bool> connecting_;
+    
+    bool connect();
+    void connectLoop();
 
+    std::string receiveBuffer_;
     HardwareEvent lastEvent_;
     std::queue<HardwareEvent> eventQueue_;
 

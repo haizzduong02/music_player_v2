@@ -19,7 +19,8 @@ enum class PlaybackStatus
 {
     STOPPED,
     PLAYING,
-    PAUSED
+    PAUSED,
+    ERROR
 };
 
 /**

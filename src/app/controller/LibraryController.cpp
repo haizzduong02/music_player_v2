@@ -137,10 +137,22 @@ int LibraryController::refreshLibrary()
     {
         if (file)
         {
-            auto metadata = metadataReader_->readMetadata(file->getPath());
-            // Update file metadata (would need setMetadata method)
-            refreshedCount++;
+            // Only refresh if duration looks suspicious (0 or very large) to save time
+            // Or force all. Let's force all for now to be safe.
+            MediaMetadata metadata = metadataReader_->readMetadata(file->getPath());
+            
+            // Check if metadata actually changed or is valid
+            if (metadata.duration > 0 || metadata.title != file->getMetadata().title) 
+            {
+               file->setMetadata(metadata);
+               refreshedCount++;
+            }
         }
+    }
+    
+    if (refreshedCount > 0)
+    {
+        library_->save(); // Save to disk
     }
 
     Logger::info("Refreshed " + std::to_string(refreshedCount) + " files");

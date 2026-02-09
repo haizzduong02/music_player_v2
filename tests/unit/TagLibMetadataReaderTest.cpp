@@ -124,7 +124,7 @@ TEST_F(TagLibMetadataReaderTest, CodecFallbacks)
     EXPECT_EQ(reader.readMetadata("test.wav").codec, "WAV");
     EXPECT_EQ(reader.readMetadata("test.m4a").codec, "AAC");
     EXPECT_EQ(reader.readMetadata("test.ogg").codec, "Vorbis");
-    EXPECT_EQ(reader.readMetadata("test.unknown").codec, "Unknown");
+    EXPECT_EQ(reader.readMetadata("test.unknown").codec, "");
 }
 
 TEST_F(TagLibMetadataReaderTest, ExtractTagsEmpty)

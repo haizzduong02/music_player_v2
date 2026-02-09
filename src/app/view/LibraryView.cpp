@@ -45,6 +45,35 @@ void LibraryView::render()
 
     renderSearchBar();
 
+    ImGui::SameLine();
+
+    // Filter Dropdown
+    ImGui::SetNextItemWidth(100);
+    if (ImGui::BeginCombo("##LibExtensionFilter", selectedExtension_.c_str()))
+    {
+        std::string newSelection = selectedExtension_;
+        bool selectionChanged = false;
+
+        for (const auto &ext : availableExtensions_)
+        {
+            bool isSelected = (selectedExtension_ == ext);
+            if (ImGui::Selectable(ext.c_str(), isSelected))
+            {
+                newSelection = ext;
+                selectionChanged = true;
+            }
+            if (isSelected)
+                ImGui::SetItemDefaultFocus();
+        }
+        ImGui::EndCombo();
+
+        if (selectionChanged)
+        {
+            selectedExtension_ = newSelection;
+            refreshDisplay();
+        }
+    }
+
     // Top Controls
     if (ImGui::Button("Add Files"))
     {
@@ -98,6 +127,37 @@ void LibraryView::refreshDisplay()
     // but we can use this to cache or force a refresh if needed.
     if (library_)
     {
-        displayedFiles_ = searchQuery_.empty() ? library_->getAll() : library_->search(searchQuery_);
+        auto allFiles = searchQuery_.empty() ? library_->getAll() : library_->search(searchQuery_);
+
+        // 1. Populate extensions
+        availableExtensions_.clear();
+        availableExtensions_.insert("All");
+        for (const auto &file : allFiles)
+        {
+            std::string ext = file->getExtension();
+            if (!ext.empty() && ext[0] == '.') ext = ext.substr(1);
+            if (!ext.empty())
+                availableExtensions_.insert(ext);
+        }
+
+        // 2. Filter
+        if (selectedExtension_ == "All")
+        {
+            displayedFiles_ = allFiles;
+        }
+        else
+        {
+            displayedFiles_.clear();
+            for (const auto &file : allFiles)
+            {
+                std::string ext = file->getExtension();
+                if (!ext.empty() && ext[0] == '.') ext = ext.substr(1);
+                
+                if (ext == selectedExtension_)
+                {
+                    displayedFiles_.push_back(file);
+                }
+            }
+        }
     }
 }

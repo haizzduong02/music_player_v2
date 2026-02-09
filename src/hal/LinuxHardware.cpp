@@ -233,6 +233,12 @@ class LinuxHardware : public IHardwareInterface
         return 0.0f;
     }
 
+    int readButton() override
+    {
+        // Not implemented for LinuxHardware yet
+        return -1;
+    }
+
     HardwareEvent getLastEvent() const override
     {
         return lastEvent_;

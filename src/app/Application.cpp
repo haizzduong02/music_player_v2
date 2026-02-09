@@ -4,9 +4,13 @@
 #include "service/JsonPersistence.h"
 #include "service/LocalFileSystem.h"
 #include "service/MpvPlaybackEngine.h"
+#include "service/MpvPlaybackEngine.h"
+#include "service/MpvMetadataReader.h"
 #include "service/TagLibMetadataReader.h"
+#include "service/HybridMetadataReader.h"
 #include "utils/Config.h"
 #include "utils/Logger.h"
+#include "hal/S32K144Interface.h"
 
 // SDL and ImGui includes
 #include <SDL.h>
@@ -59,6 +63,16 @@ bool Application::init(bool headless)
         if (!loadState())
         {
             Logger::warn("Failed to load application state");
+        }
+
+        // Verify and refresh library to ensure data integrity and fix metadata issues
+        if (libraryController_) 
+        {
+            Logger::info("Verifying library integrity...");
+            libraryController_->verifyLibrary();
+            
+            Logger::info("Refreshing library metadata...");
+            libraryController_->refreshLibrary();
         }
 
         initialized_ = true;
@@ -187,9 +201,28 @@ bool Application::createServices()
     {
         Logger::warn("Failed to load configuration, using defaults");
     }
-    metadataReader_ = std::make_unique<TagLibMetadataReader>();
+    auto tagLibReader = std::make_unique<TagLibMetadataReader>();
+    auto mpvReader = std::make_unique<MpvMetadataReader>();
+    metadataReader_ = std::make_unique<HybridMetadataReader>(std::move(tagLibReader), std::move(mpvReader));
     fileSystem_ = std::make_unique<LocalFileSystem>();
     playbackEngine_ = std::make_unique<MpvPlaybackEngine>();
+
+    // Initialize Hardware Interface (S32K144 via TCP)
+    auto s32k = std::make_unique<S32K144Interface>();
+    
+    // Configure based on settings
+    const auto& config = Config::getInstance().getConfig();
+    if (config.hardwareEnabled && !Config::getInstance().isTestMode()) {
+        if (s32k->initialize(config.hardwareIp, config.hardwarePort)) { 
+            s32k->startListening();
+        } else {
+            Logger::warn("Failed to connect to S32K144 hardware");
+        }
+    } else {
+        Logger::info("Hardware interface disabled in config");
+    }
+    hardwareInterface_ = std::move(s32k);
+
     return true;
 }
 
@@ -292,6 +325,33 @@ void Application::wireObservers()
     }
     mainWindow_->setPlaybackController(playbackController_.get());
     mainWindow_->setPlaybackState(playbackState_.get());
+
+    if (playbackController_)
+    {
+        playbackController_->setOnTrackLoadFailedCallback(
+            [this](const std::string &path)
+            {
+                Logger::error("Track load failed for: " + path);
+
+                // If library controller available, try to remove from library
+                // This will trigger onTrackRemovedCallback if successful
+                if (libraryController_)
+                {
+                    Logger::info("Removing missing track from library: " + path);
+                    // Use force removal and ensure callback is triggered
+                    if (!libraryController_->removeMedia(path))
+                    {
+                        // File was not in library, so callback wasn't triggered.
+                        // We must manually advance to next track.
+                        Logger::info("Track not found in library, skipping to next...");
+                        if (playbackController_)
+                        {
+                            playbackController_->next();
+                        }
+                    }
+                }
+            });
+    }
 }
 
 bool Application::loadState()

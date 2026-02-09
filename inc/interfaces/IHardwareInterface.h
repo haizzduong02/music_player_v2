@@ -22,6 +22,8 @@ enum class HardwareCommand
     NEXT,
     PREVIOUS,
     VOLUME_CHANGE,
+    BUTTON_PRESS,
+    ADC_UPDATE,
     UNKNOWN
 };
 
@@ -94,6 +96,12 @@ class IHardwareInterface : public ISubject
      * @return ADC value normalized to 0.0-1.0
      */
     virtual float readADC() = 0;
+
+    /**
+     * @brief Read button state
+     * @return Button ID or -1 if none
+     */
+    virtual int readButton() = 0;
 
     /**
      * @brief Get the last hardware event received

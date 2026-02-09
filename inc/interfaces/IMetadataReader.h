@@ -21,13 +21,13 @@ struct MediaMetadata
     std::string artist;
     std::string album;
     std::string genre;
-    int year;
-    int track;
-    int duration;     // in seconds
-    int bitrate;      // in kbps
-    int sampleRate;   // in Hz (e.g., 44100, 48000)
-    int channels;     // number of audio channels (1=mono, 2=stereo)
-    bool hasAlbumArt; // true if file has embedded album artwork
+    int year = 0;
+    int track = 0;
+    int duration = 0;     // in seconds
+    int bitrate = 0;      // in kbps
+    int sampleRate = 0;   // in Hz (e.g., 44100, 48000)
+    int channels = 0;     // number of audio channels (1=mono, 2=stereo)
+    bool hasAlbumArt = false; // true if file has embedded album artwork
     std::string codec;
     std::string comment;
 

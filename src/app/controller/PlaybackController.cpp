@@ -7,6 +7,18 @@ PlaybackController::PlaybackController(IPlaybackEngine *engine, PlaybackState *s
                                        IHardwareInterface *hardware, Playlist *currentPlaylist)
     : engine_(engine), state_(state), history_(history), hardware_(hardware), currentPlaylist_(currentPlaylist)
 {
+    if (hardware_)
+    {
+        hardware_->attach(this);
+    }
+}
+
+PlaybackController::~PlaybackController()
+{
+    if (hardware_)
+    {
+        hardware_->detach(this);
+    }
 }
 
 bool PlaybackController::play(std::shared_ptr<MediaFile> track, bool pushToStack)
@@ -270,10 +282,65 @@ void PlaybackController::playContext(const std::vector<std::shared_ptr<MediaFile
     play(context[startIndex]);
 }
 
-void PlaybackController::update(void * /*subject*/)
+void PlaybackController::update(void *subject)
 {
-    // Observer pattern - called when PlaybackState changes
-    // Could update UI or respond to state changes here
+    // Handle Hardware Events
+    if (hardware_ && subject == hardware_)
+    {
+        auto *hw = static_cast<IHardwareInterface *>(subject);
+        HardwareEvent event = hw->getLastEvent();
+        
+        Logger::info("Hardware Event Received: " + std::to_string((int)event.command));
+
+        switch (event.command)
+        {
+        case HardwareCommand::NEXT:
+            next();
+            break;
+        case HardwareCommand::PREVIOUS:
+            previous();
+            break;
+        case HardwareCommand::PLAY:
+            resume();
+            break;
+        case HardwareCommand::PAUSE:
+            pause();
+            break;
+        case HardwareCommand::ADC_UPDATE:
+             setVolume(event.value);
+             break;
+        case HardwareCommand::BUTTON_PRESS:
+             // button 1: next, 2: prev, 3: play/pause
+             if (event.value == 1.0f) next();
+             else if (event.value == 2.0f) previous();
+             else if (event.value == 3.0f) {
+                 if (state_->getStatus() == PlaybackStatus::PLAYING) pause();
+                 else resume();
+             }
+             break;
+        default:
+            break;
+        }
+        return;
+    }
+
+    // Observer pattern - called when PlaybackEngine changes state
+    if (!engine_) return;
+
+    if (engine_->getState() == PlaybackStatus::ERROR)
+    {
+        Logger::error("PlaybackController received ERROR state from engine");
+        
+        // Stop to clear state (and ensure we don't interfere with next track if callback triggers it)
+        stop();
+
+        // Report failure
+        if (onTrackLoadFailedCallback_ && !lastPlayedPath_.empty())
+        {
+            Logger::error("Reporting track load failure: " + lastPlayedPath_);
+            onTrackLoadFailedCallback_(lastPlayedPath_);
+        }
+    }
 }
 
 void PlaybackController::updateTime(double deltaTime)

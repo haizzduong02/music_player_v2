@@ -60,6 +60,10 @@ class LibraryView : public TrackListView
     std::vector<std::shared_ptr<MediaFile>> displayedFiles_;
     int selectedIndex_;
 
+    // Filter logic
+    std::set<std::string> availableExtensions_;
+    std::string selectedExtension_ = "All";
+
     // Popup state for Add File/Directory
     bool showAddFilePopup_ = false;
     bool showAddDirPopup_ = false;

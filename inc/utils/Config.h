@@ -41,6 +41,8 @@ struct AppConfig
     std::string serialPort = "/dev/ttyUSB0";
     int baudRate = 115200;
     bool hardwareEnabled = true;
+    std::string hardwareIp = "172.24.176.1";
+    int hardwarePort = 5000;
 
     // Playback settings
     int maxHistorySize = 50;
@@ -159,6 +161,18 @@ class Config
         return config_;
     }
 
+    /**
+     * @brief Check if in test mode
+     * @return true if testing
+     */
+    bool isTestMode() const { return testMode_; }
+
+    /**
+     * @brief Set test mode
+     * @param enabled true to enable test mode
+     */
+    void setTestMode(bool enabled) { testMode_ = enabled; }
+
   private:
     Config() : persistence_(nullptr)
     {
@@ -167,6 +181,7 @@ class Config
 
     AppConfig config_;
     IPersistence *persistence_;
+    bool testMode_ = false;
 };
 
 #endif // CONFIG_H

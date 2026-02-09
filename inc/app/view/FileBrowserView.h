@@ -82,8 +82,15 @@ class FileBrowserView : public BaseView
     // ...
 
     // UI state
-    std::vector<FileInfo> currentFiles_; // Folders for navigation
-    // std::vector<FileInfo> currentMediaFiles_; // Recursive media files - Moved to PagedFileSelector
+    // Filter logic
+    void applyFilter();
+    
+    // Internal data
+    std::vector<FileInfo> allMediaFiles_; // Store all files before filtering
+    std::set<std::string> availableExtensions_;
+    std::string selectedExtension_ = "All"; // Default filter
+
+    std::vector<FileInfo> currentFiles_; // Folders
     // std::set<std::string> selectedFiles_;  // For multi-select - Moved to PagedFileSelector
 
 
